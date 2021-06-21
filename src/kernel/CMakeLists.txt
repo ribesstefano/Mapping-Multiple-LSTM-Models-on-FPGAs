@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.10)
+
+add_library(U_KERNEL STATIC ${CMAKE_SOURCE_DIR}/src/kernel/u_kernel.cpp)
+target_include_directories(U_KERNEL PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(U_KERNEL PUBLIC ${CMAKE_SOURCE_DIR}/include/kernel)
+target_include_directories(U_KERNEL PUBLIC ${VIVADO_INCLUDE_DIRS})
+target_compile_options(U_KERNEL PRIVATE -fno-builtin)
+
+add_library(S_KERNEL STATIC ${CMAKE_SOURCE_DIR}/src/kernel/s_kernel.cpp)
+target_include_directories(S_KERNEL PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(S_KERNEL PUBLIC ${CMAKE_SOURCE_DIR}/include/kernel)
+target_include_directories(S_KERNEL PUBLIC ${VIVADO_INCLUDE_DIRS})
+target_compile_options(S_KERNEL PRIVATE -fno-builtin)
+
+add_library(V_KERNEL STATIC ${CMAKE_SOURCE_DIR}/src/kernel/v_kernel.cpp)
+target_include_directories(V_KERNEL PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(V_KERNEL PUBLIC ${CMAKE_SOURCE_DIR}/include/kernel)
+target_compile_options(V_KERNEL PRIVATE -fno-builtin)
+
+add_library(SVD_KERNEL STATIC ${CMAKE_SOURCE_DIR}/src/kernel/svd_kernel.cpp)
+target_include_directories(SVD_KERNEL PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(SVD_KERNEL PUBLIC ${CMAKE_SOURCE_DIR}/include/kernel)
+target_compile_options(SVD_KERNEL PRIVATE -fno-builtin)
+target_link_libraries(SVD_KERNEL U_KERNEL)
+target_link_libraries(SVD_KERNEL S_KERNEL)
+target_link_libraries(SVD_KERNEL V_KERNEL)
+
+# add_library(DQNET STATIC ${CMAKE_SOURCE_DIR}/src/kernel/kernel.cpp)
+# target_include_directories(DQNET PUBLIC ${CMAKE_SOURCE_DIR}/include)
+# target_include_directories(DQNET PUBLIC ${CMAKE_SOURCE_DIR}/include/kernel)
+# target_link_libraries(DQNET CONV_LAYER)
+# target_link_libraries(DQNET DENSE_LAYER)

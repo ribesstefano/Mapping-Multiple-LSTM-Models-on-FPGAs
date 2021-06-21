@@ -1,0 +1,10 @@
+# CMake Directories
+build
+bin/*
+# Images
+data/pong_*
+data/game_*
+data/windows*
+# Hardware Directories
+vivado_hls.log
+hls/
