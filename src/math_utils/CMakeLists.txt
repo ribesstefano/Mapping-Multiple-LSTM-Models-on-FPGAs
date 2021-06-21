@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.10)
+
+add_executable(BLAS_UTILS ${CMAKE_SOURCE_DIR}/src/math/blas_utils.cpp)
+target_include_directories(BLAS_UTILS PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(BLAS_UTILS PUBLIC ${VIVADO_INCLUDE_DIRS})
+target_include_directories(BLAS_UTILS PUBLIC ${OpenCv_INCLUDE_DIRS})
+target_link_libraries(BLAS_UTILS ${OpenCv_LIBS})
+
+add_executable(ACTIVATION_FUNCTIONS ${CMAKE_SOURCE_DIR}/src/math/activation_functions.cpp)
+target_include_directories(ACTIVATION_FUNCTIONS PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(ACTIVATION_FUNCTIONS PUBLIC ${VIVADO_INCLUDE_DIRS})
+target_include_directories(ACTIVATION_FUNCTIONS PUBLIC ${OpenCv_INCLUDE_DIRS})
+target_link_libraries(ACTIVATION_FUNCTIONS ${OpenCv_LIBS})
+
+# # add_test(NAME TestOpenCv COMMAND OPENCV_TEST)
+# # add_test(NAME TestAxisLib COMMAND TEST_AXIS_LIB)
+# # add_test(NAME TestConvLayer COMMAND TEST_CONV_LAYER)
+# add_test(NAME TestDenseLayer COMMAND TEST_DENSE_LAYER)
+# # add_test(NAME TestDQNet COMMAND TEST_DQNET)
+# # add_test(NAME TestGame COMMAND TEST_GAME)
+# # add_test(NAME TestPong COMMAND TEST_PONG)

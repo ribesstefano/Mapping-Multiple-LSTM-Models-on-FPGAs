@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.10)
+
+add_executable(DOT_PROD_DSP ${CMAKE_SOURCE_DIR}/src/hls_utils/dot_prod_dsp.cpp)
+target_include_directories(DOT_PROD_DSP PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(DOT_PROD_DSP PUBLIC ${VIVADO_INCLUDE_DIRS})
+target_include_directories(DOT_PROD_DSP PUBLIC ${OpenCv_INCLUDE_DIRS})
+# target_link_libraries(DOT_PROD_DSP ${OpenCv_LIBS})
+
+add_executable(HW_TIMER ${CMAKE_SOURCE_DIR}/src/hls_utils/hw_timer.cpp)
+target_include_directories(HW_TIMER PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(HW_TIMER PUBLIC ${VIVADO_INCLUDE_DIRS})
+target_include_directories(HW_TIMER PUBLIC ${OpenCv_INCLUDE_DIRS})
+
+# # add_test(NAME TestOpenCv COMMAND OPENCV_TEST)
+# # add_test(NAME TestAxisLib COMMAND TEST_AXIS_LIB)
+# # add_test(NAME TestConvLayer COMMAND TEST_CONV_LAYER)
+# add_test(NAME TestDenseLayer COMMAND TEST_DENSE_LAYER)
+# # add_test(NAME TestDQNet COMMAND TEST_DQNET)
+# # add_test(NAME TestGame COMMAND TEST_GAME)
+# # add_test(NAME TestPong COMMAND TEST_PONG)
