@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 
-add_executable(BLAS_UTILS ${CMAKE_SOURCE_DIR}/src/math/blas_utils.cpp)
+add_executable(BLAS_UTILS ${CMAKE_SOURCE_DIR}/src/math_utils/blas_utils.cpp)
 target_include_directories(BLAS_UTILS PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(BLAS_UTILS PUBLIC ${VIVADO_INCLUDE_DIRS})
 target_include_directories(BLAS_UTILS PUBLIC ${OpenCv_INCLUDE_DIRS})
 target_link_libraries(BLAS_UTILS ${OpenCv_LIBS})
 
-add_executable(ACTIVATION_FUNCTIONS ${CMAKE_SOURCE_DIR}/src/math/activation_functions.cpp)
+add_executable(ACTIVATION_FUNCTIONS ${CMAKE_SOURCE_DIR}/src/math_utils/activation_functions.cpp)
 target_include_directories(ACTIVATION_FUNCTIONS PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(ACTIVATION_FUNCTIONS PUBLIC ${VIVADO_INCLUDE_DIRS})
 target_include_directories(ACTIVATION_FUNCTIONS PUBLIC ${OpenCv_INCLUDE_DIRS})

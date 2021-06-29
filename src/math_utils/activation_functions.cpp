@@ -1,4 +1,9 @@
-#include "math/activation_functions.h"
+#include "math_utils/activation_functions.h"
+#include "hls_stream.h"
+#include <cmath>
+#include "assert.h"
+
+// #include "hls_math.h"
 
 template <>
 void svd_sigmoid<float>(const int n, const float* a, float* y) {
@@ -53,7 +58,7 @@ void svd_tanh<float>(const int n, const float* a, float* y) {
 // NOTE: Using OpenMP drastically slows down the execution.
 // #pragma omp parallel for num_threads(4)
   for (int i = 0; i < n; ++i) {
-    y[i] = tanh(a[i]);
+    y[i] = std::tanh(a[i]);
   }
 }
 
@@ -62,6 +67,6 @@ void svd_tanh<double>(const int  n, const double* a, double* y) {
 // NOTE: Using OpenMP drastically slows down the execution.
 // #pragma omp parallel for num_threads(4)
   for (int i = 0; i < n; ++i) {
-    y[i] = tanh(a[i]);
+    y[i] = std::tanh(a[i]);
   }
 }

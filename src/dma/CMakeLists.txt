@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 
-# add_library(CONV_LAYER STATIC ${CMAKE_SOURCE_DIR}/src/dqnet/conv_layer.cpp)
-# target_include_directories(CONV_LAYER PUBLIC ${CMAKE_SOURCE_DIR}/include)
-# target_include_directories(CONV_LAYER PUBLIC ${CMAKE_SOURCE_DIR}/include/dqnet)
-# target_include_directories(CONV_LAYER PUBLIC ${VIVADO_INCLUDE_DIRS})
-# target_compile_options(CONV_LAYER PRIVATE -fno-builtin)
+add_library(SVD_DMA STATIC ${CMAKE_SOURCE_DIR}/src/dma/svd_dma.cpp)
+target_include_directories(SVD_DMA PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(SVD_DMA PUBLIC ${VIVADO_INCLUDE_DIRS})
+target_compile_options(SVD_DMA PRIVATE -fno-builtin)
+target_link_libraries(SVD_DMA SVD_PARAMS)
 
 # add_library(DENSE_LAYER STATIC ${CMAKE_SOURCE_DIR}/src/dqnet/dense_layer.cpp)
 # target_include_directories(DENSE_LAYER PUBLIC ${CMAKE_SOURCE_DIR}/include)

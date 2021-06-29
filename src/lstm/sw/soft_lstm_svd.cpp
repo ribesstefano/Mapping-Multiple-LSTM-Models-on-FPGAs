@@ -1,4 +1,4 @@
-#include "lstm/sw/soft_svd_model.h"
+#include "lstm/sw/soft_lstm_svd.h"
 
 #ifdef __cplusplus
 extern "C"

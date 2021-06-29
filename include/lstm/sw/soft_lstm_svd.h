@@ -1,21 +1,13 @@
-#ifndef SOFT_SVD_MODEL_H_
-#define SOFT_SVD_MODEL_H_
+#ifndef LSTM_SW_SOFT_LSTM_SVD_H_
+#define LSTM_SW_SOFT_LSTM_SVD_H_
+
+#include "math_utils/blas_utils.h"
+#include "math_utils/activation_functions.h"
 
 #ifdef SDS_DESIGN
 #include <stdlib.h>
 #include "sds_lib.h"
 #endif // end SDS_DESIGN
-#include <iomanip>
-#include <iostream>
-#include <vector>
-
-#include "math/blas_utils.h"
-#include "math/activation_functions.h"
-
-// #include "utils.h"
-// #include "vector_ops.h"
-// #include "math_functions.h"
-// // #include <omp.h>
 
 #ifndef __SYNTHESIS__
 #include <chrono>
@@ -25,9 +17,12 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <Eigen/StdVector>
-
 // using namespace Eigen;
 #endif
+
+#include <iomanip>
+#include <iostream>
+#include <vector>
 
 // #define MULTITHREAD_DESIGN
 #if defined(MULTITHREAD_DESIGN) && !defined(SDS_DESIGN) && !defined(__SYNTHESIS__)
@@ -1291,4 +1286,4 @@ void SoftSvdModel(const int InputSize,
   }
 }
 
-#endif // end SOFT_SVD_MODEL_H_
+#endif // end LSTM_SW_SOFT_LSTM_SVD_H_

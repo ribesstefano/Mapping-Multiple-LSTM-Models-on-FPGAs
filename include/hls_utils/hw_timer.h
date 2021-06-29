@@ -342,9 +342,7 @@ void UpClockCounter(hls::stream<bool> &stop_ctrl, T &timestamp) {
 #endif
 }
 
-#ifndef NUM_HW_TIMERS 
-#define NUM_HW_TIMERS 1
-#endif
+const int NUM_HW_TIMERS = 1;
 
 /*
  * The global variable hw_timers will be used when calling the hardware counter

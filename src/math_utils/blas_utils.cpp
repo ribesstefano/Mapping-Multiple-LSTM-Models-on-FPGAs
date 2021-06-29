@@ -1,4 +1,4 @@
-#include "math/blas_utils.h"
+#include "math_utils/blas_utils.h"
 
 #ifdef USE_BLAS
 template<>

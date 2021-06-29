@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
+add_subdirectory(hls)
+add_subdirectory(sw)
 
 # add_executable(TEST_AXIS_LIB ${CMAKE_SOURCE_DIR}/src/tb/test_axis_lib.cpp)
 # target_include_directories(TEST_AXIS_LIB PUBLIC ${CMAKE_SOURCE_DIR}/include)

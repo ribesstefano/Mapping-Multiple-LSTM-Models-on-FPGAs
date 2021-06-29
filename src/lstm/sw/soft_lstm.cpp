@@ -40,6 +40,62 @@
 #include "math_utils/blas_utils.h"
 #include "math_utils/activation_functions.h"
 
+#ifdef SDS_DESIGN
+#include <stdlib.h>
+#include "sds_lib.h"
+#endif
+
+#include <algorithm>
+#include <iostream>
+#include <ctime>
+#include <stdint.h>
+#ifndef __SYNTHESIS__
+#include <chrono>
+#endif
+
+template <typename T>
+void MatrixMatrixMul(const int M, const int N, const int K, const T *A,
+                     const T *B, T *C) {
+  T sum = 0;
+  for (int i = 0; i < M; ++i) {
+    for (int j = 0; j < N; ++j) {     
+      sum = 0;
+      for (int k = 0; k < K; ++k) {
+        sum += A[i * K + k] * B[k * N + j];
+      }
+      C[i * N + j] = sum;
+    }
+  }
+}
+
+template <typename T, int Tm = 1, int Tn = 1, bool use_tile = false>
+void MatrixVectorMul(const int M, const int N, const T* mat, 
+  const T* vec, T* result) { 
+  if (!use_tile) {
+    T sum = 0;
+    for (int i = 0; i < M; i++) {
+      sum = 0;
+      for (int j = 0; j < N; j++) {
+        sum += mat[i * N + j] * vec[j];
+      }
+      result[i] = sum;
+    }
+  } else {
+    for (int i = 0; i < M; ++i) {
+      result[i] = 0; // needed for accumulation
+    }
+    for (int i = 0; i < M; i += Tm) {
+      for (int j = 0; j < N; j += Tn) {
+        for (int x = i; x < std::min(i + Tm, M); x++) {
+          for (int y = j; y < std::min(j + Tn, N); y++) {
+            result[x] += mat[x * N + y] * vec[y];
+          }
+        }
+      }
+    }
+  }
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif

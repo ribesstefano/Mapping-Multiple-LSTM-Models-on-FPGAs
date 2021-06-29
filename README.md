@@ -47,6 +47,16 @@ cmake ..
 make all
 ```
 
+## TODOs
+
+List of TODOs:
+	* Import u, s, v new kernels
+	* Import (and clean up?) u, s, v old kernels
+	* Import DMA functions
+	* Import and clean up HLS SVD-model-Bouganis
+	* Import and clean up HLS SVD-model-2LSTM
+	* Import some testbenches to try compile something
+
 ## Bugs
 
 List of possible bugs:

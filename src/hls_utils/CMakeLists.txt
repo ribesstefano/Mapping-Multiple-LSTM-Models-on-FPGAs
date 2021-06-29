@@ -11,6 +11,11 @@ target_include_directories(HW_TIMER PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(HW_TIMER PUBLIC ${VIVADO_INCLUDE_DIRS})
 target_include_directories(HW_TIMER PUBLIC ${OpenCv_INCLUDE_DIRS})
 
+add_executable(ADDER_TREE ${CMAKE_SOURCE_DIR}/src/hls_utils/adder_tree.cpp)
+target_include_directories(ADDER_TREE PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(ADDER_TREE PUBLIC ${VIVADO_INCLUDE_DIRS})
+target_include_directories(ADDER_TREE PUBLIC ${OpenCv_INCLUDE_DIRS})
+
 # # add_test(NAME TestOpenCv COMMAND OPENCV_TEST)
 # # add_test(NAME TestAxisLib COMMAND TEST_AXIS_LIB)
 # # add_test(NAME TestConvLayer COMMAND TEST_CONV_LAYER)

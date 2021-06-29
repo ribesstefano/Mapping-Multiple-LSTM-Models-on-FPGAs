@@ -8,9 +8,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # To locate "custom"/manually added libraries
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
-# # Locate libraries and headers (see Files in ./cmake/Modules/)
+# Locate libraries and headers (see Files in ./cmake/Modules/)
+# find_package(Vitis REQUIRED)
 find_package(Vivado REQUIRED)
 find_package(OpenCv REQUIRED)
+
+# set(HLS_INCLUDE_DIRS ${VITIS_INCLUDE_DIRS})
+# set(HLS_INCLUDE_DIRS ${VIVADO_INCLUDE_DIRS})
 
 # Add all definitions
 if (WIN32)
@@ -20,6 +24,7 @@ else()
 endif()
 # The following definitions is required for compiling half-precision numbers.
 add_compile_definitions(HLS_NO_XIL_FPO_LIB)
+add_compile_definitions(USE_FLOAT)
 
 # Move executable in bin/, along side the DLLs (copied)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)

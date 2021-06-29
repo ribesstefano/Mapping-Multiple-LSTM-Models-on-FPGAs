@@ -39,21 +39,6 @@
 #ifndef LSTM_SW_LSTM_SOFTWARE_H_
 #define LSTM_SW_LSTM_SOFTWARE_H_
 
-#ifdef SDS_DESIGN
-#include <stdlib.h>
-#include "sds_lib.h"
-#endif
-
-#include <iostream>
-#include <ctime>
-#include <stdint.h>
-#include "vector_ops.h"
-#include "math_functions.h"
-
-#ifndef __SYNTHESIS__
-#include <chrono>
-#endif
-
 #ifdef __cplusplus
 extern "C"
 #endif

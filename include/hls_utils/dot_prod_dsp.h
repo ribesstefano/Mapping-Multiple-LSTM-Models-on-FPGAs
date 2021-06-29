@@ -39,6 +39,7 @@
 #ifndef HLS_UTILS_DOT_PROD_DSP_H_
 #define HLS_UTILS_DOT_PROD_DSP_H_
 
+#include "ap_int.h"
 #include "assert.h"
 
 /**
