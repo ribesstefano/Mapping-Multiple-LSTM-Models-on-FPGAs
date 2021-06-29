@@ -12,6 +12,12 @@ target_include_directories(ACTIVATION_FUNCTIONS PUBLIC ${VIVADO_INCLUDE_DIRS})
 target_include_directories(ACTIVATION_FUNCTIONS PUBLIC ${OpenCv_INCLUDE_DIRS})
 target_link_libraries(ACTIVATION_FUNCTIONS ${OpenCv_LIBS})
 
+add_executable(DATA_HANDLER ${CMAKE_SOURCE_DIR}/src/math_utils/data_handler.cpp)
+target_include_directories(DATA_HANDLER PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(DATA_HANDLER PUBLIC ${VIVADO_INCLUDE_DIRS})
+target_include_directories(DATA_HANDLER PUBLIC ${OpenCv_INCLUDE_DIRS})
+target_link_libraries(DATA_HANDLER ${OpenCv_LIBS})
+
 # # add_test(NAME TestOpenCv COMMAND OPENCV_TEST)
 # # add_test(NAME TestAxisLib COMMAND TEST_AXIS_LIB)
 # # add_test(NAME TestConvLayer COMMAND TEST_CONV_LAYER)
