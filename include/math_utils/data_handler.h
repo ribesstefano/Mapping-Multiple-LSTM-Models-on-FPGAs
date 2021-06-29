@@ -12,7 +12,7 @@ namespace svd {
 template<typename FloatType, typename FixType, int NumTiles = 1>
 class VectorBlob {
 private:
-  typedef ap_uint<hls_utils::log2<(NumTiles > 1) ? NumTiles : 2>::value> IdxType;
+  typedef ap_uint<NumTiles> IdxType;
   int num_tile_elems_;
   int size_;
   int pruned_size_;

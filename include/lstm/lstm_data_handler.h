@@ -400,13 +400,13 @@ public:
         this->fix_s_[i]);
     }
 
-    // (sizeof(FixType) * 8) * 4
-    // (sizeof(FixType) * 8) * 8
-    ap_uint<64>* u_cur_uint = reinterpret_cast<ap_uint<64>*>(this->fix_u_cur_);
-    ap_uint<64>* u_rec_uint = reinterpret_cast<ap_uint<64>*>(this->fix_u_rec_);
-    ap_uint<128>* v_uint = reinterpret_cast<ap_uint<128>*>(this->fix_v_);
-    ap_uint<128>* s1_uint = reinterpret_cast<ap_uint<128>*>(this->fix_s_[0]);
-    ap_uint<128>* s2_uint = reinterpret_cast<ap_uint<128>*>(this->fix_s_[1]);
+    // // (sizeof(FixType) * 8) * 4
+    // // (sizeof(FixType) * 8) * 8
+    // ap_uint<64>* u_cur_uint = reinterpret_cast<ap_uint<64>*>(this->fix_u_cur_);
+    // ap_uint<64>* u_rec_uint = reinterpret_cast<ap_uint<64>*>(this->fix_u_rec_);
+    // ap_uint<128>* v_uint = reinterpret_cast<ap_uint<128>*>(this->fix_v_);
+    // ap_uint<128>* s1_uint = reinterpret_cast<ap_uint<128>*>(this->fix_s_[0]);
+    // ap_uint<128>* s2_uint = reinterpret_cast<ap_uint<128>*>(this->fix_s_[1]);
 
   }
 

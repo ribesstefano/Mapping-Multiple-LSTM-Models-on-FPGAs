@@ -15,6 +15,7 @@ find_package(OpenCv REQUIRED)
 
 # set(HLS_INCLUDE_DIRS ${VITIS_INCLUDE_DIRS})
 # set(HLS_INCLUDE_DIRS ${VIVADO_INCLUDE_DIRS})
+# message(${HLS_INCLUDE_DIRS})
 
 # Add all definitions
 if (WIN32)

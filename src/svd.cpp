@@ -18,6 +18,7 @@ int main(int argc, char const *argv[]) {
   ap_uint<svd_params::Tv> nz_v_port[svd_params::N] = {rand()};
   typename svd_params::ActivationD y_port[svd_params::N][svd_params::G][svd_params::H] = {rand()};
 
+  std::cout << "Running SvdIp2Inputs." << std::endl;
   SvdIp2Inputs(x_port, u_port, s_port, v_port, nz_u_port, nz_v_port, y_port);
 
   const int kNumInputs = 2;
@@ -30,10 +31,12 @@ int main(int argc, char const *argv[]) {
   const int kNumTilesV = 32;
   const int kNumZeroTilesV = 4;
 
-  lstm::AcceleratorBlob<float, ap_fixed<16, 9>, kNumTilesU, kNumTilesV>(
-    kNumInputs, kRefinementSteps, kUCurSize, kURecSize, kVSize, kNumTilesU,
-    kNumZeroTilesU, kNumTilesV, kNumZeroTilesV);
 
+  std::cout << "Setting AcceleratorBlob." << std::endl;
+  typedef lstm::AcceleratorBlob<float, ap_fixed<16, 9>, kNumTilesU, kNumTilesV> AccelDataType;
+  AccelDataType storage = AccelDataType(kNumInputs, kRefinementSteps, kUCurSize,
+    kURecSize, kVSize, kNumTilesU, kNumZeroTilesU, kNumTilesV, kNumZeroTilesV);
+  std::cout << "Cleaning up." << std::endl;
 
   return 0;
 }
