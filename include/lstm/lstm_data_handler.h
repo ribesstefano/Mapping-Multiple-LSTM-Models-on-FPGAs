@@ -4,6 +4,8 @@
 #include "math_utils/data_handler.h"
 #include "hls_utils/hls_metaprogramming.h"
 
+#include "ap_int.h"
+
 #ifdef SDS_DESIGN
 #include <stdint.h>
 #include "sds_lib.h"
@@ -289,37 +291,42 @@ template <typename FloatType, typename FixType, int NumTilesU = 1, int NumTilesV
 class GateBlob {
 private:
   int num_gates_;
-  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV> i_;
-  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV> f_;
-  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV> c_;
-  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV> o_;
+  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>* i_;
+  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>* f_;
+  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>* c_;
+  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>* o_;
 public:
   GateBlob(const int num_inputs, const int refinement_steps,
       const int u_size, const int v_size, const int num_tiles_u,
       const int num_zero_tiles_u, const int num_tiles_v,
       const int num_zero_tiles_v) {
     this->num_gates_ = 4;
-    this->i_ = svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>(num_inputs, refinement_steps, u_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
-    this->f_ = svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>(num_inputs, refinement_steps, u_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
-    this->c_ = svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>(num_inputs, refinement_steps, u_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
-    this->o_ = svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>(num_inputs, refinement_steps, u_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
+    this->i_ = new svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>(num_inputs, refinement_steps, u_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
+    this->f_ = new svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>(num_inputs, refinement_steps, u_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
+    this->c_ = new svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>(num_inputs, refinement_steps, u_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
+    this->o_ = new svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>(num_inputs, refinement_steps, u_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
   }
 
-  ~GateBlob() {};
+  ~GateBlob() {
+    delete[] this->i_;
+    delete[] this->f_;
+    delete[] this->c_;
+    delete[] this->o_;
+  }
 
-  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV> get_i() {
+  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>* get_i() {
     return this->i_;
   }
 
-  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV> get_f() {
+  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>* get_f() {
     return this->f_;
   }
 
-  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV> get_c() {
+  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>* get_c() {
     return this->c_;
   }
 
-  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV> get_o() {
+  svd::SvdComponents<FloatType, FixType, NumTilesU, NumTilesV>* get_o() {
     return this->o_;
   }
 };
@@ -327,8 +334,8 @@ public:
 template <typename FloatType, typename FixType, int NumTilesU = 1, int NumTilesV = 1>
 class AcceleratorBlob {
 private:
-  GateBlob<FloatType, FixType, NumTilesU, NumTilesV> cur_gates_;
-  GateBlob<FloatType, FixType, NumTilesU, NumTilesV> rec_gates_;
+  GateBlob<FloatType, FixType, NumTilesU, NumTilesV>* cur_gates_;
+  GateBlob<FloatType, FixType, NumTilesU, NumTilesV>* rec_gates_;
   FixType* fix_u_cur_;
   FixType* fix_u_rec_;
   FixType* fix_v_;
@@ -338,14 +345,13 @@ public:
       const int u_cur_size, const int u_rec_size, const int v_size,
       const int num_tiles_u, const int num_zero_tiles_u, const int num_tiles_v,
       const int num_zero_tiles_v) {
-    this->cur_gates_ = GateBlob<FloatType, FixType, NumTilesU, NumTilesV>(num_inputs, refinement_steps, u_cur_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
-    this->rec_gates_ = GateBlob<FloatType, FixType, NumTilesU, NumTilesV>(num_inputs, refinement_steps, u_rec_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
-
-    const int kNumInputs = this->cur_gates_.get_i().get_num_inputs();
+    this->cur_gates_ = new GateBlob<FloatType, FixType, NumTilesU, NumTilesV>(num_inputs, refinement_steps, u_cur_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
+    this->rec_gates_ = new GateBlob<FloatType, FixType, NumTilesU, NumTilesV>(num_inputs, refinement_steps, u_rec_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
+    const int kNumInputs = this->cur_gates_->get_i()->get_num_inputs();
     const int kNumGates = 8;
-    const int kU_CurTotalSize = kNumGates / 2 * this->cur_gates_.get_i().get_u().get_pruned_total_size();
-    const int kU_RecTotalSize = kNumGates / 2 * this->rec_gates_.get_i().get_u().get_pruned_total_size();
-    const int kV_TotalSize = kNumGates * this->cur_gates_.get_i().get_v().get_pruned_total_size();
+    const int kU_CurTotalSize = kNumGates / 2 * this->cur_gates_->get_i()->get_u()->get_pruned_total_size();
+    const int kU_RecTotalSize = kNumGates / 2 * this->rec_gates_->get_i()->get_u()->get_pruned_total_size();
+    const int kV_TotalSize = kNumGates * this->cur_gates_->get_i()->get_v()->get_pruned_total_size();
     const int kS_TotalSize = kNumGates * refinement_steps;
     for (int i = 0; i < kNumInputs; ++i) {
       this->fix_s_.push_back((FixType*)ALLOC(kS_TotalSize * sizeof(FixType)));
@@ -353,51 +359,49 @@ public:
     this->fix_u_cur_ = (FixType*)ALLOC(kU_CurTotalSize * sizeof(FixType));
     this->fix_u_rec_ = (FixType*)ALLOC(kU_RecTotalSize * sizeof(FixType));
     this->fix_v_ = (FixType*)ALLOC(kV_TotalSize * sizeof(FixType));
-
     // NOTE: the following arrangement is: (R, E, G)
     const int kArrangementType = 2;
-    const int kU_CurLengthPruned = this->cur_gates_.get_i().get_u().get_pruned_size();
-    const int kU_RecLengthPruned = this->rec_gates_.get_i().get_u().get_pruned_size();
-    const int kV_LengthPruned = this->cur_gates_.get_i().get_v().get_pruned_size();
+    const int kU_CurLengthPruned = this->cur_gates_->get_i()->get_u()->get_pruned_size();
+    const int kU_RecLengthPruned = this->rec_gates_->get_i()->get_u()->get_pruned_size();
+    const int kV_LengthPruned = this->cur_gates_->get_i()->get_v()->get_pruned_size();
     lstm::ArrangeWeights(kArrangementType, refinement_steps, kU_CurLengthPruned,
-      this->cur_gates_.get_i().get_u().pruned_data(),
-      this->cur_gates_.get_f().get_u().pruned_data(),
-      this->cur_gates_.get_c().get_u().pruned_data(),
-      this->cur_gates_.get_o().get_u().pruned_data(),
+      this->cur_gates_->get_i()->get_u()->pruned_data(),
+      this->cur_gates_->get_f()->get_u()->pruned_data(),
+      this->cur_gates_->get_c()->get_u()->pruned_data(),
+      this->cur_gates_->get_o()->get_u()->pruned_data(),
       this->fix_u_cur_);
     lstm::ArrangeWeights(kArrangementType, refinement_steps, kU_RecLengthPruned,
-      this->rec_gates_.get_i().get_u().pruned_data(),
-      this->rec_gates_.get_f().get_u().pruned_data(),
-      this->rec_gates_.get_c().get_u().pruned_data(),
-      this->rec_gates_.get_o().get_u().pruned_data(),
+      this->rec_gates_->get_i()->get_u()->pruned_data(),
+      this->rec_gates_->get_f()->get_u()->pruned_data(),
+      this->rec_gates_->get_c()->get_u()->pruned_data(),
+      this->rec_gates_->get_o()->get_u()->pruned_data(),
       this->fix_u_rec_);
     lstm::ArrangeWeights(kArrangementType, refinement_steps, kV_LengthPruned,
       kV_LengthPruned,
-      this->cur_gates_.get_i().get_v().pruned_data(),
-      this->cur_gates_.get_f().get_v().pruned_data(),
-      this->cur_gates_.get_c().get_v().pruned_data(),
-      this->cur_gates_.get_o().get_v().pruned_data(),
-      this->rec_gates_.get_i().get_v().pruned_data(),
-      this->rec_gates_.get_f().get_v().pruned_data(),
-      this->rec_gates_.get_c().get_v().pruned_data(),
-      this->rec_gates_.get_o().get_v().pruned_data(),
+      this->cur_gates_->get_i()->get_v()->pruned_data(),
+      this->cur_gates_->get_f()->get_v()->pruned_data(),
+      this->cur_gates_->get_c()->get_v()->pruned_data(),
+      this->cur_gates_->get_o()->get_v()->pruned_data(),
+      this->rec_gates_->get_i()->get_v()->pruned_data(),
+      this->rec_gates_->get_f()->get_v()->pruned_data(),
+      this->rec_gates_->get_c()->get_v()->pruned_data(),
+      this->rec_gates_->get_o()->get_v()->pruned_data(),
       this->fix_v_);
     for (int i = 0; i < kNumInputs; ++i) {
       lstm::ArrangeWeights(kArrangementType, refinement_steps, 1, 1,
-        this->cur_gates_.get_i().get_s().data(),
-        this->cur_gates_.get_f().get_s().data(),
-        this->cur_gates_.get_c().get_s().data(),
-        this->cur_gates_.get_o().get_s().data(),
-        this->rec_gates_.get_i().get_s().data(),
-        this->rec_gates_.get_f().get_s().data(),
-        this->rec_gates_.get_c().get_s().data(),
-        this->rec_gates_.get_o().get_s().data(),
+        this->cur_gates_->get_i()->get_s(i).data(),
+        this->cur_gates_->get_f()->get_s(i).data(),
+        this->cur_gates_->get_c()->get_s(i).data(),
+        this->cur_gates_->get_o()->get_s(i).data(),
+        this->rec_gates_->get_i()->get_s(i).data(),
+        this->rec_gates_->get_f()->get_s(i).data(),
+        this->rec_gates_->get_c()->get_s(i).data(),
+        this->rec_gates_->get_o()->get_s(i).data(),
         this->fix_s_[i]);
     }
 
     // (sizeof(FixType) * 8) * 4
     // (sizeof(FixType) * 8) * 8
-
     ap_uint<64>* u_cur_uint = reinterpret_cast<ap_uint<64>*>(this->fix_u_cur_);
     ap_uint<64>* u_rec_uint = reinterpret_cast<ap_uint<64>*>(this->fix_u_rec_);
     ap_uint<128>* v_uint = reinterpret_cast<ap_uint<128>*>(this->fix_v_);
@@ -410,9 +414,11 @@ public:
     FREE(this->fix_u_cur_);
     FREE(this->fix_u_rec_);
     FREE(this->fix_v_);
-    for (int i = 0; i < this->cur_gates_.get_i().get_num_inputs(); ++i) {
+    for (int i = 0; i < this->cur_gates_->get_i()->get_num_inputs(); ++i) {
       FREE(this->fix_s_[i]);
     }
+    delete[] this->cur_gates_;
+    delete[] this->rec_gates_;
   }
 
 };

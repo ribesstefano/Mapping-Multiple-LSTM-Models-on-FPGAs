@@ -114,7 +114,7 @@ public:
   }
 
   int get_pruned_total_size() {
-    return this->total_pruned_size_;
+    return this->pruned_total_size_;
   }
 
   int get_size() {
@@ -163,29 +163,32 @@ template <typename FloatType, typename FixType, int NumTilesU = 1, int NumTilesV
 class SvdComponents {
 private:
   int num_inputs_;
-  VectorBlob<FloatType, FixType, NumTilesU> u_;
+  VectorBlob<FloatType, FixType, NumTilesU>* u_;
   std::vector<VectorBlob<FloatType, FixType, 1> > s_;
-  VectorBlob<FloatType, FixType, NumTilesV> v_;
+  VectorBlob<FloatType, FixType, NumTilesV>* v_;
 public:
   SvdComponents(const int num_inputs, const int refinement_steps,
       const int u_size, const int v_size, const int num_tiles_u,
       const int num_zero_tiles_u, const int num_tiles_v,
       const int num_zero_tiles_v) {
     this->num_inputs_ = num_inputs;
-    this->u_ = VectorBlob<FloatType, FixType, NumTilesU>(refinement_steps, u_size, num_tiles_u, num_zero_tiles_u);
-    this->v_ = VectorBlob<FloatType, FixType, NumTilesV>(refinement_steps, v_size, num_tiles_v, num_zero_tiles_v);
+    this->u_ = new VectorBlob<FloatType, FixType, NumTilesU>(refinement_steps, u_size, num_tiles_u, num_zero_tiles_u);
+    this->v_ = new VectorBlob<FloatType, FixType, NumTilesV>(refinement_steps, v_size, num_tiles_v, num_zero_tiles_v);
     for (int i = 0; i < num_inputs; ++i) {
       this->s_.push_back(VectorBlob<FloatType, FixType, 1>(refinement_steps, 1, 1, 0));
     }
   }
 
-  ~SvdComponents() {};
+  ~SvdComponents() {
+    delete[] this->u_;
+    delete[] this->v_;
+  }
   
-  VectorBlob<FloatType, FixType, NumTilesU> get_u() {
+  VectorBlob<FloatType, FixType, NumTilesU>* get_u() {
     return this->u_;
   }
 
-  VectorBlob<FloatType, FixType, NumTilesV> get_v() {
+  VectorBlob<FloatType, FixType, NumTilesV>* get_v() {
     return this->v_;
   }
 

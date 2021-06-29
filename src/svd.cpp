@@ -1,5 +1,8 @@
 #include "svd_params.h"
 #include "svd_ip.h"
+#include "lstm/lstm_data_handler.h"
+
+#include "ap_fixed.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -16,6 +19,21 @@ int main(int argc, char const *argv[]) {
   typename svd_params::ActivationD y_port[svd_params::N][svd_params::G][svd_params::H] = {rand()};
 
   SvdIp2Inputs(x_port, u_port, s_port, v_port, nz_u_port, nz_v_port, y_port);
+
+  const int kNumInputs = 2;
+  const int kRefinementSteps = 2;
+  const int kUCurSize = 1024;
+  const int kURecSize = 512;
+  const int kVSize = 512;
+  const int kNumTilesU = 16;
+  const int kNumZeroTilesU = 8;
+  const int kNumTilesV = 32;
+  const int kNumZeroTilesV = 4;
+
+  lstm::AcceleratorBlob<float, ap_fixed<16, 9>, kNumTilesU, kNumTilesV>(
+    kNumInputs, kRefinementSteps, kUCurSize, kURecSize, kVSize, kNumTilesU,
+    kNumZeroTilesU, kNumTilesV, kNumZeroTilesV);
+
 
   return 0;
 }
