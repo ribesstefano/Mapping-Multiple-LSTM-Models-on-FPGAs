@@ -294,19 +294,6 @@ typedef ap_uint<U_PORT_WIDTH> UPortD;
 typedef ap_uint<V_PORT_WIDTH> VPortD;
 typedef ap_uint<S_PORT_WIDTH> SPortD;
 
-/**
- * @brief      Determines at compile time whether the specified x is power 2.
- *             Used by SDSoC to infer DMA transfers (with arguments having a
- *             power of 2 bitwidth), or master AXI interfaces instead.
- *
- * @param      x     Input number
- *
- * @return     True if the specified x is a power 2, False otherwise.
- */
-#ifndef IS_POW2
-#define IS_POW2(x) (x & (x - 1)) == 0
-#endif
-
 } // namespace svd
 
 #endif // end SVD_PARAMS_H_

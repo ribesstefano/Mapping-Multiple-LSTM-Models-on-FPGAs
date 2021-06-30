@@ -6,8 +6,55 @@
 #include "ap_int.h"
 
 #include <vector>
+#include <exception>
+#include <new>
+
+#ifdef SDS_DESIGN
+#include <stdint.h>
+#include "sds_lib.h"
+#else
+#include <cstdlib>
+#endif
+
+#ifndef ALLOC
+# ifdef SDS_DESIGN
+#   define ALLOC(x) sds_alloc(x)
+# else
+#   define ALLOC(x) malloc(x)
+# endif
+#endif
+
+#ifndef FREE
+# ifdef SDS_DESIGN
+#   define FREE(x) sds_free(x)
+# else
+#   define FREE(x) free(x)
+# endif
+#endif
 
 namespace svd {
+
+template <typename T>
+T* AllocateContiguously(const int size) {
+  T* tmp;
+  try {
+    tmp = (T*)ALLOC(size * sizeof(T));
+  } catch(...) {
+    std::cout << "[ERROR] Exception occurred while contiguously allocating." << std::endl;
+    throw;
+  }
+  if (!tmp) {
+    std::cout << "[ERROR] Contiguous allocation failed." << std::endl;
+    std::bad_alloc except_alloc;
+    throw except_alloc;
+  }
+  return tmp;
+}
+
+template <typename T>
+void FreeContiguously(T* x) {
+  FREE(x);
+}
 
 template<typename FloatType, typename FixType, int NumTiles = 1>
 class VectorBlob {
@@ -27,12 +74,13 @@ private:
   std::vector<FixType> fix_pruned_data_;
   std::vector<int> z_idx_;
   std::vector<int> nz_idx_;
-  std::vector<IdxType> z_fix_idx_;
-  std::vector<IdxType> nz_fix_idx_;
+  std::vector<IdxType> fix_z_idx_;
+  std::vector<IdxType> fix_nz_idx_;
 
 public:
   VectorBlob(const int refinement_steps, const int vector_size,
       const int num_tiles, const int num_zero_tiles) {
+    assert(num_tiles >= 1);
     this->num_tile_elems_ = vector_size / num_tiles;
     this->size_ = vector_size;
     this->pruned_size_ = this->num_tile_elems_ * (num_tiles - num_zero_tiles);
@@ -43,10 +91,10 @@ public:
     this->num_zero_tiles_ = num_zero_tiles;
     // NOTE: If num_tiles matches the number of tiles specified in the template,
     // then populate the fix vectors.
-    if (num_tiles == NumTiles) {
+    if (num_tiles == NumTiles && num_zero_tiles > 0) {
       for (int i = 0; i < refinement_steps; ++i) {
-        this->nz_fix_idx_.push_back(~IdxType(0));
-        this->z_fix_idx_.push_back(~IdxType(0));
+        this->fix_nz_idx_.push_back(~IdxType(0));
+        this->fix_z_idx_.push_back(~IdxType(0));
       }
     }
     if (num_zero_tiles > 0) {
@@ -62,8 +110,8 @@ public:
         // Set the bits
         for (int j = 0; j < num_tiles; ++j) {
           if (num_tiles == NumTiles) {
-            this->nz_fix_idx_[i][j] = rand_idx[j];
-            this->z_fix_idx_[i][j] = rand_idx[j] == 0 ? 1 : 0;
+            this->fix_nz_idx_[i][j] = rand_idx[j];
+            this->fix_z_idx_[i][j] = rand_idx[j] == 0 ? 1 : 0;
           }
           if (rand_idx[j] == 0) {
             for (int k = 0; k < this->num_tile_elems_; ++k) {
@@ -88,6 +136,8 @@ public:
         FloatType tmp = rand();
         this->data_.push_back(tmp);
         this->pruned_data_.push_back(tmp);
+        this->fix_data_.push_back(FixType(tmp));
+        this->fix_pruned_data_.push_back(FixType(tmp));
       }
     }
   }
@@ -114,6 +164,7 @@ public:
   }
 
   int get_pruned_total_size() {
+    assert(this->pruned_total_size_ == this->fix_pruned_data_.size());
     return this->pruned_total_size_;
   }
 
@@ -141,20 +192,20 @@ public:
     return this->nz_idx_[i];
   }
 
-  IdxType* get_z_fix_idx() {
-    return this->z_fix_idx_.data();
+  IdxType* get_fix_z_idx() {
+    return this->fix_z_idx_.data();
   }
 
-  IdxType get_z_fix_idx(const int refinement_step) {
-    return this->z_fix_idx_[refinement_step];
+  IdxType get_fix_z_idx(const int refinement_step) {
+    return this->fix_z_idx_[refinement_step];
   }
 
-  IdxType* get_nz_fix_idx() {
-    return this->nz_fix_idx_.data();
+  IdxType* get_fix_nz_idx() {
+    return this->fix_nz_idx_.data();
   }
 
-  IdxType get_nz_fix_idx(const int refinement_step) {
-    return this->nz_fix_idx_[refinement_step];
+  IdxType get_fix_nz_idx(const int refinement_step) {
+    return this->fix_nz_idx_[refinement_step];
   }
 };
 
@@ -180,8 +231,8 @@ public:
   }
 
   ~SvdComponents() {
-    delete[] this->u_;
-    delete[] this->v_;
+    delete this->u_;
+    delete this->v_;
   }
   
   VectorBlob<FloatType, FixType, NumTilesU>* get_u() {

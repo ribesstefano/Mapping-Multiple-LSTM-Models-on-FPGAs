@@ -24,11 +24,11 @@ target_link_libraries(SVD_IP ${OpenCv_LIBS})
 target_link_libraries(SVD_IP SVD_KERNEL)
 target_compile_options(SVD_IP PRIVATE -fno-builtin)
 
-
 add_library(SVD STATIC ${CMAKE_SOURCE_DIR}/src/svd.cpp)
 target_include_directories(SVD PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(SVD PUBLIC ${VIVADO_INCLUDE_DIRS})
 target_include_directories(SVD PUBLIC ${OpenCv_INCLUDE_DIRS})
 target_link_libraries(SVD ${OpenCv_LIBS})
 target_link_libraries(SVD SVD_IP)
+target_link_libraries(SVD LSTM_SVD)
 target_compile_options(SVD PRIVATE -fno-builtin)

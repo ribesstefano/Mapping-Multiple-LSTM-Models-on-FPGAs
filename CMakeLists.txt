@@ -25,7 +25,8 @@ else()
 endif()
 # The following definitions is required for compiling half-precision numbers.
 add_compile_definitions(HLS_NO_XIL_FPO_LIB)
-add_compile_definitions(USE_FLOAT)
+# add_compile_definitions(USE_FLOAT)
+add_compile_definitions(DEBUG_LEVEL=2)
 
 # Move executable in bin/, along side the DLLs (copied)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
@@ -38,3 +39,4 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
 add_executable(Svd ${CMAKE_CURRENT_SOURCE_DIR}/src/svd.cpp)
 target_link_libraries(Svd SVD)
+set_target_properties(Svd PROPERTIES LINK_FLAGS -Wl,--stack,10485760)

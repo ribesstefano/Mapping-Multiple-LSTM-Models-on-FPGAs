@@ -1,18 +1,18 @@
 cmake_minimum_required(VERSION 3.10)
 
-add_executable(BLAS_UTILS ${CMAKE_SOURCE_DIR}/src/math_utils/blas_utils.cpp)
+add_library(BLAS_UTILS STATIC ${CMAKE_SOURCE_DIR}/src/math_utils/blas_utils.cpp)
 target_include_directories(BLAS_UTILS PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(BLAS_UTILS PUBLIC ${VIVADO_INCLUDE_DIRS})
 target_include_directories(BLAS_UTILS PUBLIC ${OpenCv_INCLUDE_DIRS})
 target_link_libraries(BLAS_UTILS ${OpenCv_LIBS})
 
-add_executable(ACTIVATION_FUNCTIONS ${CMAKE_SOURCE_DIR}/src/math_utils/activation_functions.cpp)
+add_library(ACTIVATION_FUNCTIONS STATIC ${CMAKE_SOURCE_DIR}/src/math_utils/activation_functions.cpp)
 target_include_directories(ACTIVATION_FUNCTIONS PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(ACTIVATION_FUNCTIONS PUBLIC ${VIVADO_INCLUDE_DIRS})
 target_include_directories(ACTIVATION_FUNCTIONS PUBLIC ${OpenCv_INCLUDE_DIRS})
 target_link_libraries(ACTIVATION_FUNCTIONS ${OpenCv_LIBS})
 
-add_executable(DATA_HANDLER ${CMAKE_SOURCE_DIR}/src/math_utils/data_handler.cpp)
+add_library(DATA_HANDLER STATIC ${CMAKE_SOURCE_DIR}/src/math_utils/data_handler.cpp)
 target_include_directories(DATA_HANDLER PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(DATA_HANDLER PUBLIC ${VIVADO_INCLUDE_DIRS})
 target_include_directories(DATA_HANDLER PUBLIC ${OpenCv_INCLUDE_DIRS})
