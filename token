@@ -1,1 +1,5 @@
 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
+
+git remote remove origin
+git remote add origin https://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@github.com/ribesstefano/hls_svd.git
+git pull https://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@github.com/ribesstefano/hls_svd.git

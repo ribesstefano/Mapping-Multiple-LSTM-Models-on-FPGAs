@@ -162,7 +162,7 @@ private: // TODO: move parameters' access in members?
 #define NUM_TILES_V 64
 #endif
 #ifndef NUM_ZERO_TILES_V
-#define NUM_ZERO_TILES_V 21
+#define NUM_ZERO_TILES_V 8
 #endif
 #ifndef TILE_SIZE_CUR_U
 #define TILE_SIZE_CUR_U (INPUT_SIZE / NUM_TILES_U)

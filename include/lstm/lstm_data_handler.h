@@ -281,6 +281,7 @@ private:
   int u_cur_size_;
   int u_rec_size_;
   int v_size_;
+  int s_size_;
   std::unordered_map<std::string, SvdVecType*> cur_gates_;
   std::unordered_map<std::string, SvdVecType*> rec_gates_;
   FixType* fix_u_cur_;
@@ -295,8 +296,8 @@ private:
   std::vector<FixType*> fix_c_;
   std::vector<FixType*> fix_bias_;
   std::vector<FixType*> fix_s_;
-  ap_uint<NumTilesU>* fix_z_u_;
-  ap_uint<NumTilesV>* fix_z_v_;
+  ap_uint<NumTilesU>* fix_nz_u_;
+  ap_uint<NumTilesV>* fix_nz_v_;
 
   void InitVector(const bool init_random, const int num_inputs, const int size,
       std::vector<FixType*>& fix_y, std::vector<std::vector<FloatType> >& y) {
@@ -342,8 +343,9 @@ public:
     this->u_cur_size_ = kU_CurTotalSize;
     this->u_rec_size_ = kU_RecTotalSize;
     this->v_size_ = kV_TotalSize;
-    this->fix_z_u_ = svd::AllocateContiguously<ap_uint<NumTilesU>>(kS_TotalSize);
-    this->fix_z_v_ = svd::AllocateContiguously<ap_uint<NumTilesV>>(kS_TotalSize);
+    this->s_size_ = kS_TotalSize;
+    this->fix_nz_u_ = svd::AllocateContiguously<ap_uint<NumTilesU> >(kS_TotalSize);
+    this->fix_nz_v_ = svd::AllocateContiguously<ap_uint<NumTilesV> >(kS_TotalSize);
     // NOTE: the following arrangement is: (R, E, G)
     const int kArrangementTypeREG = 2;
     const int kArrangementTypeRGE = 0;
@@ -378,25 +380,25 @@ public:
       this->fix_v_);
     std::cout << "arrange NZ" << std::endl;
     lstm::ArrangeWeights(kArrangementTypeRGE, refinement_steps, 1, 1,
-      this->cur_gates_["i"]->get_u()->get_fix_z_idx(),
-      this->cur_gates_["f"]->get_u()->get_fix_z_idx(),
-      this->cur_gates_["c"]->get_u()->get_fix_z_idx(),
-      this->cur_gates_["o"]->get_u()->get_fix_z_idx(),
-      this->rec_gates_["i"]->get_u()->get_fix_z_idx(),
-      this->rec_gates_["f"]->get_u()->get_fix_z_idx(),
-      this->rec_gates_["c"]->get_u()->get_fix_z_idx(),
-      this->rec_gates_["o"]->get_u()->get_fix_z_idx(),
-      this->fix_z_u_);
+      this->cur_gates_["i"]->get_u()->get_fix_nz_idx(),
+      this->cur_gates_["f"]->get_u()->get_fix_nz_idx(),
+      this->cur_gates_["c"]->get_u()->get_fix_nz_idx(),
+      this->cur_gates_["o"]->get_u()->get_fix_nz_idx(),
+      this->rec_gates_["i"]->get_u()->get_fix_nz_idx(),
+      this->rec_gates_["f"]->get_u()->get_fix_nz_idx(),
+      this->rec_gates_["c"]->get_u()->get_fix_nz_idx(),
+      this->rec_gates_["o"]->get_u()->get_fix_nz_idx(),
+      this->fix_nz_u_);
     lstm::ArrangeWeights(kArrangementTypeRGE, refinement_steps, 1, 1,
-      this->cur_gates_["i"]->get_v()->get_fix_z_idx(),
-      this->cur_gates_["f"]->get_v()->get_fix_z_idx(),
-      this->cur_gates_["c"]->get_v()->get_fix_z_idx(),
-      this->cur_gates_["o"]->get_v()->get_fix_z_idx(),
-      this->rec_gates_["i"]->get_v()->get_fix_z_idx(),
-      this->rec_gates_["f"]->get_v()->get_fix_z_idx(),
-      this->rec_gates_["c"]->get_v()->get_fix_z_idx(),
-      this->rec_gates_["o"]->get_v()->get_fix_z_idx(),
-      this->fix_z_v_);
+      this->cur_gates_["i"]->get_v()->get_fix_nz_idx(),
+      this->cur_gates_["f"]->get_v()->get_fix_nz_idx(),
+      this->cur_gates_["c"]->get_v()->get_fix_nz_idx(),
+      this->cur_gates_["o"]->get_v()->get_fix_nz_idx(),
+      this->rec_gates_["i"]->get_v()->get_fix_nz_idx(),
+      this->rec_gates_["f"]->get_v()->get_fix_nz_idx(),
+      this->rec_gates_["c"]->get_v()->get_fix_nz_idx(),
+      this->rec_gates_["o"]->get_v()->get_fix_nz_idx(),
+      this->fix_nz_v_);
     this->fix_x_.resize(num_inputs);
     this->fix_h_.resize(num_inputs);
     this->fix_c_.resize(num_inputs);
@@ -444,8 +446,8 @@ public:
       svd::FreeContiguously(this->fix_c_[i]);
       svd::FreeContiguously(this->fix_bias_[i]);
     }
-    svd::FreeContiguously(this->fix_z_u_);
-    svd::FreeContiguously(this->fix_z_v_);
+    svd::FreeContiguously(this->fix_nz_u_);
+    svd::FreeContiguously(this->fix_nz_v_);
     for (auto g : this->cur_gates_) {
       delete g.second;
     }
@@ -513,12 +515,12 @@ public:
     return this->fix_bias_[i];
   }
 
-  ap_uint<NumTilesU>* get_fix_z_u() {
-    return this->fix_z_u_;
+  ap_uint<NumTilesU>* get_fix_nz_u() {
+    return this->fix_nz_u_;
   }
 
-  ap_uint<NumTilesV>* get_fix_z_v() {
-    return this->fix_z_v_;
+  ap_uint<NumTilesV>* get_fix_nz_v() {
+    return this->fix_nz_v_;
   }
 
   int get_u_cur_size() {
@@ -531,6 +533,10 @@ public:
 
   int get_v_size() {
     return this->v_size_;
+  }
+
+  int get_s_size() {
+    return this->s_size_;
   }
 
 };

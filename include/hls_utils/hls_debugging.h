@@ -14,8 +14,7 @@ namespace hls_utils {
 
 static int hls_debug_level = HLS_DEBUG_LEVEL;
 
-void Log(const int verbose_level, const std::string &str) {
-  std::cout << str << std::endl;
+void Log(const int verbose_level, const std::string str) {
 #ifndef __SYNTHESIS__
   if (verbose_level < hls_debug_level) {
     std::cout << str << std::endl;

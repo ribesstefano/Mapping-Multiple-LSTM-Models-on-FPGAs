@@ -24,8 +24,8 @@ void SvdModel2LstmSDSoCV2(
     const ap_uint<FIX_WIDTH * 8> *s2_port, // [NUM_ITERATIONS*8],
     const svd::WeightD bias1_port[4 * HIDDEN_SIZE],
     const svd::WeightD bias2_port[4 * HIDDEN_SIZE],
-    const ap_uint<NUM_TILES_V> comb_v_port[NUM_ITERATIONS * 8],
-    const ap_uint<NUM_TILES_U> comb_u_port[NUM_ITERATIONS * 8],
+    const ap_uint<NUM_TILES_V> comb_v_port[NUM_ITERATIONS * 8], // non-zero indexes
+    const ap_uint<NUM_TILES_U> comb_u_port[NUM_ITERATIONS * 8], // non-zero indexes
     svd::ActivationD h_t1_curr_port[HIDDEN_SIZE],
     svd::ActivationD h_t2_curr_port[HIDDEN_SIZE],
     svd::ActivationD c_t1_curr_port[HIDDEN_SIZE],
@@ -36,7 +36,7 @@ void SvdModel2LstmSDSoCV2(
     svd::CounterD *clk_count_port
 #endif
     ) {
-  std::cout << "[INFO] Running SvdModel2LstmSDSoCV2." << std::endl;
+  hls_utils::Log(0, "[INFO] Running SvdModel2LstmSDSoCV2.");
   const int kNumGates = 8;
   const int kNumCurGates = 4;
   const int kNumRecGates = 4;
@@ -58,7 +58,7 @@ void SvdModel2LstmSDSoCV2(
   // assert(kNumZeroTilesU % 2 == 0);
   // assert(kNumZeroTilesV % 2 == 0);
   assert(kNumIter % 2 == 0);
-  std::cout << "[INFO] assert passed." << std::endl;
+  hls_utils::Log(0, "[INFO] assert passed.");
 
   const int kNumElemsTileU = kInputLength / kNumTilesU;
   const int kPrunedLengthU = kInputLength - kNumZeroTilesU * kNumElemsTileU;
@@ -114,7 +114,7 @@ void SvdModel2LstmSDSoCV2(
 #endif // SDS_DESIGN
 
 #pragma HLS DATAFLOW
-  std::cout << "[INFO] DATAFLOW passed." << std::endl;
+  hls_utils::Log(0, "[INFO] DATAFLOW passed.");
 
   // ===========================================================================
   // Current streams
@@ -211,7 +211,7 @@ void SvdModel2LstmSDSoCV2(
 #pragma HLS STREAM variable=cur_out2_streams depth=kOutStreamDepth dim=2
 #pragma HLS STREAM variable=rec_out1_streams depth=kOutStreamDepth dim=2
 #pragma HLS STREAM variable=rec_out2_streams depth=kOutStreamDepth dim=2
-  std::cout << "[INFO] Depth sizing passed." << std::endl;
+  hls_utils::Log(0, "[INFO] Depth sizing passed.");
 
   // ===========================================================================
   // Zero Combinations DMA
@@ -220,7 +220,7 @@ void SvdModel2LstmSDSoCV2(
   // that a wrong factor could lead to deadlocks!
   const int kFIFOdepthDivider = 8;
   const int kStreamDepthIter = kNumIter / kFIFOdepthDivider;
-  std::cout << "[INFO] DATAFLOW passed." << std::endl;
+  hls_utils::Log(0, "[INFO] DATAFLOW passed.");
   hls::stream<ap_uint<kNumTilesV> > comb_v_stream1_cur[kNumCurGates];
   hls::stream<ap_uint<kNumTilesV> > comb_v_stream1_rec[kNumRecGates];
   hls::stream<ap_uint<kNumTilesV> > comb_v_stream2_cur[kNumCurGates];
@@ -246,7 +246,7 @@ void SvdModel2LstmSDSoCV2(
 #pragma HLS ARRAY_PARTITION variable=comb_u_stream2_cur complete
 #pragma HLS ARRAY_PARTITION variable=comb_u_stream2_rec complete
 
-  std::cout << "Starting ZeroTileCombinationDMA" << std::endl;
+  hls_utils::Log(0, "Starting ZeroTileCombinationDMA");
   hls_utils::Log(0, "Starting ZeroTileCombinationDMA");
   svd::ZeroTileCombination2LstmDMA<kNumIter, kNumTilesU, kNumGates>(comb_u_port,
     comb_u_stream1_cur, comb_u_stream1_rec, comb_u_stream2_cur,
@@ -301,7 +301,7 @@ void SvdModel2LstmSDSoCV2(
   Current_Gates_Dot_Product_Loop:
   for (int g = 0; g < kNumCurGates; ++g) {
 #pragma HLS UNROLL
-    hls_utils::Log(0, std::string("Starting Cur Gate n." + g));
+    hls_utils::Log(0, std::string("Starting Cur Gate n.") + std::to_string(g));
     svd::GateDMA<svd::WeightD>(kUweights, kNumIter, kNumNonZeroTilesU, kNumElemsTileUCurrent, u_cur_gate_streams[g], cur_u_streams[g]);
     svd::GateDMA<svd::WeightD>(!kUweights, kNumIter, kNumNonZeroTilesV, kNumElemsTileV, v_gate_streams[g], cur_v_streams[g]);
     svd::UDotUnit2Lstm<kInputLength, kNumTilesU, kNumZeroTilesU, kNumIter, 1>(x1_streams[g],
@@ -326,7 +326,7 @@ void SvdModel2LstmSDSoCV2(
   Recur_Gates_Dot_Product_Loop:
   for (int g = 0; g < kNumRecGates; ++g) {
 #pragma HLS UNROLL
-    hls_utils::Log(0, std::string("Starting Rec Gate n." + g));
+    hls_utils::Log(0, std::string("Starting Rec Gate n.") + std::to_string(g));
     svd::GateDMA<svd::WeightD>(kUweights, kNumIter, kNumNonZeroTilesU, kNumElemsTileURecur, u_rec_gate_streams[g], rec_u_streams[g]);
     svd::GateDMA<svd::WeightD>(!kUweights, kNumIter, kNumNonZeroTilesV, kNumElemsTileV, v_gate_streams[kNumCurGates + g], rec_v_streams[g]);
     svd::UDotUnit2Lstm<kOutputLength, kNumTilesU, kNumZeroTilesU, kNumIter, 1>(h1_streams[g],
