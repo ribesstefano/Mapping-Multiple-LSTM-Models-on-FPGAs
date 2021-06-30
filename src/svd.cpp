@@ -56,10 +56,12 @@ int main(int argc, char const *argv[]) {
   assert(storage.get_u_cur_size() == NUM_ITERATIONS*4*INPUT_SIZE / NUM_TILES_U * (NUM_TILES_U - NUM_ZERO_TILES_U));
   assert(storage.get_u_rec_size() == NUM_ITERATIONS*4*HIDDEN_SIZE / NUM_TILES_U * (NUM_TILES_U - NUM_ZERO_TILES_U));
   assert(storage.get_v_size() == NUM_ITERATIONS*4*2*HIDDEN_SIZE / NUM_TILES_V * (NUM_TILES_V - NUM_ZERO_TILES_V));
+  assert(storage.get_s_size() == NUM_ITERATIONS*8);
 
   std::cout << (storage.get_u_cur_size() == NUM_ITERATIONS*4*INPUT_SIZE / NUM_TILES_U * (NUM_TILES_U - NUM_ZERO_TILES_U) ? "true" : "false") << std::endl;
   std::cout << (storage.get_u_rec_size() == NUM_ITERATIONS*4*HIDDEN_SIZE / NUM_TILES_U * (NUM_TILES_U - NUM_ZERO_TILES_U) ? "true" : "false") << std::endl;
   std::cout << (storage.get_v_size() == NUM_ITERATIONS*4*2*HIDDEN_SIZE / NUM_TILES_V * (NUM_TILES_V - NUM_ZERO_TILES_V) ? "true" : "false") << std::endl;
+  std::cout << (storage.get_s_size() == NUM_ITERATIONS*8 ? "true" : "false") << std::endl;
 
   SvdModel2LstmSDSoCV2(
     storage.get_fix_x(0),
@@ -75,8 +77,8 @@ int main(int argc, char const *argv[]) {
     s2_uint,
     storage.get_fix_bias(0),
     storage.get_fix_bias(1),
-    storage.get_fix_z_v(),
-    storage.get_fix_z_u(),
+    storage.get_fix_nz_v(),
+    storage.get_fix_nz_u(),
     storage.get_fix_h(0),
     storage.get_fix_h(1),
     storage.get_fix_c(0),
