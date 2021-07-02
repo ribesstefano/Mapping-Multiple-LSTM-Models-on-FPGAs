@@ -207,6 +207,10 @@ public:
   IdxType get_fix_nz_idx(const int refinement_step) {
     return this->fix_nz_idx_[refinement_step];
   }
+
+  int get_refinement_steps() {
+    return this->refinement_steps_;
+  }
 };
 
 
@@ -243,6 +247,22 @@ public:
     return this->v_;
   }
 
+  int get_u_size() {
+    return this->u_->get_size();
+  }
+
+  int get_v_size() {
+    return this->v_->get_size();
+  }
+
+  int get_u_pruned_size() {
+    return this->u_->get_pruned_size();
+  }
+
+  int get_v_pruned_size() {
+    return this->v_->get_pruned_size();
+  }
+
   std::vector<VectorBlob<FloatType, FixType, 1> > get_s() {
     return this->s_;
   }
@@ -253,6 +273,10 @@ public:
 
   int get_num_inputs() {
     return this->num_inputs_;
+  }
+
+  int get_refinement_steps() {
+    return this->s_[0].get_refinement_steps();
   }
 };
 

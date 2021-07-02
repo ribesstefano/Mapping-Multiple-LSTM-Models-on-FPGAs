@@ -290,10 +290,18 @@ private:
   std::vector<std::vector<FloatType> > x_;
   std::vector<std::vector<FloatType> > h_;
   std::vector<std::vector<FloatType> > c_;
+  std::vector<std::vector<FloatType> > h_prev_;
+  std::vector<std::vector<FloatType> > c_prev_;
+  std::vector<std::vector<FloatType> > h_curr_;
+  std::vector<std::vector<FloatType> > c_curr_;
   std::vector<std::vector<FloatType> > bias_;
   std::vector<FixType*> fix_x_;
   std::vector<FixType*> fix_h_;
   std::vector<FixType*> fix_c_;
+  std::vector<FixType*> fix_h_prev_;
+  std::vector<FixType*> fix_c_prev_;
+  std::vector<FixType*> fix_h_curr_;
+  std::vector<FixType*> fix_c_curr_;
   std::vector<FixType*> fix_bias_;
   std::vector<FixType*> fix_s_;
   ap_uint<NumTilesU>* fix_nz_u_;
@@ -308,6 +316,58 @@ private:
         y[i][j] = tmp;
         fix_y[i][j] = FixType(tmp);
       }
+    }
+  }
+
+  void ArrangeWeights(const int arrange_type, const int n_steps,
+                        std::unordered_map<std::string, SvdVecType*>& gates,
+                        FixType* y) {
+    int idx = 0;
+    switch (arrange_type) {
+      case 0:
+        // NOTE: the following arrangement is: (N, G, E)
+        for (int i = 0; i < n_steps; ++i) {
+          for (auto g : gates) {
+            for (int j = 0; j < gates.get_u_pruned_size(); ++j) {
+              y[idx] = g.second->get_u()->fix_pruned_data()[j];
+              ++idx;
+            }
+          }
+        }
+      break;
+      case 1:
+        // NOTE: the following arrangement is: (G, N, E)
+        for (auto g : gates) {
+          for (int i = 0; i < n_steps; ++i) {
+            for (int j = 0; j < gates.get_u_pruned_size(); ++j) {
+              y[idx] = g.second->get_u()->fix_pruned_data()[j];
+              ++idx;
+            }
+          }
+        }
+      break;
+      case 2:
+        // NOTE: the following arrangement is: (N, E, G)
+        for (int i = 0; i < n_steps; ++i) {
+          for (int j = 0; j < gates.get_u_pruned_size(); ++j) {
+            for (auto g : gates) {
+              y[idx] = g.second->get_u()->fix_pruned_data()[j];
+              ++idx;
+            }
+          }
+        }
+      break;
+      default:
+        // NOTE: the following arrangement is: (N, G, E)
+        for (int i = 0; i < n_steps; ++i) {
+          for (auto g : gates) {
+            for (int j = 0; j < gates.get_u_pruned_size(); ++j) {
+              y[idx] = g.second->get_u()->fix_pruned_data()[j];
+              ++idx;
+            }
+          }
+        }
+      break;
     }
   }
 
@@ -402,17 +462,29 @@ public:
     this->fix_x_.resize(num_inputs);
     this->fix_h_.resize(num_inputs);
     this->fix_c_.resize(num_inputs);
+    this->fix_h_curr_.resize(num_inputs);
+    this->fix_c_curr_.resize(num_inputs);
+    this->fix_h_prev_.resize(num_inputs);
+    this->fix_c_prev_.resize(num_inputs);
     this->fix_bias_.resize(num_inputs);
 
     this->x_.resize(num_inputs, std::vector<FloatType>(this->lstm_input_size_));
     this->h_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
     this->c_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
+    this->h_curr_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
+    this->c_curr_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
+    this->h_prev_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
+    this->c_prev_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
     this->bias_.resize(num_inputs, std::vector<FloatType>(kNumGates / 2 * this->lstm_output_size_));
 
     const bool init_random = true;
     this->InitVector(init_random, num_inputs, this->lstm_input_size_, this->fix_x_, this->x_);
     this->InitVector(!init_random, num_inputs, this->lstm_output_size_, this->fix_h_, this->h_);
     this->InitVector(!init_random, num_inputs, this->lstm_output_size_, this->fix_c_, this->c_);
+    this->InitVector(!init_random, num_inputs, this->lstm_output_size_, this->fix_h_curr_, this->h_curr_);
+    this->InitVector(!init_random, num_inputs, this->lstm_output_size_, this->fix_c_curr_, this->c_curr_);
+    this->InitVector(!init_random, num_inputs, this->lstm_output_size_, this->fix_h_prev_, this->h_prev_);
+    this->InitVector(!init_random, num_inputs, this->lstm_output_size_, this->fix_c_prev_, this->c_prev_);
     this->InitVector(init_random, num_inputs, kNumGates / 2 * this->lstm_output_size_, this->fix_bias_, this->bias_);
 
     std::cout << "Arrange S" << std::endl;
@@ -444,6 +516,10 @@ public:
       svd::FreeContiguously(this->fix_x_[i]);
       svd::FreeContiguously(this->fix_h_[i]);
       svd::FreeContiguously(this->fix_c_[i]);
+      svd::FreeContiguously(this->fix_h_curr_[i]);
+      svd::FreeContiguously(this->fix_c_curr_[i]);
+      svd::FreeContiguously(this->fix_h_prev_[i]);
+      svd::FreeContiguously(this->fix_c_prev_[i]);
       svd::FreeContiguously(this->fix_bias_[i]);
     }
     svd::FreeContiguously(this->fix_nz_u_);
@@ -456,13 +532,21 @@ public:
     }
   }
 
-  void reset_lstm_outputs() {
+  void ResetLstmOutputs() {
     for (int i = 0; i < this->lstm_num_inputs_; ++i) {
       for (int j = 0; j < this->lstm_output_size_; ++j) {
-        h_[i][j] = 0;
-        c_[i][j] = 0;
-        fix_h_[i][j] = 0;
-        fix_c_[i][j] = 0;
+        this->h_[i][j] = 0;
+        this->c_[i][j] = 0;
+        this->h_curr_[i][j] = 0;
+        this->c_curr_[i][j] = 0;
+        this->h_prev_[i][j] = 0;
+        this->c_prev_[i][j] = 0;
+        this->fix_h_[i][j] = 0;
+        this->fix_c_[i][j] = 0;
+        this->fix_h_curr_[i][j] = 0;
+        this->fix_c_curr_[i][j] = 0;
+        this->fix_h_prev_[i][j] = 0;
+        this->fix_c_prev_[i][j] = 0;
       }
     }
   }
@@ -507,12 +591,36 @@ public:
     return this->fix_h_[i];
   }
 
+  FloatType* get_h(const int i) {
+    return this->h_[i].data();
+  }
+
+  FixType* get_fix_h_curr(const int i) {
+    return this->fix_h_curr_[i];
+  }
+
+  FixType* get_fix_h_prev(const int i) {
+    return this->fix_h_prev_[i];
+  }
+
   FixType* get_fix_c(const int i) {
     return this->fix_c_[i];
   }
 
+  FixType* get_fix_c_curr(const int i) {
+    return this->fix_c_curr_[i];
+  }
+
+  FixType* get_fix_c_prev(const int i) {
+    return this->fix_c_prev_[i];
+  }
+
   FixType* get_fix_bias(const int i) {
     return this->fix_bias_[i];
+  }
+
+  FloatType* get_bias(const int i) {
+    return this->bias_[i].data();
   }
 
   ap_uint<NumTilesU>* get_fix_nz_u() {
@@ -537,6 +645,10 @@ public:
 
   int get_s_size() {
     return this->s_size_;
+  }
+
+  FloatType* get_x(const int i) {
+    return this->x_[i].data();
   }
 
 };
