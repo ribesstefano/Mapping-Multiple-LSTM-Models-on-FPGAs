@@ -15,8 +15,8 @@
 #pragma SDS data copy(c_t2_prev_port[0:HIDDEN_SIZE])
 #pragma SDS data copy(bias1_port[0:4*HIDDEN_SIZE])
 #pragma SDS data copy(bias2_port[0:4*HIDDEN_SIZE])
-#pragma SDS data copy(comb_v_port[0:NUM_ITERATIONS * 8])
-#pragma SDS data copy(comb_u_port[0:NUM_ITERATIONS * 8])
+#pragma SDS data copy(nz_v_port[0:NUM_ITERATIONS * 8])
+#pragma SDS data copy(nz_u_port[0:NUM_ITERATIONS * 8])
 #pragma SDS data copy(h_t1_curr_port[0:HIDDEN_SIZE])
 #pragma SDS data copy(h_t2_curr_port[0:HIDDEN_SIZE])
 #pragma SDS data copy(c_t1_curr_port[0:HIDDEN_SIZE])
@@ -30,8 +30,8 @@
 #pragma SDS data data_mover(c_t2_prev_port:AXIDMA_SIMPLE)
 #pragma SDS data data_mover(bias1_port:AXIDMA_SIMPLE)
 #pragma SDS data data_mover(bias2_port:AXIDMA_SIMPLE)
-#pragma SDS data data_mover(comb_v_port:AXIDMA_SIMPLE)
-#pragma SDS data data_mover(comb_u_port:AXIDMA_SIMPLE)
+#pragma SDS data data_mover(nz_v_port:AXIDMA_SIMPLE)
+#pragma SDS data data_mover(nz_u_port:AXIDMA_SIMPLE)
 #pragma SDS data data_mover(h_t1_curr_port:AXIDMA_SIMPLE)
 #pragma SDS data data_mover(h_t2_curr_port:AXIDMA_SIMPLE)
 #pragma SDS data data_mover(c_t1_curr_port:AXIDMA_SIMPLE)
@@ -45,8 +45,8 @@
 // #pragma SDS data sys_port(c_t2_prev_port:ps_e_S_AXI_HPC0_FPD) // Coherent HP port
 // #pragma SDS data sys_port(bias1_port:ps_e_S_AXI_HPC0_FPD) // Coherent HP port
 // #pragma SDS data sys_port(bias2_port:ps_e_S_AXI_HPC0_FPD) // Coherent HP port
-// #pragma SDS data sys_port(comb_v_port:ps_e_S_AXI_HPC0_FPD) // Coherent HP port
-// #pragma SDS data sys_port(comb_u_port:ps_e_S_AXI_HPC0_FPD) // Coherent HP port
+// #pragma SDS data sys_port(nz_v_port:ps_e_S_AXI_HPC0_FPD) // Coherent HP port
+// #pragma SDS data sys_port(nz_u_port:ps_e_S_AXI_HPC0_FPD) // Coherent HP port
 // #pragma SDS data sys_port(h_t1_curr_port:ps_e_S_AXI_HPC1_FPD) // Coherent HP port
 // #pragma SDS data sys_port(h_t2_curr_port:ps_e_S_AXI_HPC1_FPD) // Coherent HP port
 // #pragma SDS data sys_port(c_t1_curr_port:ps_e_S_AXI_HPC1_FPD) // Coherent HP port
@@ -92,8 +92,8 @@
 #pragma SDS data mem_attribute(s2_port:PHYSICAL_CONTIGUOUS|NON_CACHEABLE)
 #pragma SDS data mem_attribute(bias1_port:PHYSICAL_CONTIGUOUS|NON_CACHEABLE)
 #pragma SDS data mem_attribute(bias2_port:PHYSICAL_CONTIGUOUS|NON_CACHEABLE)
-#pragma SDS data mem_attribute(comb_v_port:PHYSICAL_CONTIGUOUS|NON_CACHEABLE)
-#pragma SDS data mem_attribute(comb_u_port:PHYSICAL_CONTIGUOUS|NON_CACHEABLE)
+#pragma SDS data mem_attribute(nz_v_port:PHYSICAL_CONTIGUOUS|NON_CACHEABLE)
+#pragma SDS data mem_attribute(nz_u_port:PHYSICAL_CONTIGUOUS|NON_CACHEABLE)
 #pragma SDS data mem_attribute(h_t1_curr_port:PHYSICAL_CONTIGUOUS|NON_CACHEABLE)
 #pragma SDS data mem_attribute(h_t2_curr_port:PHYSICAL_CONTIGUOUS|NON_CACHEABLE)
 #pragma SDS data mem_attribute(c_t1_curr_port:PHYSICAL_CONTIGUOUS|NON_CACHEABLE)
@@ -112,8 +112,8 @@
 #pragma SDS data access_pattern(s2_port:SEQUENTIAL)
 #pragma SDS data access_pattern(bias1_port:SEQUENTIAL)
 #pragma SDS data access_pattern(bias2_port:SEQUENTIAL)
-#pragma SDS data access_pattern(comb_v_port:SEQUENTIAL)
-#pragma SDS data access_pattern(comb_u_port:SEQUENTIAL)
+#pragma SDS data access_pattern(nz_v_port:SEQUENTIAL)
+#pragma SDS data access_pattern(nz_u_port:SEQUENTIAL)
 #pragma SDS data access_pattern(h_t1_curr_port:SEQUENTIAL)
 #pragma SDS data access_pattern(h_t2_curr_port:SEQUENTIAL)
 #pragma SDS data access_pattern(c_t1_curr_port:SEQUENTIAL)
@@ -133,8 +133,8 @@ void SvdModel2LstmSDSoCV2(
     const ap_uint<FIX_WIDTH * 8> *s2_port, // [NUM_ITERATIONS*8],
     const svd::WeightD bias1_port[4 * HIDDEN_SIZE],
     const svd::WeightD bias2_port[4 * HIDDEN_SIZE],
-    const ap_uint<NUM_TILES_V> comb_v_port[NUM_ITERATIONS * 8],
-    const ap_uint<NUM_TILES_U> comb_u_port[NUM_ITERATIONS * 8],
+    const ap_uint<NUM_TILES_V> nz_v_port[NUM_ITERATIONS * 8],
+    const ap_uint<NUM_TILES_U> nz_u_port[NUM_ITERATIONS * 8],
     svd::ActivationD h_t1_curr_port[HIDDEN_SIZE],
     svd::ActivationD h_t2_curr_port[HIDDEN_SIZE],
     svd::ActivationD c_t1_curr_port[HIDDEN_SIZE],

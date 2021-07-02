@@ -24,8 +24,8 @@ void SvdModel2LstmSDSoCV2(
     const ap_uint<FIX_WIDTH * 8> *s2_port, // [NUM_ITERATIONS*8],
     const svd::WeightD bias1_port[4 * HIDDEN_SIZE],
     const svd::WeightD bias2_port[4 * HIDDEN_SIZE],
-    const ap_uint<NUM_TILES_V> comb_v_port[NUM_ITERATIONS * 8], // non-zero indexes
-    const ap_uint<NUM_TILES_U> comb_u_port[NUM_ITERATIONS * 8], // non-zero indexes
+    const ap_uint<NUM_TILES_V> nz_v_port[NUM_ITERATIONS * 8], // non-zero indexes
+    const ap_uint<NUM_TILES_U> nz_u_port[NUM_ITERATIONS * 8], // non-zero indexes
     svd::ActivationD h_t1_curr_port[HIDDEN_SIZE],
     svd::ActivationD h_t2_curr_port[HIDDEN_SIZE],
     svd::ActivationD c_t1_curr_port[HIDDEN_SIZE],
@@ -101,8 +101,8 @@ void SvdModel2LstmSDSoCV2(
 #pragma HLS INTERFACE ap_fifo port=x2_port
 #pragma HLS INTERFACE ap_fifo port=bias1_port
 #pragma HLS INTERFACE ap_fifo port=bias2_port
-#pragma HLS INTERFACE ap_fifo port=comb_v_port
-#pragma HLS INTERFACE ap_fifo port=comb_u_port
+#pragma HLS INTERFACE ap_fifo port=nz_v_port
+#pragma HLS INTERFACE ap_fifo port=nz_u_port
 #pragma HLS INTERFACE ap_fifo port=h_t1_prev_port
 #pragma HLS INTERFACE ap_fifo port=h_t2_prev_port
 #pragma HLS INTERFACE ap_fifo port=h_t1_curr_port
@@ -221,53 +221,53 @@ void SvdModel2LstmSDSoCV2(
   const int kFIFOdepthDivider = 8;
   const int kStreamDepthIter = kNumIter / kFIFOdepthDivider;
   hls_utils::Log(0, "[INFO] DATAFLOW passed.");
-  hls::stream<ap_uint<kNumTilesV> > comb_v_stream1_cur[kNumCurGates];
-  hls::stream<ap_uint<kNumTilesV> > comb_v_stream1_rec[kNumRecGates];
-  hls::stream<ap_uint<kNumTilesV> > comb_v_stream2_cur[kNumCurGates];
-  hls::stream<ap_uint<kNumTilesV> > comb_v_stream2_rec[kNumRecGates];
-  hls::stream<ap_uint<kNumTilesU> > comb_u_stream1_cur[kNumCurGates];
-  hls::stream<ap_uint<kNumTilesU> > comb_u_stream1_rec[kNumRecGates];
-  hls::stream<ap_uint<kNumTilesU> > comb_u_stream2_cur[kNumCurGates];
-  hls::stream<ap_uint<kNumTilesU> > comb_u_stream2_rec[kNumRecGates];
-#pragma HLS STREAM depth=kStreamDepthIter variable=comb_v_stream1_cur
-#pragma HLS STREAM depth=kStreamDepthIter variable=comb_v_stream1_rec
-#pragma HLS STREAM depth=kStreamDepthIter variable=comb_v_stream2_cur
-#pragma HLS STREAM depth=kStreamDepthIter variable=comb_v_stream2_rec
-#pragma HLS STREAM depth=kStreamDepthIter variable=comb_u_stream1_cur
-#pragma HLS STREAM depth=kStreamDepthIter variable=comb_u_stream1_rec
-#pragma HLS STREAM depth=kStreamDepthIter variable=comb_u_stream2_cur
-#pragma HLS STREAM depth=kStreamDepthIter variable=comb_u_stream2_rec
-#pragma HLS ARRAY_PARTITION variable=comb_v_stream1_cur complete
-#pragma HLS ARRAY_PARTITION variable=comb_v_stream1_rec complete
-#pragma HLS ARRAY_PARTITION variable=comb_v_stream2_cur complete
-#pragma HLS ARRAY_PARTITION variable=comb_v_stream2_rec complete
-#pragma HLS ARRAY_PARTITION variable=comb_u_stream1_cur complete
-#pragma HLS ARRAY_PARTITION variable=comb_u_stream1_rec complete
-#pragma HLS ARRAY_PARTITION variable=comb_u_stream2_cur complete
-#pragma HLS ARRAY_PARTITION variable=comb_u_stream2_rec complete
+  hls::stream<ap_uint<kNumTilesV> > nz_v_stream1_cur[kNumCurGates];
+  hls::stream<ap_uint<kNumTilesV> > nz_v_stream1_rec[kNumRecGates];
+  hls::stream<ap_uint<kNumTilesV> > nz_v_stream2_cur[kNumCurGates];
+  hls::stream<ap_uint<kNumTilesV> > nz_v_stream2_rec[kNumRecGates];
+  hls::stream<ap_uint<kNumTilesU> > nz_u_stream1_cur[kNumCurGates];
+  hls::stream<ap_uint<kNumTilesU> > nz_u_stream1_rec[kNumRecGates];
+  hls::stream<ap_uint<kNumTilesU> > nz_u_stream2_cur[kNumCurGates];
+  hls::stream<ap_uint<kNumTilesU> > nz_u_stream2_rec[kNumRecGates];
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream1_cur
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream1_rec
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream2_cur
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream2_rec
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream1_cur
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream1_rec
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream2_cur
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream2_rec
+#pragma HLS ARRAY_PARTITION variable=nz_v_stream1_cur complete
+#pragma HLS ARRAY_PARTITION variable=nz_v_stream1_rec complete
+#pragma HLS ARRAY_PARTITION variable=nz_v_stream2_cur complete
+#pragma HLS ARRAY_PARTITION variable=nz_v_stream2_rec complete
+#pragma HLS ARRAY_PARTITION variable=nz_u_stream1_cur complete
+#pragma HLS ARRAY_PARTITION variable=nz_u_stream1_rec complete
+#pragma HLS ARRAY_PARTITION variable=nz_u_stream2_cur complete
+#pragma HLS ARRAY_PARTITION variable=nz_u_stream2_rec complete
 
   hls_utils::Log(0, "Starting ZeroTileCombinationDMA");
   hls_utils::Log(0, "Starting ZeroTileCombinationDMA");
-  svd::ZeroTileCombination2LstmDMA<kNumIter, kNumTilesU, kNumGates>(comb_u_port,
-    comb_u_stream1_cur, comb_u_stream1_rec, comb_u_stream2_cur,
-    comb_u_stream2_rec);
-  svd::ZeroTileCombinationDMA<kNumIter, kNumTilesV, kNumGates>(comb_v_port,
-    comb_v_stream1_cur, comb_v_stream1_rec);
+  svd::ZeroTileCombination2LstmDMA<kNumIter, kNumTilesU, kNumGates>(nz_u_port,
+    nz_u_stream1_cur, nz_u_stream1_rec, nz_u_stream2_cur,
+    nz_u_stream2_rec);
+  svd::ZeroTileCombinationDMA<kNumIter, kNumTilesV, kNumGates>(nz_v_port,
+    nz_v_stream1_cur, nz_v_stream1_rec);
   // ===========================================================================
   // Current Input DMA
   // ===========================================================================
   hls_utils::Log(0, "Starting InputDMA");
   svd::InputDMA<kInputLength, kNumTilesU, kNumZeroTilesU, kNumCurGates, kNumIter>(
-    x1_port, comb_u_stream1_cur, x1_streams);
+    x1_port, nz_u_stream1_cur, x1_streams);
   svd::InputDMA<kInputLength, kNumTilesU, kNumZeroTilesU, kNumCurGates, kNumIter>(
-    x2_port, comb_u_stream2_cur, x2_streams);
+    x2_port, nz_u_stream2_cur, x2_streams);
   // ===========================================================================
   // Recurrent Input DMA
   // ===========================================================================
   svd::InputDMA<kOutputLength, kNumTilesU, kNumZeroTilesU, kNumCurGates, kNumIter>(
-    h_t1_prev_port, comb_u_stream1_rec, h1_streams);
+    h_t1_prev_port, nz_u_stream1_rec, h1_streams);
   svd::InputDMA<kOutputLength, kNumTilesU, kNumZeroTilesU, kNumCurGates, kNumIter>(
-    h_t2_prev_port, comb_u_stream2_rec, h2_streams);
+    h_t2_prev_port, nz_u_stream2_rec, h2_streams);
   // ===========================================================================
   // Gates DMA
   // ===========================================================================
@@ -316,7 +316,7 @@ void SvdModel2LstmSDSoCV2(
       gates_s1_streams[g],
       gates_s2_streams[g],
       cur_v_streams[g],
-      comb_v_stream1_cur[g],
+      nz_v_stream1_cur[g],
       cur_acc1_streams[g],
       cur_acc2_streams[g]);
   }
@@ -341,7 +341,7 @@ void SvdModel2LstmSDSoCV2(
       gates_s1_streams[kNumCurGates + g],
       gates_s2_streams[kNumCurGates + g],
       rec_v_streams[g],
-      comb_v_stream1_rec[g],
+      nz_v_stream1_rec[g],
       rec_acc1_streams[g],
       rec_acc2_streams[g]);
   }
