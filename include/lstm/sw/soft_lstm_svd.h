@@ -29,7 +29,6 @@
 #include <thread>
 #endif
 
-#ifdef HLS_DESIGN
 #include "hls_math.h"
 
 #define AP_INT_MAX_W 4096
@@ -38,20 +37,14 @@
 #define FIX8_INT_BIT 3
 #define FIX16_INT_BIT 7
 
+namespace svd {
+
 typedef half HalfD;
 typedef ap_fixed<8, FIX8_INT_BIT, AP_RND_ZERO, AP_SAT_SYM> Fix8D;
 typedef ap_fixed<16, FIX16_INT_BIT, AP_RND_ZERO, AP_SAT_SYM> Fix16D;
 typedef ap_fixed<Fix8D::width * 2, Fix8D::iwidth * 2, AP_RND_ZERO, AP_SAT_SYM> Accum8D;
 typedef ap_fixed<Fix16D::width * 2, Fix16D::iwidth * 2, AP_RND_ZERO, AP_SAT_SYM> Accum16D;
 typedef half AccumHalfD;
-#else
-typedef float HalfD;
-typedef float Fix8D;
-typedef float Fix16D;
-typedef float Accum8D;
-typedef float Accum16D;
-typedef float AccumHalfD;
-#endif // end HLS_DESIGN
 
 /*
  * @todo       Using Eigen library is an attempt to using sparse matrixes
@@ -62,22 +55,6 @@ typedef Eigen::SparseMatrix<float, Eigen::RowMajor> SpMatD; // declares a row-ma
 typedef Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatD; // declares a row-major dense matrix type of float
 // typedef Eigen::Matrix<float, Eigen::Dynamic, 1, Eigen::RowMajor> VecD; // declares a row-major dense matrix type of float
 typedef Eigen::Triplet<float> TripletD;
-#endif
-
-#ifndef ALLOC
-  #ifdef SDS_DESIGN
-    #define ALLOC(x) sds_alloc(x)
-  #else
-    #define ALLOC(x) malloc(x)
-  #endif
-#endif
-
-#ifndef FREE
-  #ifdef SDS_DESIGN
-    #define FREE(x) sds_free(x)
-  #else
-    #define FREE(x) free(x)
-  #endif
 #endif
 
 /**
@@ -370,7 +347,7 @@ void hls_copy_cast(const int n, const DtypeIn *a, DtypeOut *y) {
 }
 
 template <typename T, typename A, int TableSize>
-void SvdModel2LstmTemplatedLatencyCC(const int verbose,
+void SvdModelLstmTemplatedLatencyCC(const int verbose,
                                      const T *x,
                                      const int num_samples,
                                      const int num_timesteps,
@@ -512,7 +489,7 @@ void SvdModel2LstmTemplatedLatencyCC(const int verbose,
   // TanH lookup table
   // ===========================================================================
   T tanh_table[TableSize];
-  hls_init_tanh_table<T, TableSize>(tanh_table);
+  svd::hls_init_tanh_table<T, TableSize>(tanh_table);
 
   // ===========================================================================
   // NOTE: We need to 'transpose' u in order to generate the us matrix. This is
@@ -521,52 +498,52 @@ void SvdModel2LstmTemplatedLatencyCC(const int verbose,
   // BEFORE TRANSPOSE: s.shape = (n_steps)
   // BEFORE TRANSPOSE: u.shape = (n_steps, input_size)
   // BEFORE TRANSPOSE: us.shape = (n_steps, input_size)
-  hls_transpose(n_steps, input_size, cur_i_u, cur_i_u_T);
-  hls_transpose(n_steps, input_size, cur_f_u, cur_f_u_T);
-  hls_transpose(n_steps, input_size, cur_c_u, cur_c_u_T);
-  hls_transpose(n_steps, input_size, cur_o_u, cur_o_u_T);
-  hls_transpose(n_steps, hidden_size, rec_i_u, rec_i_u_T);
-  hls_transpose(n_steps, hidden_size, rec_f_u, rec_f_u_T);
-  hls_transpose(n_steps, hidden_size, rec_c_u, rec_c_u_T);
-  hls_transpose(n_steps, hidden_size, rec_o_u, rec_o_u_T);
+  svd::hls_transpose(n_steps, input_size, cur_i_u, cur_i_u_T);
+  svd::hls_transpose(n_steps, input_size, cur_f_u, cur_f_u_T);
+  svd::hls_transpose(n_steps, input_size, cur_c_u, cur_c_u_T);
+  svd::hls_transpose(n_steps, input_size, cur_o_u, cur_o_u_T);
+  svd::hls_transpose(n_steps, hidden_size, rec_i_u, rec_i_u_T);
+  svd::hls_transpose(n_steps, hidden_size, rec_f_u, rec_f_u_T);
+  svd::hls_transpose(n_steps, hidden_size, rec_c_u, rec_c_u_T);
+  svd::hls_transpose(n_steps, hidden_size, rec_o_u, rec_o_u_T);
   for (int i = 0; i < input_size; ++i) {
-    hls_mul(n_steps, &cur_i_u_T[i * n_steps], cur_i_s, &cur_i_us[i * n_steps]);
-    hls_mul(n_steps, &cur_f_u_T[i * n_steps], cur_f_s, &cur_f_us[i * n_steps]);
-    hls_mul(n_steps, &cur_c_u_T[i * n_steps], cur_c_s, &cur_c_us[i * n_steps]);
-    hls_mul(n_steps, &cur_o_u_T[i * n_steps], cur_o_s, &cur_o_us[i * n_steps]);
+    svd::hls_mul(n_steps, &cur_i_u_T[i * n_steps], cur_i_s, &cur_i_us[i * n_steps]);
+    svd::hls_mul(n_steps, &cur_f_u_T[i * n_steps], cur_f_s, &cur_f_us[i * n_steps]);
+    svd::hls_mul(n_steps, &cur_c_u_T[i * n_steps], cur_c_s, &cur_c_us[i * n_steps]);
+    svd::hls_mul(n_steps, &cur_o_u_T[i * n_steps], cur_o_s, &cur_o_us[i * n_steps]);
   }
   for (int i = 0; i < hidden_size; ++i) {
-    hls_mul(n_steps, &rec_i_u_T[i * n_steps], rec_i_s, &rec_i_us[i * n_steps]);
-    hls_mul(n_steps, &rec_f_u_T[i * n_steps], rec_f_s, &rec_f_us[i * n_steps]);
-    hls_mul(n_steps, &rec_c_u_T[i * n_steps], rec_c_s, &rec_c_us[i * n_steps]);
-    hls_mul(n_steps, &rec_o_u_T[i * n_steps], rec_o_s, &rec_o_us[i * n_steps]);
+    svd::hls_mul(n_steps, &rec_i_u_T[i * n_steps], rec_i_s, &rec_i_us[i * n_steps]);
+    svd::hls_mul(n_steps, &rec_f_u_T[i * n_steps], rec_f_s, &rec_f_us[i * n_steps]);
+    svd::hls_mul(n_steps, &rec_c_u_T[i * n_steps], rec_c_s, &rec_c_us[i * n_steps]);
+    svd::hls_mul(n_steps, &rec_o_u_T[i * n_steps], rec_o_s, &rec_o_us[i * n_steps]);
   }
   // ===========================================================================
   // Transpose back current v and current u vectors.
   // ===========================================================================
   // From (input_size, n_steps) to (n_steps, input_size)
-  hls_transpose(input_size, n_steps, cur_i_us, cur_i_u_T);
-  hls_transpose(input_size, n_steps, cur_f_us, cur_f_u_T);
-  hls_transpose(input_size, n_steps, cur_c_us, cur_c_u_T);
-  hls_transpose(input_size, n_steps, cur_o_us, cur_o_u_T);
+  svd::hls_transpose(input_size, n_steps, cur_i_us, cur_i_u_T);
+  svd::hls_transpose(input_size, n_steps, cur_f_us, cur_f_u_T);
+  svd::hls_transpose(input_size, n_steps, cur_c_us, cur_c_u_T);
+  svd::hls_transpose(input_size, n_steps, cur_o_us, cur_o_u_T);
   // From (n_steps, hidden_size) to (hidden_size, n_steps)
-  hls_transpose(n_steps, hidden_size, cur_i_v, cur_i_v_T);
-  hls_transpose(n_steps, hidden_size, cur_f_v, cur_f_v_T);
-  hls_transpose(n_steps, hidden_size, cur_c_v, cur_c_v_T);
-  hls_transpose(n_steps, hidden_size, cur_o_v, cur_o_v_T); 
+  svd::hls_transpose(n_steps, hidden_size, cur_i_v, cur_i_v_T);
+  svd::hls_transpose(n_steps, hidden_size, cur_f_v, cur_f_v_T);
+  svd::hls_transpose(n_steps, hidden_size, cur_c_v, cur_c_v_T);
+  svd::hls_transpose(n_steps, hidden_size, cur_o_v, cur_o_v_T); 
   // ===========================================================================
   // Transpose back recurrent v and recurrent u vectors.
   // ===========================================================================
   // From (hidden_size, n_steps) to (n_steps, hidden_size)
-  hls_transpose(hidden_size, n_steps, rec_i_us, rec_i_u_T);
-  hls_transpose(hidden_size, n_steps, rec_f_us, rec_f_u_T);
-  hls_transpose(hidden_size, n_steps, rec_c_us, rec_c_u_T);
-  hls_transpose(hidden_size, n_steps, rec_o_us, rec_o_u_T);
+  svd::hls_transpose(hidden_size, n_steps, rec_i_us, rec_i_u_T);
+  svd::hls_transpose(hidden_size, n_steps, rec_f_us, rec_f_u_T);
+  svd::hls_transpose(hidden_size, n_steps, rec_c_us, rec_c_u_T);
+  svd::hls_transpose(hidden_size, n_steps, rec_o_us, rec_o_u_T);
   // From (n_steps, hidden_size) to (hidden_size, n_steps)
-  hls_transpose(n_steps, hidden_size, rec_i_v, rec_i_v_T);
-  hls_transpose(n_steps, hidden_size, rec_f_v, rec_f_v_T);
-  hls_transpose(n_steps, hidden_size, rec_c_v, rec_c_v_T);
-  hls_transpose(n_steps, hidden_size, rec_o_v, rec_o_v_T);
+  svd::hls_transpose(n_steps, hidden_size, rec_i_v, rec_i_v_T);
+  svd::hls_transpose(n_steps, hidden_size, rec_f_v, rec_f_v_T);
+  svd::hls_transpose(n_steps, hidden_size, rec_c_v, rec_c_v_T);
+  svd::hls_transpose(n_steps, hidden_size, rec_o_v, rec_o_v_T);
 
   const int kSampleSize = num_timesteps * input_size;
 
@@ -597,15 +574,15 @@ void SvdModel2LstmTemplatedLatencyCC(const int verbose,
     for (int j = 0; j < num_timesteps; ++j) {
 
 #if defined(MULTITHREAD_DESIGN) && !defined(SDS_DESIGN) && !defined(__SYNTHESIS__)
-      std::thread cur_i_ux_thread(hls_gemv<T, A>, n_steps, input_size, cur_i_u_T, &x[i * kSampleSize + j * input_size], cur_i_ux);
-      std::thread cur_f_ux_thread(hls_gemv<T, A>, n_steps, input_size, cur_f_u_T, &x[i * kSampleSize + j * input_size], cur_f_ux);
-      std::thread cur_c_ux_thread(hls_gemv<T, A>, n_steps, input_size, cur_c_u_T, &x[i * kSampleSize + j * input_size], cur_c_ux);
-      std::thread cur_o_ux_thread(hls_gemv<T, A>, n_steps, input_size, cur_o_u_T, &x[i * kSampleSize + j * input_size], cur_o_ux);
+      std::thread cur_i_ux_thread(svd::hls_gemv<T, A>, n_steps, input_size, cur_i_u_T, &x[i * kSampleSize + j * input_size], cur_i_ux);
+      std::thread cur_f_ux_thread(svd::hls_gemv<T, A>, n_steps, input_size, cur_f_u_T, &x[i * kSampleSize + j * input_size], cur_f_ux);
+      std::thread cur_c_ux_thread(svd::hls_gemv<T, A>, n_steps, input_size, cur_c_u_T, &x[i * kSampleSize + j * input_size], cur_c_ux);
+      std::thread cur_o_ux_thread(svd::hls_gemv<T, A>, n_steps, input_size, cur_o_u_T, &x[i * kSampleSize + j * input_size], cur_o_ux);
 
-      std::thread rec_i_uh_thread(hls_gemv<T, A>, n_steps, hidden_size, rec_i_u_T, &out[i * hidden_size], rec_i_uh);
-      std::thread rec_f_uh_thread(hls_gemv<T, A>, n_steps, hidden_size, rec_f_u_T, &out[i * hidden_size], rec_f_uh);
-      std::thread rec_c_uh_thread(hls_gemv<T, A>, n_steps, hidden_size, rec_c_u_T, &out[i * hidden_size], rec_c_uh);
-      std::thread rec_o_uh_thread(hls_gemv<T, A>, n_steps, hidden_size, rec_o_u_T, &out[i * hidden_size], rec_o_uh);
+      std::thread rec_i_uh_thread(svd::hls_gemv<T, A>, n_steps, hidden_size, rec_i_u_T, &out[i * hidden_size], rec_i_uh);
+      std::thread rec_f_uh_thread(svd::hls_gemv<T, A>, n_steps, hidden_size, rec_f_u_T, &out[i * hidden_size], rec_f_uh);
+      std::thread rec_c_uh_thread(svd::hls_gemv<T, A>, n_steps, hidden_size, rec_c_u_T, &out[i * hidden_size], rec_c_uh);
+      std::thread rec_o_uh_thread(svd::hls_gemv<T, A>, n_steps, hidden_size, rec_o_u_T, &out[i * hidden_size], rec_o_uh);
 
       cur_i_ux_thread.join();
       cur_f_ux_thread.join();
@@ -617,15 +594,15 @@ void SvdModel2LstmTemplatedLatencyCC(const int verbose,
       rec_c_uh_thread.join();
       rec_o_uh_thread.join();
 
-      std::thread cur_i_y_thread(hls_gemv<T, A>, hidden_size, n_steps, cur_i_v_T, cur_i_ux, cur_i_y);
-      std::thread cur_f_y_thread(hls_gemv<T, A>, hidden_size, n_steps, cur_f_v_T, cur_f_ux, cur_f_y);
-      std::thread cur_c_y_thread(hls_gemv<T, A>, hidden_size, n_steps, cur_c_v_T, cur_c_ux, cur_c_y);
-      std::thread cur_o_y_thread(hls_gemv<T, A>, hidden_size, n_steps, cur_o_v_T, cur_o_ux, cur_o_y);
+      std::thread cur_i_y_thread(svd::hls_gemv<T, A>, hidden_size, n_steps, cur_i_v_T, cur_i_ux, cur_i_y);
+      std::thread cur_f_y_thread(svd::hls_gemv<T, A>, hidden_size, n_steps, cur_f_v_T, cur_f_ux, cur_f_y);
+      std::thread cur_c_y_thread(svd::hls_gemv<T, A>, hidden_size, n_steps, cur_c_v_T, cur_c_ux, cur_c_y);
+      std::thread cur_o_y_thread(svd::hls_gemv<T, A>, hidden_size, n_steps, cur_o_v_T, cur_o_ux, cur_o_y);
 
-      std::thread rec_i_y_thread(hls_gemv<T, A>, hidden_size, n_steps, rec_i_v_T, rec_i_uh, rec_i_y);
-      std::thread rec_f_y_thread(hls_gemv<T, A>, hidden_size, n_steps, rec_f_v_T, rec_f_uh, rec_f_y);
-      std::thread rec_c_y_thread(hls_gemv<T, A>, hidden_size, n_steps, rec_c_v_T, rec_c_uh, rec_c_y);
-      std::thread rec_o_y_thread(hls_gemv<T, A>, hidden_size, n_steps, rec_o_v_T, rec_o_uh, rec_o_y);
+      std::thread rec_i_y_thread(svd::hls_gemv<T, A>, hidden_size, n_steps, rec_i_v_T, rec_i_uh, rec_i_y);
+      std::thread rec_f_y_thread(svd::hls_gemv<T, A>, hidden_size, n_steps, rec_f_v_T, rec_f_uh, rec_f_y);
+      std::thread rec_c_y_thread(svd::hls_gemv<T, A>, hidden_size, n_steps, rec_c_v_T, rec_c_uh, rec_c_y);
+      std::thread rec_o_y_thread(svd::hls_gemv<T, A>, hidden_size, n_steps, rec_o_v_T, rec_o_uh, rec_o_y);
 
       cur_i_y_thread.join();
       cur_f_y_thread.join();
@@ -644,54 +621,54 @@ void SvdModel2LstmTemplatedLatencyCC(const int verbose,
       // is simmetrical, i.e. same transposed matrices logic.
       // =======================================================================
       // us.T @ x
-      hls_gemv<T, A>(n_steps, input_size, cur_i_u_T, &x[i * kSampleSize + j * input_size], cur_i_ux);
-      hls_gemv<T, A>(n_steps, input_size, cur_f_u_T, &x[i * kSampleSize + j * input_size], cur_f_ux);
-      hls_gemv<T, A>(n_steps, input_size, cur_c_u_T, &x[i * kSampleSize + j * input_size], cur_c_ux);
-      hls_gemv<T, A>(n_steps, input_size, cur_o_u_T, &x[i * kSampleSize + j * input_size], cur_o_ux);
+      svd::hls_gemv<T, A>(n_steps, input_size, cur_i_u_T, &x[i * kSampleSize + j * input_size], cur_i_ux);
+      svd::hls_gemv<T, A>(n_steps, input_size, cur_f_u_T, &x[i * kSampleSize + j * input_size], cur_f_ux);
+      svd::hls_gemv<T, A>(n_steps, input_size, cur_c_u_T, &x[i * kSampleSize + j * input_size], cur_c_ux);
+      svd::hls_gemv<T, A>(n_steps, input_size, cur_o_u_T, &x[i * kSampleSize + j * input_size], cur_o_ux);
 
       // v.T @ xus
-      hls_gemv<T, A>(hidden_size, n_steps, cur_i_v_T, cur_i_ux, cur_i_y);
-      hls_gemv<T, A>(hidden_size, n_steps, cur_f_v_T, cur_f_ux, cur_f_y);
-      hls_gemv<T, A>(hidden_size, n_steps, cur_c_v_T, cur_c_ux, cur_c_y);
-      hls_gemv<T, A>(hidden_size, n_steps, cur_o_v_T, cur_o_ux, cur_o_y);
+      svd::hls_gemv<T, A>(hidden_size, n_steps, cur_i_v_T, cur_i_ux, cur_i_y);
+      svd::hls_gemv<T, A>(hidden_size, n_steps, cur_f_v_T, cur_f_ux, cur_f_y);
+      svd::hls_gemv<T, A>(hidden_size, n_steps, cur_c_v_T, cur_c_ux, cur_c_y);
+      svd::hls_gemv<T, A>(hidden_size, n_steps, cur_o_v_T, cur_o_ux, cur_o_y);
       // =======================================================================
       // Recurrent LSTM gates
       // =======================================================================
       // us.T @ h
-      hls_gemv<T, A>(n_steps, hidden_size, rec_i_u_T, &out[i * hidden_size], rec_i_uh);
-      hls_gemv<T, A>(n_steps, hidden_size, rec_f_u_T, &out[i * hidden_size], rec_f_uh);
-      hls_gemv<T, A>(n_steps, hidden_size, rec_c_u_T, &out[i * hidden_size], rec_c_uh);
-      hls_gemv<T, A>(n_steps, hidden_size, rec_o_u_T, &out[i * hidden_size], rec_o_uh);
+      svd::hls_gemv<T, A>(n_steps, hidden_size, rec_i_u_T, &out[i * hidden_size], rec_i_uh);
+      svd::hls_gemv<T, A>(n_steps, hidden_size, rec_f_u_T, &out[i * hidden_size], rec_f_uh);
+      svd::hls_gemv<T, A>(n_steps, hidden_size, rec_c_u_T, &out[i * hidden_size], rec_c_uh);
+      svd::hls_gemv<T, A>(n_steps, hidden_size, rec_o_u_T, &out[i * hidden_size], rec_o_uh);
       
       // v.T @ hus
-      hls_gemv<T, A>(hidden_size, n_steps, rec_i_v_T, rec_i_uh, rec_i_y);
-      hls_gemv<T, A>(hidden_size, n_steps, rec_f_v_T, rec_f_uh, rec_f_y);
-      hls_gemv<T, A>(hidden_size, n_steps, rec_c_v_T, rec_c_uh, rec_c_y);
-      hls_gemv<T, A>(hidden_size, n_steps, rec_o_v_T, rec_o_uh, rec_o_y);
+      svd::hls_gemv<T, A>(hidden_size, n_steps, rec_i_v_T, rec_i_uh, rec_i_y);
+      svd::hls_gemv<T, A>(hidden_size, n_steps, rec_f_v_T, rec_f_uh, rec_f_y);
+      svd::hls_gemv<T, A>(hidden_size, n_steps, rec_c_v_T, rec_c_uh, rec_c_y);
+      svd::hls_gemv<T, A>(hidden_size, n_steps, rec_o_v_T, rec_o_uh, rec_o_y);
 #endif
       // =======================================================================
       // Non linearities
       // =======================================================================
-      hls_add(hidden_size, cur_i_y, bias_i, i_cur_bias);
-      hls_add(hidden_size, cur_f_y, bias_f, f_cur_bias);
-      hls_add(hidden_size, cur_c_y, bias_c, c_cur_bias);
-      hls_add(hidden_size, cur_o_y, bias_o, o_cur_bias);
+      svd::hls_add(hidden_size, cur_i_y, bias_i, i_cur_bias);
+      svd::hls_add(hidden_size, cur_f_y, bias_f, f_cur_bias);
+      svd::hls_add(hidden_size, cur_c_y, bias_c, c_cur_bias);
+      svd::hls_add(hidden_size, cur_o_y, bias_o, o_cur_bias);
 
-      hls_add(hidden_size, i_cur_bias, rec_i_y, i_sum);
-      hls_add(hidden_size, f_cur_bias, rec_f_y, f_sum);
-      hls_add(hidden_size, c_cur_bias, rec_c_y, c_sum);
-      hls_add(hidden_size, o_cur_bias, rec_o_y, o_sum);
+      svd::hls_add(hidden_size, i_cur_bias, rec_i_y, i_sum);
+      svd::hls_add(hidden_size, f_cur_bias, rec_f_y, f_sum);
+      svd::hls_add(hidden_size, c_cur_bias, rec_c_y, c_sum);
+      svd::hls_add(hidden_size, o_cur_bias, rec_o_y, o_sum);
 
-      hls_hard_sigmoid(hidden_size, i_sum, i_gate);
-      hls_hard_sigmoid(hidden_size, f_sum, f_gate);
-      hls_hard_sigmoid(hidden_size, o_sum, o_gate);
-      hls_tanh<T, TableSize>(hidden_size, c_sum, tanh_table, c_sum_tanh);
-      hls_mul(hidden_size, c_sum_tanh, i_gate, c_lhs);
-      hls_mul(hidden_size, c, f_gate, c_rhs);
+      svd::hls_hard_sigmoid(hidden_size, i_sum, i_gate);
+      svd::hls_hard_sigmoid(hidden_size, f_sum, f_gate);
+      svd::hls_hard_sigmoid(hidden_size, o_sum, o_gate);
+      svd::hls_tanh<T, TableSize>(hidden_size, c_sum, tanh_table, c_sum_tanh);
+      svd::hls_mul(hidden_size, c_sum_tanh, i_gate, c_lhs);
+      svd::hls_mul(hidden_size, c, f_gate, c_rhs);
 
-      hls_add(hidden_size, c_lhs, c_rhs, c);
-      hls_tanh<T, TableSize>(hidden_size, c, tanh_table, c_tanh);
-      hls_mul(hidden_size, c_tanh, o_gate, &out[i * hidden_size]);
+      svd::hls_add(hidden_size, c_lhs, c_rhs, c);
+      svd::hls_tanh<T, TableSize>(hidden_size, c, tanh_table, c_tanh);
+      svd::hls_mul(hidden_size, c_tanh, o_gate, &out[i * hidden_size]);
     }
   }
 #ifdef SDS_DESIGN
@@ -789,7 +766,7 @@ void SvdModel2LstmTemplatedLatencyCC(const int verbose,
 #ifdef __cplusplus
 extern "C"
 #endif
-void SvdModel2LstmFix8(const int verbose,
+void SvdModelLstmFix8(const int verbose,
                        const Fix8D *x,
                        const int num_samples,
                        const int num_timesteps,
@@ -829,7 +806,7 @@ void SvdModel2LstmFix8(const int verbose,
 #ifdef __cplusplus
 extern "C"
 #endif
-void SvdModel2LstmFix16(const int verbose,
+void SvdModelLstmFix16(const int verbose,
                         const Fix16D *x,
                         const int num_samples,
                         const int num_timesteps,
@@ -869,7 +846,7 @@ void SvdModel2LstmFix16(const int verbose,
 #ifdef __cplusplus
 extern "C"
 #endif
-void SvdModel2LstmSoftware(const int verbose,
+void SvdModelLstmSoftware(const int verbose,
                            const bool use_blas,
                            const int type, // 0:float, 1:fix8, 2:fix16
                            const float *x,
@@ -998,7 +975,7 @@ void SvdModelEigenUnbatched(const int verbose,
 #ifdef __cplusplus
 extern "C"
 #endif
-void SvdModel2LstmSoftwareBatched(const int verbose,
+void SvdModelLstmSoftwareBatched(const int verbose,
                              const bool use_blas,
                              const float *x, // (num_samples, num_inputs, num_timesteps, input_size)
                              const int num_inputs,
@@ -1037,253 +1014,7 @@ void SvdModel2LstmSoftwareBatched(const int verbose,
                              const float *bias_o,
                              float *out);
 
-/**
- * @brief      Emulator used to test the accuracy of the HLS accelerator. It
- *             allows for testing different design points without recompiling.
- *
- * @param[in]  InputSize     The input size
- * @param[in]  HiddenSize    The hidden size
- * @param[in]  NumIter       The number of refinement steps
- * @param[in]  Tu            The number of tiles of u
- * @param[in]  ZTu           The number of pruned tiles of u
- * @param[in]  Tv            The number of tiles of v
- * @param[in]  ZTv           The number of pruned tiles of v
- * @param[in]  NumTimesteps  The number timesteps (deprecated)
- * @param[in]  x             The input data
- * @param[in]  cur_i_u       The current i u
- * @param[in]  cur_i_s       The current i s
- * @param[in]  cur_i_v       The current i v
- * @param[in]  cur_i_unz     The current i unz
- * @param[in]  cur_i_vnz     The current i vnz
- * @param[in]  cur_f_u       The current f u
- * @param[in]  cur_f_s       The current f s
- * @param[in]  cur_f_v       The current f v
- * @param[in]  cur_f_unz     The current f unz
- * @param[in]  cur_f_vnz     The current f vnz
- * @param[in]  cur_c_u       The current c u
- * @param[in]  cur_c_s       The current c s
- * @param[in]  cur_c_v       The current c v
- * @param[in]  cur_c_unz     The current c unz
- * @param[in]  cur_c_vnz     The current c vnz
- * @param[in]  cur_o_u       The current o u
- * @param[in]  cur_o_s       The current o s
- * @param[in]  cur_o_v       The current o v
- * @param[in]  cur_o_unz     The current o unz
- * @param[in]  cur_o_vnz     The current o vnz
- * @param[in]  rec_i_u       The recurrent i u
- * @param[in]  rec_i_s       The recurrent i s
- * @param[in]  rec_i_v       The recurrent i v
- * @param[in]  rec_i_unz     The recurrent i unz
- * @param[in]  rec_i_vnz     The recurrent i vnz
- * @param[in]  rec_f_u       The recurrent f u
- * @param[in]  rec_f_s       The recurrent f s
- * @param[in]  rec_f_v       The recurrent f v
- * @param[in]  rec_f_unz     The recurrent f unz
- * @param[in]  rec_f_vnz     The recurrent f vnz
- * @param[in]  rec_c_u       The recurrent c u
- * @param[in]  rec_c_s       The recurrent c s
- * @param[in]  rec_c_v       The recurrent c v
- * @param[in]  rec_c_unz     The recurrent c unz
- * @param[in]  rec_c_vnz     The recurrent c vnz
- * @param[in]  rec_o_u       The recurrent o u
- * @param[in]  rec_o_s       The recurrent o s
- * @param[in]  rec_o_v       The recurrent o v
- * @param[in]  rec_o_unz     The recurrent o unz
- * @param[in]  rec_o_vnz     The recurrent o vnz
- * @param[in]  bias          The bias
- * @param[in]  c_prev        The c previous
- * @param[in]  h_prev        The h previous
- * @param      c_curr        The c current
- * @param      h_curr        The h current
- *
- * @tparam     DataA         Activation type
- * @tparam     DataW         Weight type
- * @tparam     DataAcc       Accumulation type
- * @tparam     DataMul       Multiplication type
- * @tparam     TanhLutSize   Size of the hard sigmoid LUT
- */
-template <typename DataA,
-          typename DataW,
-          typename DataAcc,
-          typename DataMul,
-          int TanhLutSize>
-void SoftSvdModel(const int InputSize,
-                  const int HiddenSize,
-                  const int NumIter,
-                  const int Tu,
-                  const int ZTu,
-                  const int Tv,
-                  const int ZTv,
-                  const int NumTimesteps,
-                  const DataA *x,
-                  const DataW *cur_i_u,
-                  const DataW *cur_i_s,
-                  const DataW *cur_i_v,
-                  const int *cur_i_unz,
-                  const int *cur_i_vnz,
-                  const DataW *cur_f_u,
-                  const DataW *cur_f_s,
-                  const DataW *cur_f_v,
-                  const int *cur_f_unz,
-                  const int *cur_f_vnz,
-                  const DataW *cur_c_u,
-                  const DataW *cur_c_s,
-                  const DataW *cur_c_v,
-                  const int *cur_c_unz,
-                  const int *cur_c_vnz,
-                  const DataW *cur_o_u,
-                  const DataW *cur_o_s,
-                  const DataW *cur_o_v,
-                  const int *cur_o_unz,
-                  const int *cur_o_vnz,
-                  const DataW *rec_i_u,
-                  const DataW *rec_i_s,
-                  const DataW *rec_i_v,
-                  const int *rec_i_unz,
-                  const int *rec_i_vnz,
-                  const DataW *rec_f_u,
-                  const DataW *rec_f_s,
-                  const DataW *rec_f_v,
-                  const int *rec_f_unz,
-                  const int *rec_f_vnz,
-                  const DataW *rec_c_u,
-                  const DataW *rec_c_s,
-                  const DataW *rec_c_v,
-                  const int *rec_c_unz,
-                  const int *rec_c_vnz,
-                  const DataW *rec_o_u,
-                  const DataW *rec_o_s,
-                  const DataW *rec_o_v,
-                  const int *rec_o_unz,
-                  const int *rec_o_vnz,
-                  const DataW *bias,
-                  DataA *c_prev,
-                  DataA *h_prev,
-                  DataA *c_curr,
-                  DataA *h_curr) {
-  assert(Tu % 2 == 0);
-  assert(Tv % 2 == 0);
-  assert(Tu >= 8);
-  assert(Tv >= 8);
-  assert(Tu > ZTu);
-  assert(Tv > ZTv);
-  assert(NumIter % 2 == 0);
-  const DataW *u[8];
-  const DataW *s[8];
-  const DataW *v[8];
-  const int *unz[8];
-  const int *vnz[8];
-  u[0] = cur_i_u; u[1] = cur_f_u; u[2] = cur_c_u; u[3] = cur_o_u;
-  u[4] = rec_i_u; u[5] = rec_f_u; u[6] = rec_c_u; u[7] = rec_o_u; 
-  s[0] = cur_i_s; s[1] = cur_f_s; s[2] = cur_c_s; s[3] = cur_o_s;
-  s[4] = rec_i_s; s[5] = rec_f_s; s[6] = rec_c_s; s[7] = rec_o_s;
-  v[0] = cur_i_v; v[1] = cur_f_v; v[2] = cur_c_v; v[3] = cur_o_v;
-  v[4] = rec_i_v; v[5] = rec_f_v; v[6] = rec_c_v; v[7] = rec_o_v;
-  unz[0] = cur_i_unz; unz[1] = cur_f_unz; unz[2] = cur_c_unz; unz[3] = cur_o_unz;
-  unz[4] = rec_i_unz; unz[5] = rec_f_unz; unz[6] = rec_c_unz; unz[7] = rec_o_unz;
-  vnz[0] = cur_i_vnz; vnz[1] = cur_f_vnz; vnz[2] = cur_c_vnz; vnz[3] = cur_o_vnz;
-  vnz[4] = rec_i_vnz; vnz[5] = rec_f_vnz; vnz[6] = rec_c_vnz; vnz[7] = rec_o_vnz;
-  hls::stream<DataA> **cur_out_fifo = new hls::stream<DataA>*[4];
-  hls::stream<DataA> **rec_out_fifo = new hls::stream<DataA>*[4];
-  for (int i = 0; i < 4; ++i) {
-    cur_out_fifo[i] = new hls::stream<DataA>[Tv];
-    rec_out_fifo[i] = new hls::stream<DataA>[Tv];
-  }
-  DataAcc *u_acc[8];
-  DataAcc **acc_buffer[8];
-  DataMul xs_val[8] = {0};
-  for (int i = 0; i < 8; ++i) {
-    u_acc[i] = new DataAcc[NumIter];
-  }
-  DataA *h[2];
-  DataA *c[2];
-  if (NumTimesteps > 1) {
-    for (int i = 0; i < 2; ++i) {
-      h[i] = new DataA[HiddenSize];
-      c[i] = new DataA[HiddenSize];
-      std::memset(h[i], 0, HiddenSize * sizeof(DataA));
-      std::memset(c[i], 0, HiddenSize * sizeof(DataA));
-    }
-  } else {
-    c[0] = c_prev;
-    c[1] = c_curr;
-    h[0] = h_prev;
-    h[1] = h_curr;
-  }
-  for (int i = 0; i < 8; ++i) { 
-    acc_buffer[i] = new DataAcc*[Tv];
-    for (int j = 0; j < Tv; ++j) {
-      acc_buffer[i][j] = new DataAcc[HiddenSize / Tv];
-    }
-  }
-  for (int t = 0; t < NumTimesteps; ++t) {
-    const int in_ptr = (t % 2) == 0 ? 0 : 1;
-    const int out_ptr = (t % 2) == 0 ? 1 : 0;
-    for (int i = 0; i < 8; ++i) { 
-      std::memset(u_acc[i], 0, NumIter * sizeof(DataAcc));
-      for (int j = 0; j < Tv; ++j) {
-        std::memset(acc_buffer[i][j], 0, HiddenSize / Tv * sizeof(DataAcc));
-      }
-    }
-    for (int i = 0; i < NumIter; ++i) {
-      for (int q = 0; q < 4; ++q) {
-        for (int j = 0; j < Tu - ZTu; ++j) {
-          const int nz_idx = i * (Tu - ZTu) + j;
-          for (int k = 0; k < InputSize / Tu; ++k) {
-            int u_idx = i * InputSize / Tu * (Tu - ZTu) + j * InputSize / Tu + k;
-            u_acc[q][i] += x[t * InputSize + unz[q][nz_idx] * InputSize / Tu + k] * u[q][u_idx];
-          }
-          for (int k = 0; k < HiddenSize / Tu; ++k) {
-            int u_idx = i * HiddenSize / Tu * (Tu - ZTu) + j * HiddenSize / Tu + k;
-            u_acc[q + 4][i] += h[in_ptr][unz[q + 4][nz_idx] * HiddenSize / Tu + k] * u[q + 4][u_idx];
-          }
-        }
-      }
-      for (int q = 0; q < 8; ++q) {
-        xs_val[q] = s[q][i] * DataA(u_acc[q][i]);
-        for (int j = 0; j < Tv - ZTv; ++j) {
-          for (int k = 0; k < HiddenSize / Tv; ++k) {
-            const int v_idx = i * HiddenSize / Tv * (Tv - ZTv) + j * HiddenSize / Tv + k;
-            const int nz_idx = i * (Tv - ZTv) + j;
-            acc_buffer[q][vnz[q][nz_idx]][k] += xs_val[q] * v[q][v_idx];
-          }
-        }
-      }
-    }
-    for (int i = 0; i < 4; ++i) {
-      for (int j = 0; j < Tv; ++j) {
-        for (int k = 0; k < HiddenSize / Tv; ++k) {
-          cur_out_fifo[i][j].write(acc_buffer[i][j][k]);
-          rec_out_fifo[i][j].write(acc_buffer[i + 4][j][k]);
-        }
-      }
-    }
-    NonLinearityUnitSoftware<DataA, DataW, DataAcc, TanhLutSize>(HiddenSize,
-      Tv, 4, c[in_ptr], cur_out_fifo, rec_out_fifo, h[out_ptr], c[out_ptr],
-      true, bias);
-  }
-  if (NumTimesteps > 1) {
-    std::memcpy(h_curr, h[(NumTimesteps - 1) % 2 == 0 ? 1 : 0], HiddenSize * sizeof(DataA));
-  }
-  for (int i = 0; i < 4; ++i) {
-    delete[] cur_out_fifo[i];
-    delete[] rec_out_fifo[i];
-  }
-  delete[] cur_out_fifo;
-  delete[] rec_out_fifo;
-  for (int i = 0; i < 8; ++i) {
-    delete[] u_acc[i];
-    for (int j = 0; j < Tv; ++j) {
-      delete[] acc_buffer[i][j];
-    }
-    delete[] acc_buffer[i];
-  }
-  if (NumTimesteps > 1) {
-    for (int i = 0; i < 2; ++i) {
-      delete[] h[i];
-      delete[] c[i];
-    }
-  }
-}
+
+} // svd
 
 #endif // end LSTM_SW_SOFT_LSTM_SVD_H_

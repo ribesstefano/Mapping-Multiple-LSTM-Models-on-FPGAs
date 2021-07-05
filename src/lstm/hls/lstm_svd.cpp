@@ -10,6 +10,8 @@
 #include "hls_stream.h"
 #include "ap_int.h"
 
+namespace svd {
+
 void SvdModel2LstmSDSoCV2(
     const svd::ActivationD x1_port[INPUT_SIZE],
     const svd::ActivationD x2_port[INPUT_SIZE],
@@ -370,3 +372,5 @@ void SvdModel2LstmSDSoCV2(
   svd::ClockCounter<svd::CounterD, kNumProbes>(probe_ctrl, stop_ctrl, counters_port, clk_count_port);
 #endif
 }
+
+} // svd
