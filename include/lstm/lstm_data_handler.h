@@ -11,7 +11,7 @@
 #include <iostream>
 #include <vector>
 
-namespace lstm {
+namespace svd {
 
 template <typename Tin, typename Tout>
 void ArrangeWeights(const int arrange_type,
@@ -413,21 +413,21 @@ public:
     const int kU_RecLengthPruned = this->rec_gates_["i"]->get_u()->get_pruned_size();
     const int kV_LengthPruned = this->cur_gates_["i"]->get_v()->get_pruned_size();
     std::cout << "ArrangeWeights U cur" << std::endl;
-    lstm::ArrangeWeights(kArrangementTypeREG, refinement_steps, kU_CurLengthPruned,
+    svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kU_CurLengthPruned,
       this->cur_gates_["i"]->get_u()->fix_pruned_data(),
       this->cur_gates_["f"]->get_u()->fix_pruned_data(),
       this->cur_gates_["c"]->get_u()->fix_pruned_data(),
       this->cur_gates_["o"]->get_u()->fix_pruned_data(),
       this->fix_u_cur_);
     std::cout << "ArrangeWeights U rec" << std::endl;
-    lstm::ArrangeWeights(kArrangementTypeREG, refinement_steps, kU_RecLengthPruned,
+    svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kU_RecLengthPruned,
       this->rec_gates_["i"]->get_u()->fix_pruned_data(),
       this->rec_gates_["f"]->get_u()->fix_pruned_data(),
       this->rec_gates_["c"]->get_u()->fix_pruned_data(),
       this->rec_gates_["o"]->get_u()->fix_pruned_data(),
       this->fix_u_rec_);
     std::cout << "ArrangeWeights V" << std::endl;
-    lstm::ArrangeWeights(kArrangementTypeREG, refinement_steps, kV_LengthPruned,
+    svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kV_LengthPruned,
       kV_LengthPruned,
       this->cur_gates_["i"]->get_v()->fix_pruned_data(),
       this->cur_gates_["f"]->get_v()->fix_pruned_data(),
@@ -439,7 +439,7 @@ public:
       this->rec_gates_["o"]->get_v()->fix_pruned_data(),
       this->fix_v_);
     std::cout << "arrange NZ" << std::endl;
-    lstm::ArrangeWeights(kArrangementTypeRGE, refinement_steps, 1, 1,
+    svd::ArrangeWeights(kArrangementTypeRGE, refinement_steps, 1, 1,
       this->cur_gates_["i"]->get_u()->get_fix_nz_idx(),
       this->cur_gates_["f"]->get_u()->get_fix_nz_idx(),
       this->cur_gates_["c"]->get_u()->get_fix_nz_idx(),
@@ -449,7 +449,7 @@ public:
       this->rec_gates_["c"]->get_u()->get_fix_nz_idx(),
       this->rec_gates_["o"]->get_u()->get_fix_nz_idx(),
       this->fix_nz_u_);
-    lstm::ArrangeWeights(kArrangementTypeRGE, refinement_steps, 1, 1,
+    svd::ArrangeWeights(kArrangementTypeRGE, refinement_steps, 1, 1,
       this->cur_gates_["i"]->get_v()->get_fix_nz_idx(),
       this->cur_gates_["f"]->get_v()->get_fix_nz_idx(),
       this->cur_gates_["c"]->get_v()->get_fix_nz_idx(),
@@ -550,6 +550,15 @@ public:
       }
     }
   }
+
+  int get_lstm_input_size() {
+    return this->lstm_input_size_;
+  }
+
+  int get_lstm_output_size() {
+    return this->lstm_output_size_;
+  }
+
 
   FixType* get_fix_u_cur() {
     return this->fix_u_cur_;
@@ -653,6 +662,6 @@ public:
 
 };
 
-} // lstm
+} // svd
 
 #endif // end LSTM_DATA_HANDLER_H_

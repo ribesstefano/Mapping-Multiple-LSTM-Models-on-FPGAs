@@ -1,8 +1,9 @@
 #include "svd_params.h"
 #include "svd_ip.h"
-#include "lstm/hls/lstm_svd.h"
-#include "lstm/sw/soft_lstm_svd.h"
 #include "lstm/lstm_data_handler.h"
+#include "lstm/sw/soft_lstm_svd.h"
+#include "lstm/hls/lstm_svd.h"
+#include "lstm/hls/lstm_svd_emulator.h"
 
 #include "ap_fixed.h"
 
@@ -34,9 +35,10 @@ int main(int argc, char const *argv[]) {
   const int kNumZeroTilesU = NUM_ZERO_TILES_U;
   const int kNumTilesV = NUM_TILES_V;
   const int kNumZeroTilesV = NUM_ZERO_TILES_V;
+  const int kLutSize = (FIX_WIDTH == 16) ? 512 : 256;
 
   std::cout << "Setting AcceleratorBlob." << std::endl;
-  typedef lstm::AcceleratorBlob<float, svd::ActivationD, kNumTilesU, kNumTilesV> AccelDataType;
+  typedef svd::AcceleratorBlob<float, svd::ActivationD, kNumTilesU, kNumTilesV> AccelDataType;
   AccelDataType storage = AccelDataType(kNumInputs, kRefinementSteps, kUCurSize,
     kURecSize, kVSize, kNumTilesU, kNumZeroTilesU, kNumTilesV, kNumZeroTilesV);
 
@@ -64,6 +66,11 @@ int main(int argc, char const *argv[]) {
   svd::ActivationD* c1_curr;
   svd::ActivationD* c2_curr;
 
+  svd::ActivationD* c_prev = new svd::ActivationD[kLstmOutputSize];
+  svd::ActivationD* h_prev = new svd::ActivationD[kLstmOutputSize];
+  svd::ActivationD* c_curr = new svd::ActivationD[kLstmOutputSize];
+  svd::ActivationD* h_curr = new svd::ActivationD[kLstmOutputSize];
+
   for (int t = 0; t < NUM_TIMESTEPS; ++t) {
     if (t % 2 == 0) {
       h1_prev = reinterpret_cast<svd::ActivationD*>(storage.get_fix_h_curr(0));
@@ -84,60 +91,110 @@ int main(int argc, char const *argv[]) {
       c1_curr = reinterpret_cast<svd::ActivationD*>(storage.get_fix_c_prev(0));
       c2_curr = reinterpret_cast<svd::ActivationD*>(storage.get_fix_c_prev(1));
     }
-    SvdModel2LstmSDSoCV2(storage.get_fix_x(0), storage.get_fix_x(1), // [s * NUM_TIMESTEPS + t] samples?
+    svd::SvdModel2LstmSDSoCV2(storage.get_fix_x(0), storage.get_fix_x(1), // [s * NUM_TIMESTEPS + t] samples?
       h1_curr, h2_curr, c1_curr, c2_curr,
       u_cur_uint, u_rec_uint, v_uint, s1_uint, s2_uint,
       storage.get_fix_bias(0), storage.get_fix_bias(1),
       storage.get_fix_nz_v(), storage.get_fix_nz_u(),
       h1_prev, h2_prev, c1_prev, c2_prev);
+
+    std::cout << "Starting software Models." << std::endl;
+    for (int j = 0; j < kNumInputs; ++j) {
+      std::cout << "Starting Emulator." << std::endl;
+      svd::LstmSvdSoftEmulator<svd::ActivationD, svd::WeightD, svd::AccumD, svd::MultD, kLutSize>(kLstmInputSize, kLstmOutputSize, kRefinementSteps, kNumTilesU, kNumZeroTilesU,
+        kNumTilesV, kNumZeroTilesV, 1, storage.get_fix_x(j),
+        storage.get_cur_gates("i")->get_u()->fix_pruned_data(),
+        storage.get_cur_gates("i")->get_s(j).fix_pruned_data(),
+        storage.get_cur_gates("i")->get_v()->fix_pruned_data(),
+        storage.get_cur_gates("i")->get_u()->get_nz_idx(),
+        storage.get_cur_gates("i")->get_v()->get_nz_idx(),
+        storage.get_cur_gates("f")->get_u()->fix_pruned_data(),
+        storage.get_cur_gates("f")->get_s(j).fix_pruned_data(),
+        storage.get_cur_gates("f")->get_v()->fix_pruned_data(),
+        storage.get_cur_gates("f")->get_u()->get_nz_idx(),
+        storage.get_cur_gates("f")->get_v()->get_nz_idx(),
+        storage.get_cur_gates("c")->get_u()->fix_pruned_data(),
+        storage.get_cur_gates("c")->get_s(j).fix_pruned_data(),
+        storage.get_cur_gates("c")->get_v()->fix_pruned_data(),
+        storage.get_cur_gates("c")->get_u()->get_nz_idx(),
+        storage.get_cur_gates("c")->get_v()->get_nz_idx(),
+        storage.get_cur_gates("o")->get_u()->fix_pruned_data(),
+        storage.get_cur_gates("o")->get_s(j).fix_pruned_data(),
+        storage.get_cur_gates("o")->get_v()->fix_pruned_data(),
+        storage.get_cur_gates("o")->get_u()->get_nz_idx(),
+        storage.get_cur_gates("o")->get_v()->get_nz_idx(),
+        storage.get_rec_gates("i")->get_u()->fix_pruned_data(),
+        storage.get_rec_gates("i")->get_s(j).fix_pruned_data(),
+        storage.get_rec_gates("i")->get_v()->fix_pruned_data(),
+        storage.get_rec_gates("i")->get_u()->get_nz_idx(),
+        storage.get_rec_gates("i")->get_v()->get_nz_idx(),
+        storage.get_rec_gates("f")->get_u()->fix_pruned_data(),
+        storage.get_rec_gates("f")->get_s(j).fix_pruned_data(),
+        storage.get_rec_gates("f")->get_v()->fix_pruned_data(),
+        storage.get_rec_gates("f")->get_u()->get_nz_idx(),
+        storage.get_rec_gates("f")->get_v()->get_nz_idx(),
+        storage.get_rec_gates("c")->get_u()->fix_pruned_data(),
+        storage.get_rec_gates("c")->get_s(j).fix_pruned_data(),
+        storage.get_rec_gates("c")->get_v()->fix_pruned_data(),
+        storage.get_rec_gates("c")->get_u()->get_nz_idx(),
+        storage.get_rec_gates("c")->get_v()->get_nz_idx(),
+        storage.get_rec_gates("o")->get_u()->fix_pruned_data(),
+        storage.get_rec_gates("o")->get_s(j).fix_pruned_data(),
+        storage.get_rec_gates("o")->get_v()->fix_pruned_data(),
+        storage.get_rec_gates("o")->get_u()->get_nz_idx(),
+        storage.get_rec_gates("o")->get_v()->get_nz_idx(),
+        storage.get_fix_bias(j), c_prev, h_prev, c_curr, h_curr);
+      const bool kVerbose = true;
+      const bool kUseBlas = false;
+      const int kUsaFloat = 0;
+      const int kNumSamples = 1;
+      std::cout << "Starting BLAS." << std::endl;
+      svd::SvdModelLstmSoftware(kVerbose, kUseBlas, kUsaFloat,
+                              storage.get_x(j),
+                              kNumSamples,
+                              NUM_TIMESTEPS,
+                              NUM_ITERATIONS,
+                              INPUT_SIZE,
+                              HIDDEN_SIZE,
+                              storage.get_cur_gates("i")->get_u()->data(),
+                              storage.get_cur_gates("i")->get_s(j).data(),
+                              storage.get_cur_gates("i")->get_v()->data(),
+                              storage.get_cur_gates("f")->get_u()->data(),
+                              storage.get_cur_gates("f")->get_s(j).data(),
+                              storage.get_cur_gates("f")->get_v()->data(),
+                              storage.get_cur_gates("c")->get_u()->data(),
+                              storage.get_cur_gates("c")->get_s(j).data(),
+                              storage.get_cur_gates("c")->get_v()->data(),
+                              storage.get_cur_gates("o")->get_u()->data(),
+                              storage.get_cur_gates("o")->get_s(j).data(),
+                              storage.get_cur_gates("o")->get_v()->data(),
+                              storage.get_rec_gates("i")->get_u()->data(),
+                              storage.get_rec_gates("i")->get_s(j).data(),
+                              storage.get_rec_gates("i")->get_v()->data(),
+                              storage.get_rec_gates("f")->get_u()->data(),
+                              storage.get_rec_gates("f")->get_s(j).data(),
+                              storage.get_rec_gates("f")->get_v()->data(),
+                              storage.get_rec_gates("c")->get_u()->data(),
+                              storage.get_rec_gates("c")->get_s(j).data(),
+                              storage.get_rec_gates("c")->get_v()->data(),
+                              storage.get_rec_gates("o")->get_u()->data(),
+                              storage.get_rec_gates("o")->get_s(j).data(),
+                              storage.get_rec_gates("o")->get_v()->data(),
+                              &storage.get_bias(j)[0 * storage.get_lstm_output_size()],
+                              &storage.get_bias(j)[1 * storage.get_lstm_output_size()],
+                              &storage.get_bias(j)[2 * storage.get_lstm_output_size()],
+                              &storage.get_bias(j)[3 * storage.get_lstm_output_size()],
+                              storage.get_h(j));
+    }
   }
-
-
-  std::cout << "Starting software Model." << std::endl;
-
-  const bool kVerbose = true;
-  const bool kUseBlas = false;
-  const int kUsaFloat = 0;
-  const int kNumSamples = 1;
-  SvdModel2LstmSoftware(kVerbose, kUseBlas, kUsaFloat,
-                          storage.get_x(0),
-                          kNumSamples,
-                          NUM_TIMESTEPS,
-                          NUM_ITERATIONS,
-                          INPUT_SIZE,
-                          HIDDEN_SIZE,
-                          storage.get_cur_gates()["i"]->get_u()->data(),
-                          storage.get_cur_gates()["i"]->get_s(0).data(),
-                          storage.get_cur_gates()["i"]->get_v()->data(),
-                          storage.get_cur_gates()["f"]->get_u()->data(),
-                          storage.get_cur_gates()["f"]->get_s(0).data(),
-                          storage.get_cur_gates()["f"]->get_v()->data(),
-                          storage.get_cur_gates()["c"]->get_u()->data(),
-                          storage.get_cur_gates()["c"]->get_s(0).data(),
-                          storage.get_cur_gates()["c"]->get_v()->data(),
-                          storage.get_cur_gates()["o"]->get_u()->data(),
-                          storage.get_cur_gates()["o"]->get_s(0).data(),
-                          storage.get_cur_gates()["o"]->get_v()->data(),
-                          storage.get_rec_gates()["i"]->get_u()->data(),
-                          storage.get_rec_gates()["i"]->get_s(0).data(),
-                          storage.get_rec_gates()["i"]->get_v()->data(),
-                          storage.get_rec_gates()["f"]->get_u()->data(),
-                          storage.get_rec_gates()["f"]->get_s(0).data(),
-                          storage.get_rec_gates()["f"]->get_v()->data(),
-                          storage.get_rec_gates()["c"]->get_u()->data(),
-                          storage.get_rec_gates()["c"]->get_s(0).data(),
-                          storage.get_rec_gates()["c"]->get_v()->data(),
-                          storage.get_rec_gates()["o"]->get_u()->data(),
-                          storage.get_rec_gates()["o"]->get_s(0).data(),
-                          storage.get_rec_gates()["o"]->get_v()->data(),
-                          &storage.get_bias(0)[0 * HIDDEN_SIZE],
-                          &storage.get_bias(0)[1 * HIDDEN_SIZE],
-                          &storage.get_bias(0)[2 * HIDDEN_SIZE],
-                          &storage.get_bias(0)[3 * HIDDEN_SIZE],
-                          storage.get_h(0));
 
   storage.ResetLstmOutputs();
   std::cout << "Cleaning up." << std::endl;
+
+  delete[] c_prev;
+  delete[] h_prev;
+  delete[] c_curr;
+  delete[] h_curr;
 
   return 0;
 }

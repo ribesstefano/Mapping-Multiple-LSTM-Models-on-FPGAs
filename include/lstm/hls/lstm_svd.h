@@ -3,6 +3,10 @@
 
 #include "svd_params.h"
 
+#include "ap_int.h"
+
+namespace svd {
+
 #ifdef SDS_DESIGN
 // =============================================================================
 // Ports using DMAs
@@ -139,5 +143,7 @@ void SvdModel2LstmSDSoCV2(
     svd::ActivationD h_t2_curr_port[HIDDEN_SIZE],
     svd::ActivationD c_t1_curr_port[HIDDEN_SIZE],
     svd::ActivationD c_t2_curr_port[HIDDEN_SIZE]);
+
+} // svd
 
 #endif // end LSTM_HLS_LSTM_SVD_H_

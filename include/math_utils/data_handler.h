@@ -81,6 +81,9 @@ public:
   VectorBlob(const int refinement_steps, const int vector_size,
       const int num_tiles, const int num_zero_tiles) {
     assert(num_tiles >= 1);
+    assert(refinement_steps > 0);
+    assert(vector_size > 0);
+    assert(num_tiles > 0);
     this->num_tile_elems_ = vector_size / num_tiles;
     this->size_ = vector_size;
     this->pruned_size_ = this->num_tile_elems_ * (num_tiles - num_zero_tiles);
@@ -226,6 +229,7 @@ public:
       const int u_size, const int v_size, const int num_tiles_u,
       const int num_zero_tiles_u, const int num_tiles_v,
       const int num_zero_tiles_v) {
+    assert(num_inputs > 0);
     this->num_inputs_ = num_inputs;
     this->u_ = new VectorBlob<FloatType, FixType, NumTilesU>(refinement_steps, u_size, num_tiles_u, num_zero_tiles_u);
     this->v_ = new VectorBlob<FloatType, FixType, NumTilesV>(refinement_steps, v_size, num_tiles_v, num_zero_tiles_v);

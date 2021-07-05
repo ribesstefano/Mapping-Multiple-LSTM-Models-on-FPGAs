@@ -1,5 +1,7 @@
 #include "lstm/sw/soft_lstm_svd.h"
 
+namespace svd {
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -959,7 +961,7 @@ void SvdModelSoftwareUnbatched(const int verbose,
 #ifdef __cplusplus
 extern "C"
 #endif
-void SvdModel2LstmFix8(const int verbose,
+void SvdModelLstmFix8(const int verbose,
                        const Fix8D *x,
                        const int num_samples,
                        const int num_timesteps,
@@ -995,47 +997,19 @@ void SvdModel2LstmFix8(const int verbose,
                        const Fix8D *bias_c,
                        const Fix8D *bias_o,
                        Fix8D *out) {
-  SvdModel2LstmTemplatedLatencyCC<Fix8D, Accum8D, 512>(verbose, x,
-                                              num_samples,
-                                              num_timesteps,
-                                              n_steps,
-                                              input_size,
-                                              hidden_size,
-                                              cur_i_u,
-                                              cur_i_s,
-                                              cur_i_v,
-                                              cur_f_u,
-                                              cur_f_s,
-                                              cur_f_v,
-                                              cur_c_u,
-                                              cur_c_s,
-                                              cur_c_v,
-                                              cur_o_u,
-                                              cur_o_s,
-                                              cur_o_v,
-                                              rec_i_u,
-                                              rec_i_s,
-                                              rec_i_v,
-                                              rec_f_u,
-                                              rec_f_s,
-                                              rec_f_v,
-                                              rec_c_u,
-                                              rec_c_s,
-                                              rec_c_v,
-                                              rec_o_u,
-                                              rec_o_s,
-                                              rec_o_v,
-                                              bias_i,
-                                              bias_f,
-                                              bias_c,
-                                              bias_o,
-                                              out);
+  SvdModelLstmTemplatedLatencyCC<Fix8D, Accum8D, 512>(verbose, x,
+    num_samples, num_timesteps, n_steps, input_size, hidden_size,
+    cur_i_u, cur_i_s, cur_i_v, cur_f_u, cur_f_s, cur_f_v,
+    cur_c_u, cur_c_s, cur_c_v, cur_o_u, cur_o_s, cur_o_v,
+    rec_i_u, rec_i_s, rec_i_v, rec_f_u, rec_f_s, rec_f_v,
+    rec_c_u, rec_c_s, rec_c_v, rec_o_u, rec_o_s, rec_o_v,
+    bias_i, bias_f, bias_c, bias_o, out);
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
-void SvdModel2LstmFix16(const int verbose,
+void SvdModelLstmFix16(const int verbose,
                         const Fix16D *x,
                         const int num_samples,
                         const int num_timesteps,
@@ -1071,47 +1045,19 @@ void SvdModel2LstmFix16(const int verbose,
                         const Fix16D *bias_c,
                         const Fix16D *bias_o,
                         Fix16D *out) {
-  SvdModel2LstmTemplatedLatencyCC<Fix16D, Accum16D, 512>(verbose, x,
-                                               num_samples,
-                                               num_timesteps,
-                                               n_steps,
-                                               input_size,
-                                               hidden_size,
-                                               cur_i_u,
-                                               cur_i_s,
-                                               cur_i_v,
-                                               cur_f_u,
-                                               cur_f_s,
-                                               cur_f_v,
-                                               cur_c_u,
-                                               cur_c_s,
-                                               cur_c_v,
-                                               cur_o_u,
-                                               cur_o_s,
-                                               cur_o_v,
-                                               rec_i_u,
-                                               rec_i_s,
-                                               rec_i_v,
-                                               rec_f_u,
-                                               rec_f_s,
-                                               rec_f_v,
-                                               rec_c_u,
-                                               rec_c_s,
-                                               rec_c_v,
-                                               rec_o_u,
-                                               rec_o_s,
-                                               rec_o_v,
-                                               bias_i,
-                                               bias_f,
-                                               bias_c,
-                                               bias_o,
-                                               out);
+  SvdModelLstmTemplatedLatencyCC<Fix16D, Accum16D, 512>(verbose, x,
+    num_samples, num_timesteps, n_steps, input_size, hidden_size,
+    cur_i_u, cur_i_s, cur_i_v, cur_f_u, cur_f_s, cur_f_v,
+    cur_c_u, cur_c_s, cur_c_v, cur_o_u, cur_o_s, cur_o_v,
+    rec_i_u, rec_i_s, rec_i_v, rec_f_u, rec_f_s, rec_f_v,
+    rec_c_u, rec_c_s, rec_c_v, rec_o_u, rec_o_s, rec_o_v,
+    bias_i, bias_f, bias_c, bias_o, out);
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
-void SvdModel2LstmHalf(const int verbose,
+void SvdModelLstmHalf(const int verbose,
                         const HalfD *x,
                         const int num_samples,
                         const int num_timesteps,
@@ -1147,47 +1093,19 @@ void SvdModel2LstmHalf(const int verbose,
                         const HalfD *bias_c,
                         const HalfD *bias_o,
                         HalfD *out) {
-  SvdModel2LstmTemplatedLatencyCC<HalfD, AccumHalfD, 256>(verbose, x,
-                                               num_samples,
-                                               num_timesteps,
-                                               n_steps,
-                                               input_size,
-                                               hidden_size,
-                                               cur_i_u,
-                                               cur_i_s,
-                                               cur_i_v,
-                                               cur_f_u,
-                                               cur_f_s,
-                                               cur_f_v,
-                                               cur_c_u,
-                                               cur_c_s,
-                                               cur_c_v,
-                                               cur_o_u,
-                                               cur_o_s,
-                                               cur_o_v,
-                                               rec_i_u,
-                                               rec_i_s,
-                                               rec_i_v,
-                                               rec_f_u,
-                                               rec_f_s,
-                                               rec_f_v,
-                                               rec_c_u,
-                                               rec_c_s,
-                                               rec_c_v,
-                                               rec_o_u,
-                                               rec_o_s,
-                                               rec_o_v,
-                                               bias_i,
-                                               bias_f,
-                                               bias_c,
-                                               bias_o,
-                                               out);
+  SvdModelLstmTemplatedLatencyCC<HalfD, AccumHalfD, 256>(verbose, x,
+    num_samples, num_timesteps, n_steps, input_size, hidden_size,
+    cur_i_u, cur_i_s, cur_i_v, cur_f_u, cur_f_s, cur_f_v,
+    cur_c_u, cur_c_s, cur_c_v, cur_o_u, cur_o_s, cur_o_v,
+    rec_i_u, rec_i_s, rec_i_v, rec_f_u, rec_f_s, rec_f_v,
+    rec_c_u, rec_c_s, rec_c_v, rec_o_u, rec_o_s, rec_o_v,
+    bias_i, bias_f, bias_c, bias_o, out);
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
-void SvdModel2LstmSoftware(const int verbose,
+void SvdModelLstmSoftware(const int verbose,
                            const bool use_blas,
                            const int type, // 0:float, 1:fix8, 2:fix16, 3:half16
                            const float *x,
@@ -1329,7 +1247,7 @@ void SvdModel2LstmSoftware(const int verbose,
         // =====================================================================
         // Call function
         // =====================================================================
-        SvdModel2LstmFix8(verbose, x_fix, num_samples, num_timesteps, n_steps, input_size,
+        SvdModelLstmFix8(verbose, x_fix, num_samples, num_timesteps, n_steps, input_size,
                           hidden_size, cur_i_u_fix, cur_i_s_fix, cur_i_v_fix,
                           cur_f_u_fix, cur_f_s_fix, cur_f_v_fix, cur_c_u_fix,
                           cur_c_s_fix, cur_c_v_fix, cur_o_u_fix, cur_o_s_fix,
@@ -1446,7 +1364,7 @@ void SvdModel2LstmSoftware(const int verbose,
         // =====================================================================
         // Call function
         // =====================================================================
-        SvdModel2LstmFix16(verbose, x_fix, num_samples, num_timesteps, n_steps,
+        SvdModelLstmFix16(verbose, x_fix, num_samples, num_timesteps, n_steps,
                            input_size, hidden_size, cur_i_u_fix, cur_i_s_fix,
                            cur_i_v_fix, cur_f_u_fix, cur_f_s_fix, cur_f_v_fix,
                            cur_c_u_fix, cur_c_s_fix, cur_c_v_fix, cur_o_u_fix,
@@ -1564,8 +1482,8 @@ void SvdModel2LstmSoftware(const int verbose,
         // =====================================================================
         // Call function
         // =====================================================================
-        // std::cout << "Starting SvdModel2LstmHalf\n";
-        SvdModel2LstmHalf(verbose, x_fix, num_samples, num_timesteps, n_steps,
+        // std::cout << "Starting SvdModelLstmHalf\n";
+        SvdModelLstmHalf(verbose, x_fix, num_samples, num_timesteps, n_steps,
                            input_size, hidden_size, cur_i_u_fix, cur_i_s_fix,
                            cur_i_v_fix, cur_f_u_fix, cur_f_s_fix, cur_f_v_fix,
                            cur_c_u_fix, cur_c_s_fix, cur_c_v_fix, cur_o_u_fix,
@@ -2741,7 +2659,7 @@ void SvdModelEigenUnbatched(const int verbose,
 #ifdef __cplusplus
 extern "C"
 #endif
-void SvdModel2LstmHardware(const int verbose,
+void SvdModelLstmHardware(const int verbose,
                            const bool use_blas,
                            const int type, // 0:float, 1:fix8, 2:fix16
                            const float *x1,
@@ -2803,7 +2721,7 @@ void SvdModel2LstmHardware(const int verbose,
           int Tv,
           int ZTv,
           int NumTimesteps
-        SvdModel2LstmTemplated<float, float>(x1,
+        SvdModelLstmTemplated<float, float>(x1,
                       x2,
                       cur_i_u,
                       cur_i_s,
@@ -2942,7 +2860,7 @@ void SvdModel2LstmHardware(const int verbose,
         // =====================================================================
         // Call function
         // =====================================================================
-        SvdModel2LstmFix8(verbose, x_fix, num_samples, num_timesteps, n_steps, input_size,
+        SvdModelLstmFix8(verbose, x_fix, num_samples, num_timesteps, n_steps, input_size,
                           hidden_size, cur_i_u_fix, cur_i_s_fix, cur_i_v_fix,
                           cur_f_u_fix, cur_f_s_fix, cur_f_v_fix, cur_c_u_fix,
                           cur_c_s_fix, cur_c_v_fix, cur_o_u_fix, cur_o_s_fix,
@@ -3059,7 +2977,7 @@ void SvdModel2LstmHardware(const int verbose,
         // =====================================================================
         // Call function
         // =====================================================================
-        SvdModel2LstmFix16(verbose, x_fix, num_samples, num_timesteps, n_steps,
+        SvdModelLstmFix16(verbose, x_fix, num_samples, num_timesteps, n_steps,
                            input_size, hidden_size, cur_i_u_fix, cur_i_s_fix,
                            cur_i_v_fix, cur_f_u_fix, cur_f_s_fix, cur_f_v_fix,
                            cur_c_u_fix, cur_c_s_fix, cur_c_v_fix, cur_o_u_fix,
@@ -3177,8 +3095,8 @@ void SvdModel2LstmHardware(const int verbose,
         // =====================================================================
         // Call function
         // =====================================================================
-        // std::cout << "Starting SvdModel2LstmHalf\n";
-        SvdModel2LstmHalf(verbose, x_fix, num_samples, num_timesteps, n_steps,
+        // std::cout << "Starting SvdModelLstmHalf\n";
+        SvdModelLstmHalf(verbose, x_fix, num_samples, num_timesteps, n_steps,
                            input_size, hidden_size, cur_i_u_fix, cur_i_s_fix,
                            cur_i_v_fix, cur_f_u_fix, cur_f_s_fix, cur_f_v_fix,
                            cur_c_u_fix, cur_c_s_fix, cur_c_v_fix, cur_o_u_fix,
@@ -3256,7 +3174,7 @@ void print_vect(const int size, const int num_elem_to_print, T *v) {
 #ifdef __cplusplus
 extern "C"
 #endif
-void SvdModel2LstmSoftwareBatched(const int verbose,
+void SvdModelLstmSoftwareBatched(const int verbose,
                              const bool use_blas,
                              const float *x, // (num_samples, num_inputs, num_timesteps, input_size)
                              const int num_inputs,
@@ -3741,3 +3659,5 @@ void SvdModel2LstmSoftwareBatched(const int verbose,
   delete[] rec_o_us;
 }
 #endif
+
+} // svd
