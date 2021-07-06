@@ -264,10 +264,6 @@ typedef uint64_t AccelD;
 
 typedef ap_uint<AXI_PORT_WIDTH> AxiD; // 64bit for ZedBoard HP and ACP ports (128bit for ZCU104)
 
-// Used by software versions:
-typedef ap_fixed<16, 2 * FIX_FRACT_WIDTH> Fix16D;
-typedef ap_fixed<8, 2 * FIX_FRACT_WIDTH> Fix8D;
-
 typedef hls::stream<ActivationD> ActivationStream;
 typedef hls::stream<WeightD> WeightStream;
 typedef hls::stream<AxiD> AxiStream;
@@ -275,24 +271,6 @@ typedef hls::stream<AccumD> AccumStream;
 
 typedef long long CounterD;
 typedef hls::stream<bool> ProbeStream;
-
-#ifndef X_PORT_WIDTH
-#define X_PORT_WIDTH (FIX_WIDTH * NUM_TILES_U)
-#endif
-#ifndef U_PORT_WIDTH
-#define U_PORT_WIDTH (FIX_WIDTH * (NUM_TILES_U - NUM_ZERO_TILES_U))
-#endif
-#ifndef V_PORT_WIDTH
-#define V_PORT_WIDTH (FIX_WIDTH * (HIDDEN_SIZE / NUM_TILES_V))
-#endif
-#ifndef S_PORT_WIDTH
-#define S_PORT_WIDTH (FIX_WIDTH * 8)
-#endif
-
-typedef ap_uint<X_PORT_WIDTH> XPortD;
-typedef ap_uint<U_PORT_WIDTH> UPortD;
-typedef ap_uint<V_PORT_WIDTH> VPortD;
-typedef ap_uint<S_PORT_WIDTH> SPortD;
 
 } // namespace svd
 
