@@ -10,6 +10,8 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
+#include <stdlib.h>
+#include <time.h>
 
 namespace svd {
 
@@ -376,12 +378,10 @@ public:
       const int u_cur_size, const int u_rec_size, const int v_size,
       const int num_tiles_u, const int num_zero_tiles_u, const int num_tiles_v,
       const int num_zero_tiles_v) {
+    srand(time(NULL));
     this->lstm_num_inputs_ = num_inputs;
     this->lstm_input_size_ = u_cur_size;
     this->lstm_output_size_ = v_size;
-    std::cout << this->lstm_num_inputs_ << std::endl;
-    std::cout << this->lstm_input_size_ << std::endl;
-    std::cout << this->lstm_output_size_ << std::endl;
     // NOTE: The following instantiation order is important and must be that.
     this->cur_gates_["o"] = new SvdVecType(num_inputs, refinement_steps, u_cur_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
     this->cur_gates_["c"] = new SvdVecType(num_inputs, refinement_steps, u_cur_size, v_size, num_tiles_u, num_zero_tiles_u, num_tiles_v, num_zero_tiles_v);
@@ -396,7 +396,6 @@ public:
     const int kU_RecTotalSize = kNumGates / 2 * this->rec_gates_["i"]->get_u()->get_pruned_total_size();
     const int kV_TotalSize = kNumGates * this->cur_gates_["i"]->get_v()->get_pruned_total_size();
     const int kS_TotalSize = kNumGates * refinement_steps;
-    std::cout << "allocate stuff" << std::endl;
     this->fix_u_cur_ = svd::AllocateContiguously<FixType>(kU_CurTotalSize);
     this->fix_u_rec_ = svd::AllocateContiguously<FixType>(kU_RecTotalSize);
     this->fix_v_ = svd::AllocateContiguously<FixType>(kV_TotalSize);
@@ -412,21 +411,18 @@ public:
     const int kU_CurLengthPruned = this->cur_gates_["i"]->get_u()->get_pruned_size();
     const int kU_RecLengthPruned = this->rec_gates_["i"]->get_u()->get_pruned_size();
     const int kV_LengthPruned = this->cur_gates_["i"]->get_v()->get_pruned_size();
-    std::cout << "ArrangeWeights U cur" << std::endl;
     svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kU_CurLengthPruned,
       this->cur_gates_["i"]->get_u()->fix_pruned_data(),
       this->cur_gates_["f"]->get_u()->fix_pruned_data(),
       this->cur_gates_["c"]->get_u()->fix_pruned_data(),
       this->cur_gates_["o"]->get_u()->fix_pruned_data(),
       this->fix_u_cur_);
-    std::cout << "ArrangeWeights U rec" << std::endl;
     svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kU_RecLengthPruned,
       this->rec_gates_["i"]->get_u()->fix_pruned_data(),
       this->rec_gates_["f"]->get_u()->fix_pruned_data(),
       this->rec_gates_["c"]->get_u()->fix_pruned_data(),
       this->rec_gates_["o"]->get_u()->fix_pruned_data(),
       this->fix_u_rec_);
-    std::cout << "ArrangeWeights V" << std::endl;
     svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kV_LengthPruned,
       kV_LengthPruned,
       this->cur_gates_["i"]->get_v()->fix_pruned_data(),
@@ -438,7 +434,6 @@ public:
       this->rec_gates_["c"]->get_v()->fix_pruned_data(),
       this->rec_gates_["o"]->get_v()->fix_pruned_data(),
       this->fix_v_);
-    std::cout << "arrange NZ" << std::endl;
     svd::ArrangeWeights(kArrangementTypeRGE, refinement_steps, 1, 1,
       this->cur_gates_["i"]->get_u()->get_fix_nz_idx(),
       this->cur_gates_["f"]->get_u()->get_fix_nz_idx(),
@@ -467,7 +462,6 @@ public:
     this->fix_h_prev_.resize(num_inputs);
     this->fix_c_prev_.resize(num_inputs);
     this->fix_bias_.resize(num_inputs);
-
     this->x_.resize(num_inputs, std::vector<FloatType>(this->lstm_input_size_));
     this->h_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
     this->c_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
@@ -476,7 +470,6 @@ public:
     this->h_prev_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
     this->c_prev_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
     this->bias_.resize(num_inputs, std::vector<FloatType>(kNumGates / 2 * this->lstm_output_size_));
-
     const bool init_random = true;
     this->InitVector(init_random, num_inputs, this->lstm_input_size_, this->fix_x_, this->x_);
     this->InitVector(!init_random, num_inputs, this->lstm_output_size_, this->fix_h_, this->h_);
@@ -486,9 +479,6 @@ public:
     this->InitVector(!init_random, num_inputs, this->lstm_output_size_, this->fix_h_prev_, this->h_prev_);
     this->InitVector(!init_random, num_inputs, this->lstm_output_size_, this->fix_c_prev_, this->c_prev_);
     this->InitVector(init_random, num_inputs, kNumGates / 2 * this->lstm_output_size_, this->fix_bias_, this->bias_);
-
-    std::cout << "Arrange S" << std::endl;
-
     for (int i = 0; i < num_inputs; ++i) {
       this->fix_s_.push_back(svd::AllocateContiguously<FixType>(kS_TotalSize));
     }
@@ -658,6 +648,28 @@ public:
 
   FloatType* get_x(const int i) {
     return this->x_[i].data();
+  }
+
+  int CountMismatches(FixType** x, const int verbose = 0) {
+    int num_errors = 0;
+    for (int i = 0; i < this->lstm_num_inputs_; ++i) {
+      for (int j = 0; j < this->lstm_output_size_; ++j) {
+        if (verbose > 0) {
+          std:: cout << j << ") hls/emulator: " << this->fix_h_curr_[i][j] << " / " << x[i][j];
+        }
+        if (this->fix_h_curr_[i][j] != x[i][j]) {
+          ++num_errors;
+          if (verbose > 0) {
+            std:: cout << " <-- ERROR" << std::endl;
+          }
+        } else {
+          if (verbose > 0) {
+            std:: cout << std::endl;
+          }
+        }
+      }
+    }
+    return num_errors;
   }
 
 };
