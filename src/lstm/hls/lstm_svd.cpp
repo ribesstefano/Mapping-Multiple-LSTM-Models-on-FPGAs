@@ -9,6 +9,9 @@
 
 #include "hls_stream.h"
 #include "ap_int.h"
+#include "assert.h"
+
+#include <string>
 
 namespace svd {
 
@@ -26,8 +29,8 @@ void SvdModel2LstmSDSoCV2(
     const ap_uint<FIX_WIDTH * 8> *s2_port, // [NUM_ITERATIONS*8],
     const svd::WeightD bias1_port[4 * HIDDEN_SIZE],
     const svd::WeightD bias2_port[4 * HIDDEN_SIZE],
-    const ap_uint<NUM_TILES_V> nz_v_port[NUM_ITERATIONS * 8], // non-zero indexes
-    const ap_uint<NUM_TILES_U> nz_u_port[NUM_ITERATIONS * 8], // non-zero indexes
+    const ap_uint<NUM_TILES_V> nz_v_port[NUM_ITERATIONS * 8],
+    const ap_uint<NUM_TILES_U> nz_u_port[NUM_ITERATIONS * 8],
     svd::ActivationD h_t1_curr_port[HIDDEN_SIZE],
     svd::ActivationD h_t2_curr_port[HIDDEN_SIZE],
     svd::ActivationD c_t1_curr_port[HIDDEN_SIZE],
@@ -59,7 +62,7 @@ void SvdModel2LstmSDSoCV2(
   assert(kNumTilesV % 2 == 0);
   // assert(kNumZeroTilesU % 2 == 0);
   // assert(kNumZeroTilesV % 2 == 0);
-  assert(kNumIter % 2 == 0);
+  // assert(kNumIter % 2 == 0);
   hls_utils::Log(0, "[INFO] assert passed.");
 
   const int kNumElemsTileU = kInputLength / kNumTilesU;
@@ -273,6 +276,13 @@ void SvdModel2LstmSDSoCV2(
   // ===========================================================================
   // Gates DMA
   // ===========================================================================
+  const int kUcurSize = kNumGates / 2 * kNumIter * kInputLength / kNumTilesU * (kNumTilesU - kNumZeroTilesU);
+  const int kUrecSize = kNumGates / 2 * kNumIter * kOutputLength / kNumTilesU * (kNumTilesU - kNumZeroTilesU);
+  const int kSsize = kNumGates * kNumIter;
+  const int kVsize = kNumGates * kNumIter * kOutputLength / kNumTilesV * (kNumTilesV - kNumZeroTilesV);
+  const int kBitWidthU = FIX_WIDTH * 4;
+  const int kBitWidthV = FIX_WIDTH * 8;
+  const int kBitWidthS = FIX_WIDTH * 8;
   svd::WeightD u_cur_gate_streams[kNumGates / 2][kNumIter * kInputLength / kNumTilesU * (kNumTilesU - kNumZeroTilesU)];
   svd::WeightD u_rec_gate_streams[kNumGates / 2][kNumIter * kOutputLength / kNumTilesU * (kNumTilesU - kNumZeroTilesU)];
   svd::WeightD v_gate_streams[kNumGates][kNumIter * kOutputLength / kNumTilesV * (kNumTilesV - kNumZeroTilesV)];
@@ -282,20 +292,17 @@ void SvdModel2LstmSDSoCV2(
 #pragma HLS ARRAY_PARTITION variable=u_cur_gate_streams complete dim=1
 #pragma HLS ARRAY_PARTITION variable=u_rec_gate_streams complete dim=1
 #pragma HLS ARRAY_PARTITION variable=v_gate_streams complete dim=1
-
-  const int kUcurSize = kNumGates / 2 * kNumIter * kInputLength / kNumTilesU * (kNumTilesU - kNumZeroTilesU);
-  const int kUrecSize = kNumGates / 2 * kNumIter * kOutputLength / kNumTilesU * (kNumTilesU - kNumZeroTilesU);
-  const int kSsize = kNumGates * kNumIter;
-  const int kVsize = kNumGates * kNumIter * kOutputLength / kNumTilesV * (kNumTilesV - kNumZeroTilesV);
-  const int kBitWidthU = FIX_WIDTH * 4;
-  const int kBitWidthV = FIX_WIDTH * 8;
-  const int kBitWidthS = FIX_WIDTH * 8;
   hls_utils::Log(0, "Starting ArraySplitter");
-  svd::ArraySplitter<ap_uint<kBitWidthU>, svd::WeightD, kBitWidthU, FIX_WIDTH, kUcurSize>(u_cur_port, u_cur_gate_streams);
-  svd::ArraySplitter<ap_uint<kBitWidthU>, svd::WeightD, kBitWidthU, FIX_WIDTH, kUrecSize>(u_rec_port, u_rec_gate_streams);
-  svd::ArraySplitter<ap_uint<kBitWidthV>, svd::WeightD, kBitWidthV, FIX_WIDTH, kVsize>(v_port, v_gate_streams);
-  svd::StreamSplitter<ap_uint<kBitWidthS>, svd::WeightD, kBitWidthS, FIX_WIDTH>(kSsize, s1_port, gates_s1_streams);
-  svd::StreamSplitter<ap_uint<kBitWidthS>, svd::WeightD, kBitWidthS, FIX_WIDTH>(kSsize, s2_port, gates_s2_streams);
+  svd::ArraySplitter<ap_uint<kBitWidthU>, svd::WeightD, kBitWidthU, FIX_WIDTH, kUcurSize>(
+    u_cur_port, u_cur_gate_streams);
+  svd::ArraySplitter<ap_uint<kBitWidthU>, svd::WeightD, kBitWidthU, FIX_WIDTH, kUrecSize>(
+    u_rec_port, u_rec_gate_streams);
+  svd::ArraySplitter<ap_uint<kBitWidthV>, svd::WeightD, kBitWidthV, FIX_WIDTH, kVsize>(
+    v_port, v_gate_streams);
+  svd::StreamSplitter<ap_uint<kBitWidthS>, svd::WeightD, kBitWidthS, FIX_WIDTH>(
+    kSsize, s1_port, gates_s1_streams);
+  svd::StreamSplitter<ap_uint<kBitWidthS>, svd::WeightD, kBitWidthS, FIX_WIDTH>(
+    kSsize, s2_port, gates_s2_streams);
   const bool kUweights = true;
   // ===========================================================================
   // Current Dot Product Unit
@@ -303,24 +310,19 @@ void SvdModel2LstmSDSoCV2(
   Current_Gates_Dot_Product_Loop:
   for (int g = 0; g < kNumCurGates; ++g) {
 #pragma HLS UNROLL
-    hls_utils::Log(0, std::string("Starting Cur Gate n.") + std::to_string(g));
-    svd::GateDMA<svd::WeightD>(kUweights, kNumIter, kNumNonZeroTilesU, kNumElemsTileUCurrent, u_cur_gate_streams[g], cur_u_streams[g]);
-    svd::GateDMA<svd::WeightD>(!kUweights, kNumIter, kNumNonZeroTilesV, kNumElemsTileV, v_gate_streams[g], cur_v_streams[g]);
-    svd::UDotUnit2Lstm<kInputLength, kNumTilesU, kNumZeroTilesU, kNumIter, 1>(x1_streams[g],
-      x2_streams[g], cur_u_streams[g],
-      cur_dot1_streams[g], cur_dot2_streams[g]);
+    svd::GateDispatcher(kUweights, kNumIter, kNumNonZeroTilesU,
+      kNumElemsTileUCurrent, u_cur_gate_streams[g], cur_u_streams[g]);
+    svd::GateDispatcher(!kUweights, kNumIter, kNumNonZeroTilesV, kNumElemsTileV,
+      v_gate_streams[g], cur_v_streams[g]);
+    svd::UDotUnit2Lstm<kInputLength, kNumTilesU, kNumZeroTilesU, kNumIter, 1>(
+      x1_streams[g], x2_streams[g], cur_u_streams[g], cur_dot1_streams[g],
+      cur_dot2_streams[g]);
     svd::VDotUnit2LstmV2<kOutputLength, kNumTilesV, kNumZeroTilesV, kNumIter, 1>(
-      false,
-      nullptr,
-      nullptr,
-      cur_dot1_streams[g],
-      cur_dot2_streams[g],
-      gates_s1_streams[g],
-      gates_s2_streams[g],
-      cur_v_streams[g],
-      nz_v_stream1_cur[g],
-      cur_acc1_streams[g],
-      cur_acc2_streams[g]);
+      false, nullptr, nullptr,
+      cur_dot1_streams[g], cur_dot2_streams[g],
+      gates_s1_streams[g], gates_s2_streams[g],
+      cur_v_streams[g], nz_v_stream1_cur[g],
+      cur_acc1_streams[g], cur_acc2_streams[g]);
   }
   // ===========================================================================
   // Recur Dot Product Unit
@@ -328,24 +330,19 @@ void SvdModel2LstmSDSoCV2(
   Recur_Gates_Dot_Product_Loop:
   for (int g = 0; g < kNumRecGates; ++g) {
 #pragma HLS UNROLL
-    hls_utils::Log(0, std::string("Starting Rec Gate n.") + std::to_string(g));
-    svd::GateDMA<svd::WeightD>(kUweights, kNumIter, kNumNonZeroTilesU, kNumElemsTileURecur, u_rec_gate_streams[g], rec_u_streams[g]);
-    svd::GateDMA<svd::WeightD>(!kUweights, kNumIter, kNumNonZeroTilesV, kNumElemsTileV, v_gate_streams[kNumCurGates + g], rec_v_streams[g]);
-    svd::UDotUnit2Lstm<kOutputLength, kNumTilesU, kNumZeroTilesU, kNumIter, 1>(h1_streams[g],
-      h2_streams[g], rec_u_streams[g],
-      rec_dot1_streams[g], rec_dot2_streams[g]);
+    svd::GateDispatcher(kUweights, kNumIter, kNumNonZeroTilesU,
+      kNumElemsTileURecur, u_rec_gate_streams[g], rec_u_streams[g]);
+    svd::GateDispatcher(!kUweights, kNumIter, kNumNonZeroTilesV, kNumElemsTileV,
+      v_gate_streams[kNumCurGates + g], rec_v_streams[g]);
+    svd::UDotUnit2Lstm<kOutputLength, kNumTilesU, kNumZeroTilesU, kNumIter, 1>(
+      h1_streams[g], h2_streams[g], rec_u_streams[g], rec_dot1_streams[g],
+      rec_dot2_streams[g]);
     svd::VDotUnit2LstmV2<kOutputLength, kNumTilesV, kNumZeroTilesV, kNumIter, 1>(
-      false,
-      nullptr,
-      nullptr,
-      rec_dot1_streams[g],
-      rec_dot2_streams[g],
-      gates_s1_streams[kNumCurGates + g],
-      gates_s2_streams[kNumCurGates + g],
-      rec_v_streams[g],
-      nz_v_stream1_rec[g],
-      rec_acc1_streams[g],
-      rec_acc2_streams[g]);
+      false, nullptr, nullptr,
+      rec_dot1_streams[g], rec_dot2_streams[g],
+      gates_s1_streams[kNumCurGates + g], gates_s2_streams[kNumCurGates + g],
+      rec_v_streams[g], nz_v_stream1_rec[g],
+      rec_acc1_streams[g], rec_acc2_streams[g]);
   }
   // ===========================================================================
   // Output Non-Linearities

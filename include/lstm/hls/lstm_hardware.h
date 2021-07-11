@@ -36,12 +36,16 @@
  * streams 
  *
  *****************************************************************************/
-#ifndef LSTM_HARDWARE_H_
-#define LSTM_HARDWARE_H_
+#ifndef LSTM_HLS_LSTM_HARDWARE_H_
+#define LSTM_HLS_LSTM_HARDWARE_H_
 
 #include "math_utils/activation_functions.h"
+#include "svd_params.h"
 
+#ifdef AP_INT_MAX_W
+#undef AP_INT_MAX_W
 #define AP_INT_MAX_W 4096
+#endif
 #include "ap_int.h"
 #include "hls_linear_algebra.h"
 #include "ap_axi_sdata.h"
@@ -224,4 +228,4 @@ void dummy_gemm_v0(const svd::ActivationD a[16][16], const svd::ActivationD b[16
 
 void test_dispatcher();
 
-#endif // end LSTM_HARDWARE_H_
+#endif // end LSTM_HLS_LSTM_HARDWARE_H_

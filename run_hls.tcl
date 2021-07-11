@@ -1,66 +1,5 @@
-#
-# @brief      Find all files in a directory and return them in a list.
-#
-# @param      basedir            The directory to start looking in pattern.
-# @param      pattern            A pattern, as defined by the glob command, that
-#                                the files must match.
-# @param      exclude_dirs_list  Ignore searching in specified directories
-#
-# @return     The list of found files.
-#
-proc findFiles { basedir pattern exclude_dirs_list } {
-    # Fix the directory name, this ensures the directory name is in the
-    # native format for the platform and contains a final directory seperator
-    set basedir [string trimright [file join [file normalize $basedir] { }]]
-    set fileList {}
-    # Look in the current directory for matching files, -type {f r}
-    # means ony readable normal files are looked at, -nocomplain stops
-    # an error being thrown if the returned list is empty
-    foreach fileName [glob -nocomplain -type {f r} -path $basedir $pattern] {
-        lappend fileList $fileName
-    }
-    # Now look for any sub direcories in the current directory
-    foreach dirName [glob -nocomplain -type {d  r} -path $basedir *] {
-        # Recusively call the routine on the sub directory and append any
-        # new files to the results
-        if {[lsearch -exact ${exclude_dirs_list} $dirName] == -1} {
-            set subDirList [findFiles $dirName $pattern $exclude_dirs_list]
-            if { [llength $subDirList] > 0 } {
-                foreach subDirFile $subDirList {
-                    lappend fileList $subDirFile
-                }
-            }
-        }
-    }
-    return $fileList
-}
-
-#
-# @brief      Greps a file content and writes matches to a file.
-#
-# @param      re     Regular expression
-# @param      lines  Number of lines to report/include after the found match
-# @param      fin    The fin pointer
-# @param      fout   The fout pointer
-#
-proc grep {re lines fin fout} {
-    set cnt 0
-    set match false
-    seek $fin 0
-    while {[gets $fin line] >= 0} {
-        if [regexp -- $re $line] {
-            set cnt 0
-            set match true
-        }
-        if {$match && ($cnt < $lines)} {
-            puts $line
-            puts $fout $line
-            set cnt [expr {$cnt +1}]
-        } else {
-            set match false
-        }
-    }
-}
+source tcl/utils.tcl
+source tcl/lstm_params.tcl
 
 set PRJ_PATH [pwd]
 
@@ -71,8 +10,8 @@ cd hls
 # ==============================================================================
 # Top function name, testbench file
 # ==============================================================================
-set TOP "hls_pong"
-set TB "test_game"
+set TOP "SvdModel2LstmSDSoCV2"
+set TB ""
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
 # ==============================================================================
@@ -124,6 +63,8 @@ if {${use_zcu104_pynq}} {
 } else {
     append DEFINES " -DAXI_PORT_WIDTH=64"
 }
+
+append_lstm_params DEFINES
 # append DEFINES " -DDEBUG_INTERNAL_STREAMS"
 # append DEFINES " -DUSE_BLAS"
 # ==============================================================================
@@ -164,15 +105,19 @@ set BLAS_LIB "C:/Users/ste/.caffe/dependencies/libraries_v140_x64_py27_1.1.0/lib
 set BLAS_LIB_DIR "C:/Users/ste/.caffe/dependencies/libraries_v140_x64_py27_1.1.0/libraries/lib"
 
 # Get Source Files (1st argument: regex, 2nd argument: excluded directory)
-set src_files [findFiles "${PRJ_PATH}/src/${SRC_DIR}/" "*.cpp" "${PRJ_PATH}/src/tb"]
-set include_files [findFiles "${PRJ_PATH}/include/${SRC_DIR}/" "*.h" "${PRJ_PATH}/include/tb"]
+set src_files [findFiles "${PRJ_PATH}/src/${SRC_DIR}/" "*.cpp" "${PRJ_PATH}/src/testbenches"]
+set include_files [findFiles "${PRJ_PATH}/include/${SRC_DIR}/" "*.h" "${PRJ_PATH}/include/testbenches"]
 
 if {${reset_project}} {
-    foreach f ${src_files} {
-        add_files ${f} -cflags ${CFLAGS}
-    }
     foreach f ${include_files} {
-        add_files ${f} -cflags ${CFLAGS}
+        if {${f} ne "svd.h"} {
+            add_files ${f} -cflags ${CFLAGS}
+        }
+    }
+    foreach f ${src_files} {
+        if {${f} ne "svd.cpp"} {
+            add_files ${f} -cflags ${CFLAGS}
+        }
     }
     # if {llength $SRC_LIST -eq 0} {
     #     foreach f ${src_files} {
@@ -193,8 +138,8 @@ if {${reset_project}} {
     # Add Testbench Files
     if {${csim} || ${cosim}} {
         # TB Files (to avoid including multiple files with main() in them)
-        add_files -tb ${PRJ_PATH}/src/tb/${TB}.cpp -cflags ${CFLAGS}
-        add_files -tb ${PRJ_PATH}/include/tb/${TB}.h -cflags ${CFLAGS}
+        add_files -tb ${PRJ_PATH}/src/testbenches/${TB}.cpp -cflags ${CFLAGS}
+        add_files -tb ${PRJ_PATH}/include/testbenches/${TB}.h -cflags ${CFLAGS}
     }
 }
 

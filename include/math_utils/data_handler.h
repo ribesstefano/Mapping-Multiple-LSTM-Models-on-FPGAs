@@ -8,6 +8,9 @@
 #include <vector>
 #include <exception>
 #include <new>
+#include <iostream>
+#include <cassert>
+#include <algorithm>
 
 #ifdef SDS_DESIGN
 #include <stdint.h>
@@ -36,6 +39,7 @@ namespace svd {
 
 template <typename T>
 T* AllocateContiguously(const int size) {
+#ifndef __SYNTHESIS__
   T* tmp;
   try {
     tmp = (T*)ALLOC(size * sizeof(T));
@@ -49,6 +53,14 @@ T* AllocateContiguously(const int size) {
     throw except_alloc;
   }
   return tmp;
+#else
+  T* tmp = (T*)ALLOC(size * sizeof(T));
+  if (!tmp) {
+    std::cout << "[ERROR] Contiguous allocation failed." << std::endl;
+    exit(1);
+  }
+  return tmp;
+#endif
 }
 
 template <typename T>

@@ -3,6 +3,8 @@
 
 #include "hls_utils/hls_metaprogramming.h"
 
+#include "assert.h"
+
 namespace svd {
 
 /**

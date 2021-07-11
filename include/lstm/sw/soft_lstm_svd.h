@@ -17,7 +17,6 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <Eigen/StdVector>
-// using namespace Eigen;
 #endif
 
 #include <iomanip>
@@ -31,7 +30,10 @@
 
 #include "hls_math.h"
 
+#ifdef AP_INT_MAX_W
+#undef AP_INT_MAX_W
 #define AP_INT_MAX_W 4096
+#endif
 #include "ap_int.h"
 
 #define FIX8_INT_BIT 3
