@@ -6,6 +6,8 @@
 #include "ap_int.h"
 #include "hls_stream.h"
 
+#include <cstdint>
+
 namespace svd {
 
 template <int Ni, int Ii, int Hi, int Ri, int Tui, int Tvi, int ZTui = 0,

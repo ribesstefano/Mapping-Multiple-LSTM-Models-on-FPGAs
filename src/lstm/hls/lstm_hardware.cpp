@@ -36,12 +36,15 @@
 * streams 
 *
 *****************************************************************************/
+#include "svd_params.h"
 #include "lstm/hls/lstm_hardware.h"
 #include "dma/svd_dma.h"
-#include "svd_params.h"
 
 #include "hls_math.h"
 #include "hls_half.h"
+#include "assert.h"
+
+#include <iostream>
 
 template <int BramRows, int BramCols>
 void print_matrix(const svd::ActivationD matrix[BramRows][BramCols]) {

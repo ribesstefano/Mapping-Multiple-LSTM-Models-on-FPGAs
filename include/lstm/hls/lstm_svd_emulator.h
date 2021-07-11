@@ -6,6 +6,7 @@
 #include "hls_stream.h"
 
 #include <cstdlib>
+#include <cstring>
 
 namespace svd {
 

@@ -664,8 +664,8 @@ public:
           }
         } else {
           if (verbose > 0) {
-            std:: cout << std::endl;
-          }
+          std:: cout << std::endl;
+        }
         }
       }
     }

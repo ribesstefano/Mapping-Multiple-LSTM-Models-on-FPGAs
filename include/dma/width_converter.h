@@ -2,6 +2,7 @@
 #define DMA_WIDTH_CONVERTER_H_
 
 #include "ap_int.h"
+#include "assert.h"
 
 #include <type_traits>
 #include <cstdint>
@@ -145,8 +146,6 @@ void Mem2MemDataWidthConverter(const int num_in_words,
 #pragma HLS PIPELINE II=1
       const int kHi = ((i + 1) * InWidth) % OutWidth - 1;
       const int kLo = (i * InWidth) % OutWidth;
-      std::cout << "(" << kHi << ", " << kLo << ")\n";
-
       // if constexpr (std::is_same<InD, float>::value || std::is_same<InD, double>::value) {
       //   elem_out(kHi, kLo) = in[i];
       // } else {

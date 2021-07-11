@@ -7,6 +7,9 @@
 #include "dma/width_converter.h"
 
 #include "hls_stream.h"
+#include "assert.h"
+
+#include <iostream>
 
 template <typename Din, typename Dout>
 void StreamSplitter(const int output_size,
@@ -389,17 +392,16 @@ void StreamSplitter(const int output_size,
  * @tparam     num_elems_per_tile  Number of elements per tile.
  */
 template <typename T>
-void GateDMA(const bool use_nz_dim, const int num_iter,
+void GateDispatcher(const bool use_nz_dim, const int num_iter,
     const int num_non_zero_tiles, const int num_elems_per_tile,
     const T *gate_port, hls::stream<T> *gate_streams) {
 #pragma HLS INLINE
-#pragma HLS FUNCTION_INSTANTIATE vriable=num_iter
-#pragma HLS FUNCTION_INSTANTIATE vriable=num_non_zero_tiles
-#pragma HLS FUNCTION_INSTANTIATE vriable=num_elems_per_tile
+#pragma HLS FUNCTION_INSTANTIATE variable=num_iter
+#pragma HLS FUNCTION_INSTANTIATE variable=num_non_zero_tiles
+#pragma HLS FUNCTION_INSTANTIATE variable=num_elems_per_tile
   const int kI = num_iter;
   const int kNZ = num_non_zero_tiles;
   const int kE = num_elems_per_tile;
-
   I : for (int i = 0; i < kI; ++i) {
     Z : for (int z = 0; z < kNZ; ++z) {
       E : for (int e = 0; e < kE; ++e) {
