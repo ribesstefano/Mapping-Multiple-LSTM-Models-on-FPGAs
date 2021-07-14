@@ -10,7 +10,8 @@ cd hls
 # ==============================================================================
 # Top function name, testbench file
 # ==============================================================================
-set TOP "SvdModel2LstmSDSoCV2"
+# NOTE: The namespace must also be included.
+set TOP "svd::SvdModel2LstmSDSoCV2"
 set TB ""
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
@@ -49,7 +50,8 @@ if {${use_zedboard}} {
 # ==============================================================================
 # Project name
 # ==============================================================================
-set PROJECT_NAME "${board_name}_${TOP}"
+set TOP_NO_NAMESPACE [ regsub ***=:: ${TOP} "" string ]
+set PROJECT_NAME "${board_name}_${TOP_NO_NAMESPACE}"
 # ==============================================================================
 # Defines
 # ==============================================================================
@@ -110,12 +112,16 @@ set include_files [findFiles "${PRJ_PATH}/include/${SRC_DIR}/" "*.h" "${PRJ_PATH
 
 if {${reset_project}} {
     foreach f ${include_files} {
-        if {${f} ne "svd.h"} {
+        # File svd.h contains main()
+        if {${f} eq "${PRJ_PATH}/include/svd.h"} {
+        } else {
             add_files ${f} -cflags ${CFLAGS}
         }
     }
     foreach f ${src_files} {
-        if {${f} ne "svd.cpp"} {
+        # File svd.cpp contains main()
+        if {${f} eq "${PRJ_PATH}/src/svd.cpp"} {
+        } else {
             add_files ${f} -cflags ${CFLAGS}
         }
     }
@@ -143,7 +149,7 @@ if {${reset_project}} {
     }
 }
 
-open_solution "solution_${TOP}"
+open_solution "solution_${TOP_NO_NAMESPACE}"
 # ==============================================================================
 # Set Part
 # ==============================================================================
@@ -215,7 +221,7 @@ if {${synth}} {
         puts "\[INFO\] Reporting information"
         puts "================================================================"
 
-        set FILENAME "${REPORT_FILE_PATH}/${board_name}_${TOP}.rpt"
+        set FILENAME "${REPORT_FILE_PATH}/${board_name}_${TOP_NO_NAMESPACE}.rpt"
         set fin [open ${HLS_REPORT_PATH}/${TOP}_csynth.rpt r]
         set fout [open ${FILENAME} a]
 
@@ -238,8 +244,8 @@ if {${cosim}} {
         puts "\[INFO\] Reporting information"
         puts "================================================================"
 
-        set REPORT_FILENAME "${REPORT_FILE_PATH}/${board_name}_${TOP}.rpt"
-        set HLS_REPORT_PATH "hls_${PROJECT_NAME}/solution_${TOP}/sim/report/"
+        set REPORT_FILENAME "${REPORT_FILE_PATH}/${board_name}_${TOP_NO_NAMESPACE}.rpt"
+        set HLS_REPORT_PATH "hls_${PROJECT_NAME}/solution_${TOP_NO_NAMESPACE}/sim/report/"
         set fin [open ${HLS_REPORT_PATH}/${TOP}_cosim.rpt r]
         set fout [open ${REPORT_FILENAME} a]
 
