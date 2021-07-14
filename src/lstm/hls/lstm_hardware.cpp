@@ -1847,11 +1847,11 @@ void svd_fpga_lstm(const svd::ActivationD *x,
                    const svd::ActivationD *c_rec,
                    svd::ActivationD *c_cur,
                    svd::ActivationD *out) {
-#ifndef SDS_DESIGN
   const int kInputDepth = INPUT_SIZE;
   const int kHiddenDepth = HIDDEN_SIZE;
   const int kCurGateDepth = 4 * INPUT_SIZE * HIDDEN_SIZE;
   const int kRecGateDepth = 4 * HIDDEN_SIZE * HIDDEN_SIZE;
+#ifndef SDS_DESIGN
 #pragma HLS INTERFACE s_axilite port=return bundle=ctrl
 #pragma HLS INTERFACE m_axi port=x depth=kInputDepth
 #pragma HLS INTERFACE m_axi port=h depth=kHiddenDepth
@@ -1872,8 +1872,8 @@ void svd_fpga_lstm(const svd::ActivationD *x,
   svd::ActivationD rec_y[HIDDEN_SIZE * kNumGates];
 #pragma HLS ARRAY_PARTITION variable=cur_y block factor=kNumGates
 #pragma HLS ARRAY_PARTITION variable=rec_y block factor=kNumGates
-#pragma HLS STREAM variable=cur_y depth=HIDDEN_SIZE
-#pragma HLS STREAM variable=rec_y depth=HIDDEN_SIZE
+#pragma HLS STREAM variable=cur_y depth=kHiddenDepth
+#pragma HLS STREAM variable=rec_y depth=kHiddenDepth
 
   const bool kWritebackOnce = true;
   const int kCurM = HIDDEN_SIZE * kNumGates;

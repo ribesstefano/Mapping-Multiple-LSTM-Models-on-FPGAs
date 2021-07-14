@@ -411,7 +411,7 @@ void NonLinearityUnit(const svd::ActivationD *c_t_prev,
     svd::ActivationD *c_t,
     const bool has_bias = false,
     const WeightD *bias_port = nullptr) {
-#pragma HLS INLINE
+// #pragma HLS INLINE
 // #pragma HLS INTERFACE ap_ctrl_none port=return
 #pragma HLS DATAFLOW
   assert(VectLength % NumTiles == 0);

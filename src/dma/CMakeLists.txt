@@ -11,3 +11,8 @@ target_include_directories(WIDTH_CONVERTER PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(WIDTH_CONVERTER PUBLIC ${VIVADO_INCLUDE_DIRS})
 target_compile_options(WIDTH_CONVERTER PRIVATE -fno-builtin)
 target_link_libraries(WIDTH_CONVERTER SVD_PARAMS)
+
+add_library(AXIS_LIB STATIC ${CMAKE_SOURCE_DIR}/src/dma/axis_lib.cpp)
+target_include_directories(AXIS_LIB PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(AXIS_LIB PUBLIC ${VIVADO_INCLUDE_DIRS})
+target_compile_options(AXIS_LIB PRIVATE -fno-builtin)
