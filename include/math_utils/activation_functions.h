@@ -249,19 +249,19 @@ void LstmNonLinearFunctions(const bool has_bias,
     f_gate = cur_gate_f + rec_gate_f + bias_f;
     c_gate = cur_gate_c + rec_gate_c + bias_c;
     o_gate = cur_gate_o + rec_gate_o + bias_o;
-#pragma HLS RESOURCE variable=i_gate core=AddSub_DSP latency=3
-#pragma HLS RESOURCE variable=f_gate core=AddSub_DSP latency=3
-#pragma HLS RESOURCE variable=c_gate core=AddSub_DSP latency=3
-#pragma HLS RESOURCE variable=o_gate core=AddSub_DSP latency=3
+#pragma HLS RESOURCE variable=i_gate core=AddSub_DSP // latency=3
+#pragma HLS RESOURCE variable=f_gate core=AddSub_DSP // latency=3
+#pragma HLS RESOURCE variable=c_gate core=AddSub_DSP // latency=3
+#pragma HLS RESOURCE variable=o_gate core=AddSub_DSP // latency=3
   } else {
     i_gate = cur_gate_i + rec_gate_i;
     f_gate = cur_gate_f + rec_gate_f;
     o_gate = cur_gate_c + rec_gate_c;
     c_gate = cur_gate_o + rec_gate_o;
-#pragma HLS RESOURCE variable=i_gate core=AddSub_DSP latency=3
-#pragma HLS RESOURCE variable=f_gate core=AddSub_DSP latency=3
-#pragma HLS RESOURCE variable=c_gate core=AddSub_DSP latency=3
-#pragma HLS RESOURCE variable=o_gate core=AddSub_DSP latency=3
+#pragma HLS RESOURCE variable=i_gate core=AddSub_DSP // latency=3
+#pragma HLS RESOURCE variable=f_gate core=AddSub_DSP // latency=3
+#pragma HLS RESOURCE variable=c_gate core=AddSub_DSP // latency=3
+#pragma HLS RESOURCE variable=o_gate core=AddSub_DSP // latency=3
   }
 
   const auto sigma_i = HardSigmoid<ActivationType>(i_gate);

@@ -11,7 +11,7 @@ cd hls
 # Top function name, testbench file
 # ==============================================================================
 # NOTE: The namespace must also be included.
-set TOP "SvdIp2Inputs" ;#"svd::SvdModel2LstmSDSoCV2"
+set TOP "HlsKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
 set TB ""
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
@@ -29,7 +29,7 @@ set report_info 1
 # ==============================================================================
 # HLS Synthesis Options + Platform Selection
 # ==============================================================================
-set scheduler_effort "medium"
+set scheduler_effort "high" ;# medium
 set relax_ii 0
 set use_hlslib 0
 set use_zedboard 1
@@ -51,9 +51,9 @@ if {${use_zedboard}} {
 # Project name
 # ==============================================================================
 set prefix ":"
-set TOP_NO_NAMESPACE "SvdIp2Inputs" ;# [ regsub ***=${prefix} ${TOP} "" string ]
+set TOP_NO_NAMESPACE "HlsKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
 puts ${TOP_NO_NAMESPACE}
-set PROJECT_NAME "${board_name}_${TOP_NO_NAMESPACE}"
+set PROJECT_NAME "vitis_${board_name}_${TOP_NO_NAMESPACE}"
 # ==============================================================================
 # Defines
 # ==============================================================================
@@ -94,14 +94,14 @@ if {${cosim}} {
 # Open Project and Add Files
 # ==============================================================================
 if {${reset_project}} {
-    open_project -reset hls_${PROJECT_NAME}
+    open_project -reset ${PROJECT_NAME}
 } else {
-    open_project hls_${PROJECT_NAME}
+    open_project ${PROJECT_NAME}
 }
 
 set_top ${TOP}
 
-set HLS_REPORT_PATH "hls_${PROJECT_NAME}/solution_${TOP}/syn/report/"
+set HLS_REPORT_PATH "${PROJECT_NAME}/solution_${TOP}/syn/report/"
 set REPORT_DIR "${PRJ_PATH}/hls/reports"
 set REPORT_FILE_PATH "${PRJ_PATH}/hls/reports/"
 set VIVADO_LIB "C:/Xilinx/Vivado/2018.3/include/"
@@ -158,7 +158,7 @@ open_solution "solution_${TOP_NO_NAMESPACE}"
 if {${reset_project}} {
     if {${use_zedboard}} {
         # ZedBoard
-        set_part {xc7z020clg484-1} -tool vivado
+        set_part {xc7z020clg484-1} ;#-tool vivado
     } else {
         if {${use_zcu104_pynq}} {
             # Pynq ZCU104 Board
@@ -169,11 +169,11 @@ if {${reset_project}} {
             create_clock -period 5 -name default
         } elseif {${use_zcu102_vassilis}} {
             # Ultrascale+ ZCU102
-            set_part {xczu9eg-ffvb1156-2-i} -tool vivado
+            set_part {xczu9eg-ffvb1156-2-i} ;#-tool vivado
             create_clock -period 10 -name default
         } else {
             # ZedBoard (default)
-            set_part {xc7z020clg484-1} -tool vivado
+            set_part {xc7z020clg484-1} ;#-tool vivado
             create_clock -period 10 -name default
         }
     }
@@ -188,12 +188,12 @@ if {${reset_project}} {
 # Configure HLS
 # ==============================================================================
 if {${relax_ii}} {
-    config_schedule -effort ${scheduler_effort} -relax_ii_for_timing=0
+    config_schedule -effort ${scheduler_effort} -relax_ii_for_timing
 } else {
-    config_schedule -effort ${scheduler_effort}
+    config_schedule -effort ${scheduler_effort} -relax_ii_for_timing=0
 }
 
-# config_sdx -target sds ;# -optimization_level 3
+# config_sdx -target sdx ;# -optimization_level 3
 
 if {${use_zcu104_pynq}} {
     config_interface -m_axi_addr64
@@ -247,7 +247,7 @@ if {${cosim}} {
         puts "================================================================"
 
         set REPORT_FILENAME "${REPORT_FILE_PATH}/${board_name}_${TOP_NO_NAMESPACE}.rpt"
-        set HLS_REPORT_PATH "hls_${PROJECT_NAME}/solution_${TOP_NO_NAMESPACE}/sim/report/"
+        set HLS_REPORT_PATH "${PROJECT_NAME}/solution_${TOP_NO_NAMESPACE}/sim/report/"
         set fin [open ${HLS_REPORT_PATH}/${TOP}_cosim.rpt r]
         set fout [open ${REPORT_FILENAME} a]
 
@@ -269,7 +269,7 @@ if {${export}} {
 }
 
 puts "================================================================"
-puts "\[INFO\] Closing project: ./hls/hls_${PROJECT_NAME}"
+puts "\[INFO\] Closing project: ./hls/${PROJECT_NAME}"
 puts "================================================================"
 
 exit
