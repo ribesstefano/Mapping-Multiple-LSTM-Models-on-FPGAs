@@ -4,6 +4,8 @@
 #include "hls_stream.h"
 #include "hls_utils/hls_metaprogramming.h"
 
+namespace hlsutils {
+
 /**
  * @brief      Given a static array, sum-reduce all its elements.
  *
@@ -23,8 +25,8 @@ DataType adder_tree(DataType x[NumPE]) {
   // Determine the number of ranks for the adder tree and declare array:
   // - The adder_tree is larger than required as each rank only needs to be
   //   half the size of the previous rank.
-  const unsigned kNumPEsLog2 = hls_utils::log2<NumPE>::value;
-  const unsigned kNumPEsSub1Log2 = hls_utils::log2<NumPE - 1>::value;
+  const unsigned kNumPEsLog2 = hlsutils::log2<NumPE>::value;
+  const unsigned kNumPEsSub1Log2 = hlsutils::log2<NumPE - 1>::value;
   const unsigned kNumRanks = kNumPEsLog2 != kNumPEsSub1Log2 ? kNumPEsLog2 : kNumPEsLog2 + 1;
   DataType adder_tree[kNumRanks][NumPE];
 #pragma HLS ARRAY_PARTITION variable=adder_tree complete dim=0
@@ -96,8 +98,8 @@ DataType adder_tree(hls::stream<DataType> x[NumPE]) {
   // Determine the number of ranks for the adder tree and declare array:
   // - The adder_tree is larger than required as each rank only needs to be
   //   half the size of the previous rank.
-  const unsigned kNumPEsLog2 = hls_utils::log2<NumPE>::value;
-  const unsigned kNumPEsSub1Log2 = hls_utils::log2<NumPE - 1>::value;
+  const unsigned kNumPEsLog2 = hlsutils::log2<NumPE>::value;
+  const unsigned kNumPEsSub1Log2 = hlsutils::log2<NumPE - 1>::value;
   const unsigned kNumRanks = kNumPEsLog2 != kNumPEsSub1Log2 ? kNumPEsLog2 : kNumPEsLog2 + 1;
   DataType adder_tree[kNumRanks][NumPE];
 #pragma HLS ARRAY_PARTITION variable=adder_tree complete dim=0
@@ -148,5 +150,7 @@ DataType adder_tree(hls::stream<DataType> x[NumPE]) {
   }
   return ret_val;
 }
+
+} // hlsutils
 
 #endif // end HLS_UTILS_ADDER_TREE_H_

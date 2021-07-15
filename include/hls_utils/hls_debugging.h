@@ -10,7 +10,7 @@
 #define HLS_DEBUG_LEVEL 0
 #endif
 
-namespace hls_utils {
+namespace hlsutils {
 
 static int hls_debug_level = HLS_DEBUG_LEVEL;
 
@@ -23,6 +23,6 @@ void Log(const int verbose_level, const char* str) {
 }
 
 
-} // hls_utils
+} // hlsutils
 
 #endif // HLS_UTILS_HLS_DEBUGGING

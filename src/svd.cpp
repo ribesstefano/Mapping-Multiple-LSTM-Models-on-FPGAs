@@ -12,16 +12,6 @@
 
 int main(int argc, char const *argv[]) {
   std::cout << "Hello SVD!" << std::endl;
-  typename svd_params::ActivationD x_port[svd_params::N][svd_params::I] = {rand()};
-  typename svd_params::UPortD u_port[svd_params::PrunedSizeU] = {rand()};
-  typename svd_params::SPortD s_port[svd_params::N][svd_params::R] = {rand()};
-  typename svd_params::VPortD v_port[svd_params::PrunedSizeV] = {rand()};
-  ap_uint<svd_params::Tu> nz_u_port[svd_params::N] = {rand()};
-  ap_uint<svd_params::Tv> nz_v_port[svd_params::N] = {rand()};
-  typename svd_params::ActivationD y_port[svd_params::N][svd_params::G][svd_params::H] = {rand()};
-
-  std::cout << "Running SvdIp2Inputs." << std::endl;
-  SvdIp2Inputs(x_port, u_port, s_port, v_port, nz_u_port, nz_v_port, y_port);
 
   const bool kTestSoftwareAccelerator = false;
   const int kNumInputs = 2;
@@ -41,6 +31,16 @@ int main(int argc, char const *argv[]) {
   typedef svd::AcceleratorBlob<float, svd::ActivationD, kNumTilesU, kNumTilesV> AcceleratorStorage;
   AcceleratorStorage storage = AcceleratorStorage(kNumInputs, kRefinementSteps, kUCurSize,
     kURecSize, kVSize, kNumTilesU, kNumZeroTilesU, kNumTilesV, kNumZeroTilesV);
+
+  std::cout << "Running SvdIp2Inputs." << std::endl;
+  typename svd::svd_params::ActivationD x_port[svd::svd_params::N][svd::svd_params::I] = {rand()};
+  typename svd::svd_params::UPortD u_port[svd::svd_params::R * svd::svd_params::PrunedSizeU] = {rand()};
+  typename svd::svd_params::SPortD s_port[svd::svd_params::N][svd::svd_params::R] = {rand()};
+  typename svd::svd_params::VPortD v_port[svd::svd_params::R * svd::svd_params::PrunedSizeV] = {rand()};
+  ap_uint<svd::svd_params::Tu> nz_u_port[svd::svd_params::G * svd::svd_params::R] = {rand()};
+  ap_uint<svd::svd_params::Tv> nz_v_port[svd::svd_params::G * svd::svd_params::R] = {rand()};
+  typename svd::svd_params::ActivationD y_port[svd::svd_params::N][svd::svd_params::G][svd::svd_params::H] = {rand()};
+  // SvdIp2Inputs(x_port, u_port, s_port, v_port, nz_u_port, nz_v_port, y_port);
 
   std::cout << "reinterpret_cast." << std::endl;
 

@@ -11,7 +11,7 @@ cd hls
 # Top function name, testbench file
 # ==============================================================================
 # NOTE: The namespace must also be included.
-set TOP "svd::SvdModel2LstmSDSoCV2"
+set TOP "SvdIp2Inputs" ;#"svd::SvdModel2LstmSDSoCV2"
 set TB ""
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
@@ -50,7 +50,9 @@ if {${use_zedboard}} {
 # ==============================================================================
 # Project name
 # ==============================================================================
-set TOP_NO_NAMESPACE [ regsub ***=:: ${TOP} "" string ]
+set prefix ":"
+set TOP_NO_NAMESPACE "SvdIp2Inputs" ;# [ regsub ***=${prefix} ${TOP} "" string ]
+puts ${TOP_NO_NAMESPACE}
 set PROJECT_NAME "${board_name}_${TOP_NO_NAMESPACE}"
 # ==============================================================================
 # Defines

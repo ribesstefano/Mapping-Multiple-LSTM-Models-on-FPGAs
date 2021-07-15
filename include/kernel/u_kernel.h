@@ -6,20 +6,23 @@
 
 #include "hls_stream.h"
 
+namespace svd {
+
 /**
  * @brief      Kernel performing x @ U.
  *
- * @param[in]  size     The size, ideally: params::R * params::PrunedSizeU / params::R / params::PeU
  * @param      streams  The streams group
+ * @param[in]  size  The size, ideally: params::R * params::PrunedSizeU / params::R
+ *                   / params::PeU
  *
  * @tparam     params   The algorithm characteristics
  */
 template <typename params>
-void KernelU(svd::SvdStreams<params> &streams) {
+void KernelU(const int num_refinements, svd::SvdStreams<params> &streams) {
   typename params::AccumulationD xu[params::N][params::G][params::PeU];
 #pragma HLS ARRAY_PARTITION variable=xu complete dim=0
-  for (int i = 0; i < params::R; ++i) {
-    for (int j = 0; j < params::PrunedSizeU / params::R / params::PeU; ++j) {
+  for (int i = 0; i < num_refinements; ++i) {
+    for (int j = 0; j < params::PrunedSizeU / params::PeU; ++j) {
 #pragma HLS PIPELINE II=1
       for (int k = 0; k < params::PeU; ++k) {
         for (int g = 0; g < params::G; ++g) {
@@ -30,7 +33,7 @@ void KernelU(svd::SvdStreams<params> &streams) {
             }
             xu[ii][g][k] += u * streams.x[ii][g][k].read();
 #pragma HLS RESOURCE variable=xu[ii][g][k] core=DSP48 latency=3
-            if (j == params::PrunedSizeU / params::R / params::PeU - 1) {
+            if (j == params::PrunedSizeU / params::PeU - 1) {
               streams.xu[ii][g][k].write(xu[ii][g][k]);
             }
           }
@@ -39,8 +42,6 @@ void KernelU(svd::SvdStreams<params> &streams) {
     }
   }
 }
-
-namespace svd {
 
 /**
  * @brief      Performs MAC operation. The weight values are read directly from
@@ -136,8 +137,8 @@ void UDotUnit2LstmAccumulator(svd::AccumStream (&acc1_streams)[NumTiles-NumZeroT
   if (AdderTreeDesign) {
     // Determine the number of ranks for the adder tree and declare array
     // - The adder_tree is larger than required as each rank only needs to be half the size of the previous rank
-    const unsigned kNumPEsLog2 = hls_utils::log2<kNumPEs>::value;
-    const unsigned kNumPEsSub1Log2 = hls_utils::log2<kNumPEs - 1>::value;
+    const unsigned kNumPEsLog2 = hlsutils::log2<kNumPEs>::value;
+    const unsigned kNumPEsSub1Log2 = hlsutils::log2<kNumPEs - 1>::value;
     const unsigned kNumRanks = kNumPEsLog2 != kNumPEsSub1Log2 ? kNumPEsLog2 : kNumPEsLog2 + 1;
     svd::AccumD adder_tree1[kNumRanks][kNumPEs];
     svd::AccumD adder_tree2[kNumRanks][kNumPEs];

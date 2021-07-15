@@ -3,6 +3,8 @@
 
 #include "hls_stream.h"
 
+namespace hlsutils {
+
 /**
  * @brief      Synthesizeable HLS clock counter. Note: this module must be
  *             placed in a DATAFLOW region and at the bottom of it (to avoid
@@ -353,5 +355,10 @@ const int NUM_HW_TIMERS = 1;
  * This could be useful to printout timing results in Cosimulation.
  */
 static unsigned long long hw_timers[NUM_HW_TIMERS];
+
+typedef long long CounterD;
+typedef hls::stream<bool> ProbeStream;
+
+} // hlsutils
 
 #endif // end HLS_UTILS_HW_TIMER_H_

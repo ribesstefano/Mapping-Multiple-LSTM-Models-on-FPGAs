@@ -29,8 +29,8 @@ struct SvdParameters {
   static const int PeV = H / Tv;
   static const int TuElems = I / Tu;
   static const int TvElems = H / Tv;
-  static const int TuBits = hls_utils::log2<Tu>::value > 0 ? hls_utils::log2<Tu>::value : 1;
-  static const int TvBits = hls_utils::log2<Tv>::value > 0 ? hls_utils::log2<Tv>::value : 1;
+  static const int TuBits = hlsutils::log2<Tu>::value > 0 ? hlsutils::log2<Tu>::value : 1;
+  static const int TvBits = hlsutils::log2<Tv>::value > 0 ? hlsutils::log2<Tv>::value : 1;
   typedef ap_uint<Tu> UnzD;
   typedef ap_uint<Tv> VnzD;
   typedef ap_uint<TuBits> UnzIdxD;
@@ -45,15 +45,15 @@ struct SvdParameters {
   typedef hls::stream<ActivationD> ActivationS;
   typedef hls::stream<WeightD> WeightS;
   typedef hls::stream<AccumulationD> AccumulationS;
-  typedef ap_uint<hls_utils::Bitwidth<WeightD>::value * G> SPortD;
-  typedef ap_uint<hls_utils::Bitwidth<WeightD>::value * G> UPortD;
-  typedef ap_uint<hls_utils::Bitwidth<WeightD>::value * G> VPortD;
-  static const int PrunedSizeU = R * I / Tu * (Tu - ZTu);
-  static const int PrunedSizeV = R * H / Tv * (Tv - ZTv);
+  typedef ap_uint<hlsutils::Bitwidth<WeightD>::value * G> SPortD;
+  typedef ap_uint<hlsutils::Bitwidth<WeightD>::value * G> UPortD;
+  typedef ap_uint<hlsutils::Bitwidth<WeightD>::value * G> VPortD;
+  static const int PrunedSizeU = I / Tu * (Tu - ZTu);
+  static const int PrunedSizeV = H / Tv * (Tv - ZTv);
   static const int SizeS = R * G;
-  static const int ActivationWidth = hls_utils::Bitwidth<ActivationD>::value;
-  static const int WeightWidth = hls_utils::Bitwidth<WeightD>::value;
-  static const int AccumulationWidth = hls_utils::Bitwidth<AccumulationD>::value;
+  static const int ActivationWidth = hlsutils::Bitwidth<ActivationD>::value;
+  static const int WeightWidth = hlsutils::Bitwidth<WeightD>::value;
+  static const int AccumulationWidth = hlsutils::Bitwidth<AccumulationD>::value;
 };
 
 template<typename params>
@@ -186,19 +186,6 @@ private: // TODO: move parameters' access in members?
 #define NUM_TIMESTEPS 28
 #endif
 
-#ifndef PRUNED_SIZE_CUR_U
-#define PRUNED_SIZE_CUR_U (NUM_ITERATIONS * (INPUT_SIZE - NUM_ZERO_TILES_U * INPUT_SIZE / NUM_TILES_U))
-#endif
-#ifndef PRUNED_SIZE_REC_U
-#define PRUNED_SIZE_REC_U (NUM_ITERATIONS * (HIDDEN_SIZE - NUM_ZERO_TILES_U * HIDDEN_SIZE / NUM_TILES_U))
-#endif
-#ifndef PRUNED_SIZE_CUR_V
-#define PRUNED_SIZE_CUR_V (NUM_ITERATIONS * (HIDDEN_SIZE - NUM_ZERO_TILES_V * HIDDEN_SIZE / NUM_TILES_V))
-#endif
-#ifndef PRUNED_SIZE_REC_V
-#define PRUNED_SIZE_REC_V (NUM_ITERATIONS * (HIDDEN_SIZE - NUM_ZERO_TILES_V * HIDDEN_SIZE / NUM_TILES_V))
-#endif
-
 #if defined(USE_FIX)
   #define USE_FIX 1
   #define USE_FLOAT 0
@@ -227,8 +214,6 @@ private: // TODO: move parameters' access in members?
 #ifndef AXI_PORT_WIDTH
 #define AXI_PORT_WIDTH 128
 #endif
-
-
 
 #if USE_FLOAT
 typedef float WeightD;
@@ -271,8 +256,13 @@ typedef hls::stream<WeightD> WeightStream;
 typedef hls::stream<AxiD> AxiStream;
 typedef hls::stream<AccumD> AccumStream;
 
-typedef long long CounterD;
-typedef hls::stream<bool> ProbeStream;
+// TODO: Remove CounterD and ProbeStream types from here.
+// typedef long long CounterD;
+// typedef hls::stream<bool> ProbeStream;
+
+typedef svd::SvdParameters<NUM_INPUTS, INPUT_SIZE, HIDDEN_SIZE, NUM_ITERATIONS,
+    NUM_TILES_U, NUM_TILES_V, NUM_ZERO_TILES_U, NUM_ZERO_TILES_V, NUM_GATES,
+    ActivationD, WeightD, AccumD> svd_params;
 
 } // namespace svd
 
