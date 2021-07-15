@@ -1,11 +1,11 @@
 #ifndef HLS_UTILS_HLS_METAPROGRAMMING_H_
 #define HLS_UTILS_HLS_METAPROGRAMMING_H_
 
-namespace hls_utils {
+namespace hlsutils {
 
 template <int x>
 struct log2 {
-  enum {value = 1 + hls_utils::log2<x / 2>::value};
+  enum {value = 1 + hlsutils::log2<x / 2>::value};
 };
 
 template <>
@@ -26,13 +26,13 @@ class GCDbase;
 template<int N, int M>
 class GCD {
 public:
-    static const int value = hls_utils::GCDbase<N, M, N % M>::value;
+    static const int value = hlsutils::GCDbase<N, M, N % M>::value;
 };
 
 template<int N, int M, int K>
 class GCDbase {
 public:
-    static const int value = hls_utils::GCDbase<M, K, M % K>::value;
+    static const int value = hlsutils::GCDbase<M, K, M % K>::value;
 };
 
 template<int N, int M>

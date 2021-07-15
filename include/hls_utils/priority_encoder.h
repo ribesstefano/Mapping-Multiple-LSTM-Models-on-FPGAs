@@ -5,7 +5,7 @@
 
 #include "assert.h"
 
-namespace svd {
+namespace hlsutils {
 
 /**
  * @brief      Priority Encoder: returns the MSB set bit.
@@ -66,7 +66,7 @@ int PriorityEncoderLSB(const T a) {
 }
 
 template <int NumTiles>
-void PriorityEncoder(const int num_zero_tiles, const ap_uint<NumTiles> a, hls::stream<ap_uint<hls_utils::log2<NumTiles>::value> > &idx_stream) {
+void PriorityEncoder(const int num_zero_tiles, const ap_uint<NumTiles> a, hls::stream<ap_uint<hlsutils::log2<NumTiles>::value> > &idx_stream) {
   ap_uint<NumTiles> tmp = a;
   for (int i = 0; i < NumTiles - num_zero_tiles; ++i) {
 #pragma HLS PIPELINE II=1
@@ -78,7 +78,7 @@ void PriorityEncoder(const int num_zero_tiles, const ap_uint<NumTiles> a, hls::s
 }
 
 template <typename T>
-void PriorityEncoder(const int num_zero_tiles, const T a, hls::stream<ap_uint<hls_utils::log2<T::width>::value> > &idx_stream) {
+void PriorityEncoder(const int num_zero_tiles, const T a, hls::stream<ap_uint<hlsutils::log2<T::width>::value> > &idx_stream) {
   T tmp = a;
   for (int i = 0; i < T::width - num_zero_tiles; ++i) {
 #pragma HLS PIPELINE II=1
@@ -89,6 +89,6 @@ void PriorityEncoder(const int num_zero_tiles, const T a, hls::stream<ap_uint<hl
   }
 }
 
-} // end namespace svd
+} // end namespace hlsutils
 
 #endif // end HLS_UTILS_PRIORITY_ENCODER_H_

@@ -14,21 +14,21 @@
 template <typename Din, typename Dout>
 void StreamSplitter(const int output_size,
     const Din *x,
-    hls::stream<Dout> (&y)[hls_utils::Bitwidth<Din>::value / hls_utils::Bitwidth<Dout>::value]) {
+    hls::stream<Dout> (&y)[hlsutils::Bitwidth<Din>::value / hlsutils::Bitwidth<Dout>::value]) {
 #pragma HLS ARRAY_PARTITION variable=y complete dim=1
-  const int kDivider = hls_utils::Bitwidth<Din>::value / hls_utils::Bitwidth<Dout>::value;
+  const int kDivider = hlsutils::Bitwidth<Din>::value / hlsutils::Bitwidth<Dout>::value;
   const int kInputSize = output_size / kDivider;
-  assert(hls_utils::Bitwidth<Din>::value % hls_utils::Bitwidth<Dout>::value == 0);
-  assert(hls_utils::Bitwidth<Din>::value >= hls_utils::Bitwidth<Dout>::value);
+  assert(hlsutils::Bitwidth<Din>::value % hlsutils::Bitwidth<Dout>::value == 0);
+  assert(hlsutils::Bitwidth<Din>::value >= hlsutils::Bitwidth<Dout>::value);
   assert(output_size % kDivider == 0);
   DMA_Loop:
   for (int i = 0; i < kInputSize; ++i) {
 #pragma HLS PIPELINE II=1
     Parallel_Write_Loop:
     for (int j = 0; j < kDivider; ++j) {
-      const int kHi = (j + 1) * hls_utils::Bitwidth<Dout>::value - 1;
-      const int kLo = j * hls_utils::Bitwidth<Dout>::value;
-      ap_uint<hls_utils::Bitwidth<Dout>::value> x_val = x[i].range(kHi, kLo);
+      const int kHi = (j + 1) * hlsutils::Bitwidth<Dout>::value - 1;
+      const int kLo = j * hlsutils::Bitwidth<Dout>::value;
+      ap_uint<hlsutils::Bitwidth<Dout>::value> x_val = x[i].range(kHi, kLo);
       y[j].write(*((Dout*)&x_val));
     }
   }
@@ -60,12 +60,12 @@ void S_DMA(const typename params::SPortD s_port[params::N][params::R],
 }
 
 template <typename params>
-void U_Dispatcher(const typename params::UPortD u_port[params::PrunedSizeU],
+void U_Dispatcher(const typename params::UPortD u_port[params::R * params::PrunedSizeU],
                   svd::SvdStreams<params> &streams) {
   U_Dispatcher:
   for (int i = 0; i < params::R; ++i) {
     for (int j = 0; j < params::PeU; ++j) {
-      for (int k = 0; k < params::PrunedSizeU / params::R / params::PeU; ++k) {
+      for (int k = 0; k < params::PrunedSizeU / params::PeU; ++k) {
 #pragma HLS PIPELINE II=1
 #pragma HLS LOOP_FLATTEN
         for (int g = 0; g < params::G; ++g) {
@@ -148,12 +148,12 @@ void InputDMA(
 }
 
 template <typename params>
-void V_Dispatcher(const typename params::VPortD v_port[params::PrunedSizeV],
+void V_Dispatcher(const typename params::VPortD v_port[params::R * params::PrunedSizeV],
                   svd::SvdStreams<params> &streams) {
   V_Dispatcher:
   for (int i = 0; i < params::R; ++i) {
     for (int j = 0; j < params::PeV; ++j) {
-      for (int k = 0; k < params::PrunedSizeV / params::R / params::PeV; ++k) {
+      for (int k = 0; k < params::PrunedSizeV / params::PeV; ++k) {
 #pragma HLS PIPELINE II=1
 #pragma HLS LOOP_FLATTEN
         for (int g = 0; g < params::G; ++g) {
@@ -167,9 +167,9 @@ void V_Dispatcher(const typename params::VPortD v_port[params::PrunedSizeV],
 template <typename params>
 void SvdInDMA(
     const typename params::ActivationD x_port[params::N][params::I],
-    const typename params::UPortD u_port[params::PrunedSizeU],
+    const typename params::UPortD u_port[params::R * params::PrunedSizeU],
     const typename params::SPortD s_port[params::N][params::R],
-    const typename params::VPortD v_port[params::PrunedSizeV],
+    const typename params::VPortD v_port[params::R * params::PrunedSizeV],
     const typename params::UnzD nz_u_port[params::R * params::G],
     const typename params::VnzD nz_v_port[params::R * params::G],
     svd::SvdStreams<params> &streams,
@@ -179,8 +179,8 @@ void SvdInDMA(
 #pragma HLS DATAFLOW
 #endif
   S_DMA<params>(s_port, streams);
-  U_DMA: StreamSplitter(params::G * params::PrunedSizeU, u_port, streams.u_dma);
-  V_DMA: StreamSplitter(params::G * params::PrunedSizeV, v_port, streams.v_dma);
+  U_DMA: StreamSplitter(params::G * params::R * params::PrunedSizeU, u_port, streams.u_dma);
+  V_DMA: StreamSplitter(params::G * params::R * params::PrunedSizeV, v_port, streams.v_dma);
   if (params::ZTu > 0) {
     NzDMA<params>(nz_u_port, nz_v_port, streams);
     NzIdxConverter<params>(streams);
@@ -293,7 +293,7 @@ void InputDMA(const svd::ActivationD *x_dmem,
       x_buffer[i][j] = x_dmem[i * kNumElemsTile + j];
     }
   }
-  hls::stream<ap_uint<hls_utils::log2<NumTiles>::value> > tile_idx_stream[NumGates][kNumPEs];
+  hls::stream<ap_uint<hlsutils::log2<NumTiles>::value> > tile_idx_stream[NumGates][kNumPEs];
 #pragma HLS ARRAY_PARTITION variable=tile_idx_stream complete dim=0
   NZ_to_Idx:
   for (int i = 0; i < NumIter; ++i) {
@@ -305,7 +305,7 @@ void InputDMA(const svd::ActivationD *x_dmem,
         if (j == 0) {
           nz_idx[k] = comb_stream[k].read();
         }
-        int set_idx = PriorityEncoderLSB<NumTiles>(nz_idx[k]);
+        int set_idx = hlsutils::PriorityEncoderLSB<NumTiles>(nz_idx[k]);
         assert(set_idx < NumTiles);
         tile_idx_stream[k][j].write(set_idx);
         nz_idx[k][set_idx] = 0;
@@ -316,7 +316,7 @@ void InputDMA(const svd::ActivationD *x_dmem,
   for (int i = 0; i < NumIter; ++i) {
     for (int k = 0; k < kNumElemsTile; ++k) {
 #pragma HLS PIPELINE II=1
-      ap_uint<hls_utils::log2<NumTiles>::value> tile_idx[NumGates][kNumPEs];
+      ap_uint<hlsutils::log2<NumTiles>::value> tile_idx[NumGates][kNumPEs];
 #pragma HLS ARRAY_PARTITION variable=tile_idx complete dim=0
       for (int j = 0; j < kNumPEs; ++j) {
         for (int g = 0; g < NumGates; ++g) {

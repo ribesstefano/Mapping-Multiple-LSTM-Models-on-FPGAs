@@ -3,8 +3,10 @@
 
 #include "svd_params.h"
 
+namespace svd {
+
 template <typename params>
-void KernelV(svd::SvdStreams<params> &streams) {
+void KernelV(const int num_refinements, svd::SvdStreams<params> &streams) {
 #pragma HLS INLINE
 #ifndef __VITIS_HLS__
 #pragma HLS DATAFLOW
@@ -34,8 +36,8 @@ void KernelV(svd::SvdStreams<params> &streams) {
 #endif
   if (params::ZTv > 0) { // constexpr
     V_Nz_Converter:
-    for (int i = 0; i < params::R; ++i) {
-      for (int j = 0; j < params::PrunedSizeV / params::R / params::PeV; ++j) {
+    for (int i = 0; i < num_refinements; ++i) {
+      for (int j = 0; j < params::PrunedSizeV / params::PeV; ++j) {
 #pragma HLS PIPELINE II=1
 #pragma HLS LOOP_FLATTEN
         for (int k = 0; k < params::G; ++k) {
@@ -61,8 +63,8 @@ void KernelV(svd::SvdStreams<params> &streams) {
     }
   }
   V_Unit:
-  for (int i = 0; i < params::R; ++i) {
-    for (int j = 0; j < params::PrunedSizeV / params::R / params::PeV; ++j) {
+  for (int i = 0; i < num_refinements; ++i) {
+    for (int j = 0; j < params::PrunedSizeV / params::PeV; ++j) {
 #pragma HLS PIPELINE II=1
 #pragma HLS LOOP_FLATTEN
       for (int g = 0; g < params::G; ++g) {
@@ -97,9 +99,6 @@ void KernelV(svd::SvdStreams<params> &streams) {
   }
 }
 
-
-namespace svd {
-
 template <int VectLength, int NumTiles, int NumZeroTiles, int NumIter, int NumTimesteps>
 void VDotUnit2LstmV2(const bool has_bias,
                    svd::WeightStream *bias1,
@@ -111,9 +110,7 @@ void VDotUnit2LstmV2(const bool has_bias,
                    svd::WeightStream (&gate_v_streams)[VectLength / NumTiles],
                    hls::stream<ap_uint<NumTiles> > &comb_stream_port,
                    svd::ActivationStream (&gate_out1_streams)[VectLength / NumTiles],
-                   svd::ActivationStream (&gate_out2_streams)[VectLength / NumTiles],
-                   bool debug_module = false,
-                   ProbeStream *probe_ctrl = nullptr) {
+                   svd::ActivationStream (&gate_out2_streams)[VectLength / NumTiles]) {
 #pragma HLS INLINE
 #pragma HLS DATAFLOW
 
@@ -174,7 +171,7 @@ void VDotUnit2LstmV2(const bool has_bias,
   }
 
   const int kCombStreamDepth = NumIter * NumZeroTiles / (kFifoResizeFactor * 2);
-  const int kNzBitLength = hls_utils::log2<NumTiles>::value;
+  const int kNzBitLength = hlsutils::log2<NumTiles>::value;
   hls::stream<ap_uint<kNzBitLength> > nz_idx_streams[kNumTileElems];
 #pragma HLS STREAM variable=nz_idx_streams depth=kCombStreamDepth dim=1
 #pragma HLS RESOURCE variable=nz_idx_streams core=FIFO_SRL
@@ -250,10 +247,6 @@ void VDotUnit2LstmV2(const bool has_bias,
 #if 1
   V_Kernel: {
 #pragma HLS INLINE off
-    if (debug_module) {
-      probe_ctrl->write(1);
-    }
-
     svd::AccumD acc_buffer1[kNumTileElems][NumTiles];
     svd::AccumD acc_buffer2[kNumTileElems][NumTiles];
 #pragma HLS ARRAY_PARTITION variable=acc_buffer1 complete dim=1
@@ -392,10 +385,6 @@ void VDotUnit2LstmV2(const bool has_bias,
           gate_out2_streams[j].write(acc_buffer2[j][i]);
         }
       }
-    }
-
-    if (debug_module) {
-      probe_ctrl->write(0);
     }
 #else
 

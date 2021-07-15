@@ -42,6 +42,8 @@
 #include "ap_int.h"
 #include "assert.h"
 
+namespace hlsutils {
+
 /**
  * @brief      Implements p0 += y_dsp * w_dsp + y_lut * w_lut; p1 += x_dsp *
  *             w_dsp + x_lut * w_lut;
@@ -148,5 +150,7 @@ void dot_prod_dsp_lut_generic(const T x_dsp, const T y_dsp, const T w_dsp,
   p0 += p0_tmp;
   p1 += p1_tmp;
 }
+
+} // hlsutils
 
 #endif // end HLS_UTILS_DOT_PROD_DSP_H_
