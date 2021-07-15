@@ -2318,7 +2318,9 @@ void test_dispatcher() {
     x_stream.write(x[i]);
   }
 
+#ifndef __VITIS_HLS__
   std::cout << "[Dispatcher] Running IP. x_stream.size() = " << x_stream.size() << "\n";
+#endif
   hls::stream<ap_uint<1 * 8> > y_stream[kNumPE];
   dummy_dispatcher(x_stream, y_stream);
 

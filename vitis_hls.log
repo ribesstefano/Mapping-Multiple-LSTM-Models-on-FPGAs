@@ -1,0 +1,822 @@
+
+****** Vitis HLS - High-Level Synthesis from C, C++ and OpenCL v2020.2 (64-bit)
+  **** SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+  **** IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+source D:/Programs/Xilinx/Vitis_HLS/2020.2/scripts/vitis_hls/hls.tcl -notrace
+INFO: [HLS 200-10] Running 'D:/Programs/Xilinx/Vitis_HLS/2020.2/bin/unwrapped/win64.o/vitis_hls.exe'
+INFO: [HLS 200-10] For user 'ste' on host 'desktop-m9rjbi2' (Windows NT_amd64 version 6.2) on Thu Jul 15 18:24:20 +0200 2021
+INFO: [HLS 200-10] In directory 'C:/Users/ste/phd/hls_projects/hls_svd'
+Sourcing Tcl script 'run_hls.tcl'
+HlsKernelU
+================================================================
+[INFO] LSTM parameters:
+ -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28 
+================================================================
+INFO: [HLS 200-1510] Running: open_project -reset vitis_ZedBoard_HlsKernelU 
+INFO: [HLS 200-10] Opening and resetting project 'C:/Users/ste/phd/hls_projects/hls_svd/hls/vitis_ZedBoard_HlsKernelU'.
+WARNING: [HLS 200-40] No C:/Users/ste/phd/hls_projects/hls_svd/hls/vitis_ZedBoard_HlsKernelU/solution_HlsKernelU/solution_HlsKernelU.aps file found.
+INFO: [HLS 200-1510] Running: set_top HlsKernelU 
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/svd_ip.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/svd_ip.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/svd_params.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/svd_params.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/dma/axis_lib.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/dma/axis_lib.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/dma/svd_dma.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/dma/svd_dma.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/dma/width_converter.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/dma/width_converter.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/hls_utils/adder_tree.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/hls_utils/adder_tree.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/hls_utils/dot_prod_dsp.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/hls_utils/dot_prod_dsp.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/hls_utils/hls_debugging.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/hls_utils/hls_debugging.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/hls_utils/hls_metaprogramming.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/hls_utils/hls_metaprogramming.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/hls_utils/hw_timer.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/hls_utils/hw_timer.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/hls_utils/priority_encoder.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/hls_utils/priority_encoder.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/kernel/svd_kernel.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/kernel/svd_kernel.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/kernel/s_kernel.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/kernel/s_kernel.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/kernel/u_kernel.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/kernel/u_kernel.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/kernel/v_kernel.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/kernel/v_kernel.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/lstm/lstm_data_handler.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/lstm/lstm_data_handler.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/lstm/hls/lstm_hardware.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/lstm/hls/lstm_hardware.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/lstm/hls/lstm_svd.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/lstm/hls/lstm_svd.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/lstm/hls/lstm_svd_emulator.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/lstm/hls/lstm_svd_emulator.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/lstm/sw/soft_lstm.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/lstm/sw/soft_lstm.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/lstm/sw/soft_lstm_svd.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/lstm/sw/soft_lstm_svd.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/math_utils/activation_functions.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/math_utils/activation_functions.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/math_utils/blas_utils.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/math_utils/blas_utils.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/include/math_utils/data_handler.h -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/include/math_utils/data_handler.h' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/svd_ip.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/svd_ip.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/svd_params.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/svd_params.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/dma/axis_lib.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/dma/axis_lib.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/dma/svd_dma.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/dma/svd_dma.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/dma/width_converter.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/dma/width_converter.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/hls_utils/adder_tree.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/hls_utils/adder_tree.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/hls_utils/dot_prod_dsp.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/hls_utils/dot_prod_dsp.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/hls_utils/hw_timer.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/hls_utils/hw_timer.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/svd_kernel.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/svd_kernel.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/s_kernel.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/s_kernel.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/v_kernel.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/v_kernel.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/lstm_data_handler.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/lstm_data_handler.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd_emulator.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd_emulator.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/math_utils/activation_functions.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/math_utils/activation_functions.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/math_utils/blas_utils.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/math_utils/blas_utils.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files C:/Users/ste/phd/hls_projects/hls_svd/src/math_utils/data_handler.cpp -cflags -O3 -g -std=c++0x -fno-builtin -IC:/Users/ste/phd/hls_projects/hls_svd/include// -DHLS_NO_XIL_FPO_LIB -DAXI_PORT_WIDTH=64 -DNUM_GATES=4 -DNUM_SAMPLES=2 -DINPUT_SIZE=1024 -DHIDDEN_SIZE=512 -DNUM_ITERATIONS=16 -DNUM_TILES_U=32 -DNUM_ZERO_TILES_U=16 -DNUM_TILES_V=64 -DNUM_ZERO_TILES_V=8 -DNUM_TIMESTEPS=28  -I/usr/local/include 
+INFO: [HLS 200-10] Adding design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/math_utils/data_handler.cpp' to the project
+INFO: [HLS 200-1510] Running: open_solution solution_HlsKernelU -flow_target vitis 
+INFO: [HLS 200-10] Creating and opening solution 'C:/Users/ste/phd/hls_projects/hls_svd/hls/vitis_ZedBoard_HlsKernelU/solution_HlsKernelU'.
+INFO: [HLS 200-1505] Using flow_target 'vitis'
+Resolution: For help on HLS 200-1505 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=200-1505.html
+INFO: [HLS 200-435] Setting 'open_solution -flow_target vitis' configuration: config_interface -m_axi_latency=64
+INFO: [HLS 200-435] Setting 'open_solution -flow_target vitis' configuration: config_interface -m_axi_alignment_byte_size=64
+INFO: [HLS 200-435] Setting 'open_solution -flow_target vitis' configuration: config_interface -m_axi_max_widen_bitwidth=512
+INFO: [HLS 200-435] Setting 'open_solution -flow_target vitis' configuration: config_interface -m_axi_offset=slave
+INFO: [HLS 200-435] Setting 'open_solution -flow_target vitis' configuration: config_rtl -register_reset_num=3
+INFO: [HLS 200-1510] Running: set_part xc7z020clg484-1 
+INFO: [HLS 200-10] Setting target device to 'xc7z020-clg484-1'
+INFO: [HLS 200-1510] Running: config_schedule -effort medium 
+WARNING: [HLS 200-484] The 'config_schedule -effort' command is deprecated and will be removed in a future release.
+WARNING: [HLS 200-483] The 'config_core' command is deprecated and will be removed in a future release. Use 'config_op or config_storage' as its replacement.
+INFO: [TECH 200-24] Change the default latency of core 'DSP48' to 3
+INFO: [HLS 200-1510] Running: config_dataflow -default_channel pingpong 
+INFO: [XFORM 203-701] Set the default channel type in dataflow to ping-pong buffer.
+INFO: [HLS 200-1510] Running: csynth_design 
+INFO: [HLS 200-111] Finished File checks and directory preparation: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.047 seconds; current allocated memory: 475.420 MB.
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/math_utils/data_handler.cpp' ... 
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/math_utils/blas_utils.cpp' ... 
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/math_utils/activation_functions.cpp' ... 
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_params.h:121:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:252:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:253:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:254:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:255:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:261:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:262:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:263:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:264:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:274:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:275:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:280:9
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp' ... 
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_params.h:121:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:252:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:253:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:254:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:255:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:261:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:262:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:263:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:264:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:274:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:275:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:280:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:117:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:118:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:119:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:120:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:121:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:151:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:152:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:153:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:154:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:155:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:156:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:157:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:158:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:159:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:160:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:210:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:211:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:212:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:239:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:240:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:241:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:242:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:243:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:244:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:280:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:281:9
+WARNING: [HLS 207-5301] unused parameter 'x': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3179:43
+WARNING: [HLS 207-5301] unused parameter 'num_samples': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3181:40
+WARNING: [HLS 207-5301] unused parameter 'cur_i_s': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3187:43
+WARNING: [HLS 207-5301] unused parameter 'cur_i_v': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3188:43
+WARNING: [HLS 207-5301] unused parameter 'cur_f_s': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3190:43
+WARNING: [HLS 207-5301] unused parameter 'cur_f_v': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3191:43
+WARNING: [HLS 207-5301] unused parameter 'cur_c_s': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3193:43
+WARNING: [HLS 207-5301] unused parameter 'cur_c_v': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3194:43
+WARNING: [HLS 207-5301] unused parameter 'cur_o_s': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3196:43
+WARNING: [HLS 207-5301] unused parameter 'cur_o_v': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3197:43
+WARNING: [HLS 207-5301] unused parameter 'rec_i_s': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3199:43
+WARNING: [HLS 207-5301] unused parameter 'rec_i_v': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3200:43
+WARNING: [HLS 207-5301] unused parameter 'rec_f_s': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3202:43
+WARNING: [HLS 207-5301] unused parameter 'rec_f_v': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3203:43
+WARNING: [HLS 207-5301] unused parameter 'rec_c_s': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3205:43
+WARNING: [HLS 207-5301] unused parameter 'rec_c_v': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3206:43
+WARNING: [HLS 207-5301] unused parameter 'rec_o_s': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3208:43
+WARNING: [HLS 207-5301] unused parameter 'rec_o_v': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3209:43
+WARNING: [HLS 207-5301] unused parameter 'bias_i': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3210:43
+WARNING: [HLS 207-5301] unused parameter 'bias_f': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3211:43
+WARNING: [HLS 207-5301] unused parameter 'bias_c': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3212:43
+WARNING: [HLS 207-5301] unused parameter 'bias_o': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3213:43
+WARNING: [HLS 207-5301] unused parameter 'out': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm_svd.cpp:3214:37
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp' ... 
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_params.h:121:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:252:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:253:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:254:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:255:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:261:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:262:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:263:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:264:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:274:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:275:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:280:9
+WARNING: [HLS 207-5301] unused parameter 'use_blas': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:102:22
+WARNING: [HLS 207-5301] unused parameter 'use_blas': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:328:31
+WARNING: [HLS 207-5301] unused parameter 'use_blas': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:531:29
+WARNING: [HLS 207-5301] unused parameter 'x': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:532:31
+WARNING: [HLS 207-5301] unused parameter 'batch_size': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:533:28
+WARNING: [HLS 207-5301] unused parameter 'num_samples': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:534:28
+WARNING: [HLS 207-5301] unused parameter 'num_timesteps': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:535:28
+WARNING: [HLS 207-5301] unused parameter 'input_size': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:536:28
+WARNING: [HLS 207-5301] unused parameter 'hidden_size': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:537:28
+WARNING: [HLS 207-5301] unused parameter 'cur_i': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:538:31
+WARNING: [HLS 207-5301] unused parameter 'cur_f': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:539:31
+WARNING: [HLS 207-5301] unused parameter 'cur_c': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:540:31
+WARNING: [HLS 207-5301] unused parameter 'cur_o': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:541:31
+WARNING: [HLS 207-5301] unused parameter 'rec_i': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:542:31
+WARNING: [HLS 207-5301] unused parameter 'rec_f': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:543:31
+WARNING: [HLS 207-5301] unused parameter 'rec_c': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:544:31
+WARNING: [HLS 207-5301] unused parameter 'rec_o': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:545:31
+WARNING: [HLS 207-5301] unused parameter 'bias_i': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:546:31
+WARNING: [HLS 207-5301] unused parameter 'bias_f': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:547:31
+WARNING: [HLS 207-5301] unused parameter 'bias_c': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:548:31
+WARNING: [HLS 207-5301] unused parameter 'bias_o': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:549:31
+WARNING: [HLS 207-5301] unused parameter 'out': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/sw/soft_lstm.cpp:550:25
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd_emulator.cpp' ... 
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_params.h:121:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:252:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:253:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:254:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:255:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:261:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:262:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:263:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:264:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:274:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:275:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:280:9
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp' ... 
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:61:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:62:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:310:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-169] There are a total of 4 such instances of non-canonical statements in the dataflow region: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:44:3
+Resolution: For help on HLS 214-169 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-169.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:278:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:279:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:289:2
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-169] There are a total of 5 such instances of non-canonical statements in the dataflow region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:278:3
+Resolution: For help on HLS 214-169 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-169.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:278:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:279:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:289:2
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-169] There are a total of 5 such instances of non-canonical statements in the dataflow region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:278:3
+Resolution: For help on HLS 214-169 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-169.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:257:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:258:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:259:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-169] There are a total of 5 such instances of non-canonical statements in the dataflow region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:257:3
+Resolution: For help on HLS 214-169 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-169.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:117:2
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:118:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:119:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-169] There are a total of 10 such instances of non-canonical statements in the dataflow region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:117:2
+Resolution: For help on HLS 214-169 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-169.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:257:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:258:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:259:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-169] There are a total of 5 such instances of non-canonical statements in the dataflow region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:257:3
+Resolution: For help on HLS 214-169 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-169.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:417:2
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:418:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:434:2
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-169] There are a total of 7 such instances of non-canonical statements in the dataflow region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:417:2
+Resolution: For help on HLS 214-169 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-169.html
+WARNING: [HLS 200-471] Dataflow form checks found 28 issue(s) in file C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp
+Resolution: For help on HLS 200-471 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=200-471.html
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_params.h:121:9
+WARNING: [HLS 207-5301] unused parameter 'u_port': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:63:49
+WARNING: [HLS 207-5301] unused parameter 'v_port': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:151:49
+WARNING: [HLS 207-5301] unused parameter 'verbose': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:438:36
+WARNING: [HLS 207-5301] unused parameter 'verbose': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:490:36
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:36:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:96:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:97:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:182:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:183:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:190:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:191:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:219:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:220:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:64:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:68:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:137:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:141:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:22:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:80:9
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:130:65
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:131:65
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:142:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:143:9
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:154:63
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:155:63
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:176:72
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:177:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:360:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:361:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:379:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:380:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:252:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:253:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:254:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:255:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:261:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:262:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:263:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:264:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:274:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:275:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:280:9
+WARNING: [HLS 207-5301] unused parameter 'verbose_level': C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/hls_debugging.h:17:20
+WARNING: [HLS 207-5301] unused parameter 'str': C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/hls_debugging.h:17:47
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:193:72
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:194:72
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:195:74
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:196:74
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:198:75
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:199:77
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:200:68
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:201:68
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:210:77
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:211:77
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:212:77
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:213:77
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:215:71
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:216:71
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:217:71
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:218:71
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:289:61
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:290:61
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:291:57
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:105:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:106:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:111:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:112:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:115:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:116:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:99:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:99:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:100:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:100:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:101:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:101:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:102:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:102:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:103:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:103:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:107:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:108:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:109:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:110:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:113:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:114:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:117:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:118:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_svd.cpp:82:9
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp' ... 
+WARNING: [HLS 207-943] HLS Linear Algebra Library is deprecated in Vitis HLS, and will be removed in Release 2021.1. For matrix decomposition please consider the Vitis Solver Library (https://github.com/Xilinx/Vitis_Libraries).: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/39\hls_linear_algebra.h:46:2
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1632:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1998:2
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2005:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2155:2
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2162:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-104] Only for-loops and functions support the dataflow: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:294:9
+Resolution: For help on HLS 214-104 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-104.html
+WARNING: [HLS 214-113] Either use an argument of the function or declare the variable inside the dataflow loop body: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:632:3
+Resolution: For help on HLS 214-113 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-113.html
+WARNING: [HLS 214-113] Either use an argument of the function or declare the variable inside the dataflow loop body: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:652:3
+Resolution: For help on HLS 214-113 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-113.html
+WARNING: [HLS 214-113] Either use an argument of the function or declare the variable inside the dataflow loop body: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:681:3
+Resolution: For help on HLS 214-113 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-113.html
+WARNING: [HLS 214-113] Either use an argument of the function or declare the variable inside the dataflow loop body: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:697:3
+Resolution: For help on HLS 214-113 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-113.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:623:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:624:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:625:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-169] There are a total of 7 such instances of non-canonical statements in the dataflow region: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:623:3
+Resolution: For help on HLS 214-169 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-169.html
+WARNING: [HLS 214-104] Only for-loops and functions support the dataflow: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:294:9
+Resolution: For help on HLS 214-104 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-104.html
+WARNING: [HLS 214-104] Only for-loops and functions support the dataflow: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:294:9
+Resolution: For help on HLS 214-104 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-104.html
+WARNING: [HLS 200-471] Dataflow form checks found 16 issue(s) in file C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp
+Resolution: For help on HLS 200-471 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=200-471.html
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_params.h:121:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:252:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:253:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:254:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:255:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:261:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:262:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:263:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:264:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:274:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:275:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\math_utils/activation_functions.h:280:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:117:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:118:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:119:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:120:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:121:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:151:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:152:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:153:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:154:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:155:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:156:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:157:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:158:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:159:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:160:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:210:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:211:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:212:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:239:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:240:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:241:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:242:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:243:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:244:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:280:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_hotbm_apfixed.h:281:9
+WARNING: [HLS 207-4069] variable templates are a C++14 extension: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\ap_axi_sdata.h:97:40
+WARNING: [HLS 207-4069] variable templates are a C++14 extension: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\ap_axi_sdata.h:107:18
+WARNING: [HLS 207-5301] unused parameter 'u_port': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:63:49
+WARNING: [HLS 207-5301] unused parameter 'v_port': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:151:49
+WARNING: [HLS 207-5301] unused parameter 'verbose': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:438:36
+WARNING: [HLS 207-5301] unused parameter 'verbose': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:490:36
+WARNING: [HLS 207-5301] unused parameter 'matrix': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:50:42
+WARNING: [HLS 207-5301] unused parameter 'row_size': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:66:46
+WARNING: [HLS 207-5301] unused parameter 'row_size': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:81:46
+WARNING: [HLS 207-5301] unused parameter 'row_size': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:102:47
+WARNING: [HLS 207-5301] unused parameter 'row_size': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:140:47
+WARNING: [HLS 207-5301] unused parameter 'row_size': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:163:71
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:191:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:192:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:228:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:394:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:394:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:395:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:395:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:396:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:396:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:393:9
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:506:50
+WARNING: [HLS 207-5301] unused parameter 'architecture_type': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:559:34
+WARNING: [HLS 207-5301] unused parameter 'row_id': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:713:37
+WARNING: [HLS 207-5301] unused parameter 'col_id': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:714:37
+WARNING: [HLS 207-5301] unused parameter 'a_in': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:715:49
+WARNING: [HLS 207-5301] unused parameter 'a_out': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:716:49
+WARNING: [HLS 207-5301] unused parameter 'b_in': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:717:49
+WARNING: [HLS 207-5301] unused parameter 'b_out': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:718:49
+WARNING: [HLS 207-5301] unused parameter 'c': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:719:50
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:833:9
+WARNING: [HLS 207-5301] unused parameter 'pe_id': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:957:33
+WARNING: [HLS 207-5301] unused parameter 'a': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:961:68
+WARNING: [HLS 207-5301] unused parameter 'b': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:962:46
+WARNING: [HLS 207-5301] unused parameter 'c_fwrd_in': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:963:68
+WARNING: [HLS 207-5301] unused parameter 'c_fwrd_out': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:964:68
+WARNING: [HLS 207-5301] unused parameter 'c_bwrd_in': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:965:68
+WARNING: [HLS 207-5301] unused parameter 'c_bwrd_out': C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:966:68
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1322:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1322:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1323:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1323:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1324:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1324:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1318:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1357:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1357:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1358:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1358:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1359:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1359:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1353:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1395:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1395:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1396:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1396:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1397:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1397:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1394:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1424:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1424:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1425:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1425:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1426:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1426:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1423:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1462:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1462:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1463:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1463:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1464:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1464:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1461:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1498:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1498:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1499:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1499:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1500:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1500:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1497:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1534:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1534:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1535:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1535:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1536:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1536:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1533:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1856:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1856:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1857:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1857:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1858:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1858:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1859:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1859:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1860:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1860:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1861:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1861:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1862:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1862:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1863:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1863:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1864:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1864:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1865:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1865:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1866:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1866:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1855:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1964:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1964:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1965:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1965:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1966:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1966:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1967:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1967:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1968:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1968:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1969:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1969:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1970:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1970:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1971:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1971:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1972:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1972:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1973:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1973:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1974:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1974:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1975:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1975:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1976:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1976:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1977:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1977:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1978:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1978:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1979:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1979:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1980:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1980:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:1963:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2117:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2117:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2118:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2118:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2119:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2119:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2120:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2120:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2121:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2121:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2122:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2122:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2123:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2123:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2124:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2124:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2125:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2125:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2126:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2126:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2127:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2127:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2128:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2128:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2129:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2129:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2130:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2130:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2131:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2131:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2132:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2132:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2133:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2133:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2116:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2206:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2207:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2208:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2208:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2207:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2206:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2201:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2256:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2257:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2258:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2258:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2257:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2256:9
+WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:2251:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:89:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:89:9
+WARNING: [HLS 207-5334] Only for-loops and functions support the dataflow: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:294:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:171:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:148:9
+WARNING: [HLS 207-5334] Only for-loops and functions support the dataflow: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:294:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:89:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:89:9
+WARNING: [HLS 207-5334] Only for-loops and functions support the dataflow: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:294:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:171:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:148:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:89:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:89:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:148:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:148:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:89:9
+WARNING: [HLS 207-5336] Only for/while/do support the pipeline  pragma: C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/hls/lstm_hardware.cpp:89:9
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/lstm/lstm_data_handler.cpp' ... 
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/v_kernel.cpp' ... 
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp' ... 
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:33:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:42:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:54:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 200-471] Dataflow form checks found 3 issue(s) in file C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp
+Resolution: For help on HLS 200-471 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=200-471.html
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_params.h:121:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:36:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:96:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:97:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:182:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:183:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:190:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:191:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:219:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:220:9
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/s_kernel.cpp' ... 
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/svd_kernel.cpp' ... 
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_params.h:121:9
+WARNING: [HLS 207-5301] unused parameter 'u_port': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:63:49
+WARNING: [HLS 207-5301] unused parameter 'v_port': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:151:49
+WARNING: [HLS 207-5301] unused parameter 'verbose': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:438:36
+WARNING: [HLS 207-5301] unused parameter 'verbose': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:490:36
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:36:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:96:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:97:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:182:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:183:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:190:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:191:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:219:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:220:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:64:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:68:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:137:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:141:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:22:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:80:9
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:130:65
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:131:65
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:142:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:143:9
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:154:63
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:155:63
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:176:72
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:177:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:360:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:361:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:379:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:380:9
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/hls_utils/hw_timer.cpp' ... 
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/hls_utils/dot_prod_dsp.cpp' ... 
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/dot_prod_dsp.h:77:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/dot_prod_dsp.h:78:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/dot_prod_dsp.h:111:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/dot_prod_dsp.h:149:9
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/hls_utils/adder_tree.cpp' ... 
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:64:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:68:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:137:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:141:9
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/dma/width_converter.cpp' ... 
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/dma/svd_dma.cpp' ... 
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_params.h:121:9
+WARNING: [HLS 207-5301] unused parameter 'u_port': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:63:49
+WARNING: [HLS 207-5301] unused parameter 'v_port': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:151:49
+WARNING: [HLS 207-5301] unused parameter 'verbose': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:438:36
+WARNING: [HLS 207-5301] unused parameter 'verbose': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:490:36
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/dma/axis_lib.cpp' ... 
+WARNING: [HLS 207-4069] variable templates are a C++14 extension: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\ap_axi_sdata.h:97:40
+WARNING: [HLS 207-4069] variable templates are a C++14 extension: D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\ap_axi_sdata.h:107:18
+WARNING: [HLS 207-5301] unused parameter 'name': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/axis_lib.h:36:35
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/svd_params.cpp' ... 
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_params.h:121:9
+INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/svd_ip.cpp' ... 
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_ip.h:20:2
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_ip.h:21:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_ip.h:22:3
+Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
+WARNING: [HLS 214-169] There are a total of 4 such instances of non-canonical statements in the dataflow region: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_ip.h:20:2
+Resolution: For help on HLS 214-169 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-169.html
+WARNING: [HLS 200-471] Dataflow form checks found 4 issue(s) in file C:/Users/ste/phd/hls_projects/hls_svd/src/svd_ip.cpp
+Resolution: For help on HLS 200-471 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=200-471.html
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//./svd_params.h:121:9
+WARNING: [HLS 207-5301] unused parameter 'u_port': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:63:49
+WARNING: [HLS 207-5301] unused parameter 'v_port': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:151:49
+WARNING: [HLS 207-5301] unused parameter 'verbose': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:438:36
+WARNING: [HLS 207-5301] unused parameter 'verbose': C:/Users/ste/phd/hls_projects/hls_svd/include//.\dma/svd_dma.h:490:36
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:36:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:96:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:97:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:182:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:183:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:190:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:191:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:219:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:220:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:64:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:68:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:137:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:141:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:22:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:80:9
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:130:65
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:131:65
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:142:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:143:9
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:154:63
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:155:63
+WARNING: [HLS 207-5498] the 'dim' option to 'Stream' pragma is not supported and will be ignored: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:176:72
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:177:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:360:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:361:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:379:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/v_kernel.h:380:9
+INFO: [HLS 200-111] Finished Source Code Analysis and Preprocessing: CPU user time: 12 seconds. CPU system time: 3 seconds. Elapsed time: 225.352 seconds; current allocated memory: 97.022 MB.
+INFO: [HLS 200-777] Using interface defaults for 'Vitis' flow target.
+INFO: [HLS 200-111] Finished Command csynth_design CPU user time: 13 seconds. CPU system time: 3 seconds. Elapsed time: 233.47 seconds; current allocated memory: 97.102 MB.
+Pre-synthesis failed.
+    while executing
+"source run_hls.tcl"
+    ("uplevel" body line 1)
+    invoked from within
+"uplevel \#0 [list source $arg] "
+
+INFO: [HLS 200-112] Total CPU user time: 14 seconds. Total CPU system time: 5 seconds. Total elapsed time: 235.725 seconds; peak allocated memory: 475.420 MB.
+INFO: [Common 17-206] Exiting vitis_hls at Thu Jul 15 18:28:15 2021...

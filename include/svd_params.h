@@ -76,34 +76,34 @@ public:
   typename params::UnzIdxS tile_idx_stream[params::N][params::G][params::PeU];
 
   SvdStreams() {
-#pragma HLS STREAM depth=2 variable=x
-#pragma HLS STREAM depth=2 variable=nz_u
-#pragma HLS STREAM depth=2 variable=nz_v
-#pragma HLS STREAM depth=2 variable=u
-#pragma HLS STREAM depth=2 variable=s
-#pragma HLS STREAM depth=2 variable=v
-#pragma HLS STREAM depth=2 variable=xu
-#pragma HLS STREAM depth=2 variable=xus
-#pragma HLS STREAM depth=2 variable=xusv
-#pragma HLS STREAM depth=2 variable=nz_u_idx
-#pragma HLS STREAM depth=2 variable=nz_v_idx
-#pragma HLS STREAM depth=2 variable=u_dma
-#pragma HLS STREAM depth=2 variable=v_dma
-#pragma HLS STREAM depth=2 variable=tile_idx_stream
-#pragma HLS ARRAY_PARTITION complete dim=0 variable=x
-#pragma HLS ARRAY_PARTITION complete dim=0 variable=nz_u
-#pragma HLS ARRAY_PARTITION complete dim=0 variable=nz_v
-#pragma HLS ARRAY_PARTITION complete dim=0 variable=u
-#pragma HLS ARRAY_PARTITION complete dim=0 variable=s
-#pragma HLS ARRAY_PARTITION complete dim=0 variable=v
-#pragma HLS ARRAY_PARTITION complete dim=0 variable=u_dma
-#pragma HLS ARRAY_PARTITION complete dim=0 variable=v_dma
-#pragma HLS ARRAY_PARTITION complete dim=0 variable=xu
-#pragma HLS ARRAY_PARTITION complete dim=0 variable=xus
-#pragma HLS ARRAY_PARTITION complete dim=0 variable=xusv
-#pragma HLS ARRAY_PARTITION complete dim=0 variable=nz_u_idx
-#pragma HLS ARRAY_PARTITION complete dim=0 variable=nz_v_idx
-#pragma HLS ARRAY_PARTITION variable=tile_idx_stream complete dim=0
+#pragma HLS STREAM depth=2 variable=this->x
+#pragma HLS STREAM depth=2 variable=this->nz_u
+#pragma HLS STREAM depth=2 variable=this->nz_v
+#pragma HLS STREAM depth=2 variable=this->u
+#pragma HLS STREAM depth=2 variable=this->s
+#pragma HLS STREAM depth=2 variable=this->v
+#pragma HLS STREAM depth=2 variable=this->xu
+#pragma HLS STREAM depth=2 variable=this->xus
+#pragma HLS STREAM depth=2 variable=this->xusv
+#pragma HLS STREAM depth=2 variable=this->nz_u_idx
+#pragma HLS STREAM depth=2 variable=this->nz_v_idx
+#pragma HLS STREAM depth=2 variable=this->u_dma
+#pragma HLS STREAM depth=2 variable=this->v_dma
+#pragma HLS STREAM depth=2 variable=this->tile_idx_stream
+#pragma HLS ARRAY_PARTITION complete dim=0 variable=this->x
+#pragma HLS ARRAY_PARTITION complete dim=0 variable=this->nz_u
+#pragma HLS ARRAY_PARTITION complete dim=0 variable=this->nz_v
+#pragma HLS ARRAY_PARTITION complete dim=0 variable=this->u
+#pragma HLS ARRAY_PARTITION complete dim=0 variable=this->s
+#pragma HLS ARRAY_PARTITION complete dim=0 variable=this->v
+#pragma HLS ARRAY_PARTITION complete dim=0 variable=this->u_dma
+#pragma HLS ARRAY_PARTITION complete dim=0 variable=this->v_dma
+#pragma HLS ARRAY_PARTITION complete dim=0 variable=this->xu
+#pragma HLS ARRAY_PARTITION complete dim=0 variable=this->xus
+#pragma HLS ARRAY_PARTITION complete dim=0 variable=this->xusv
+#pragma HLS ARRAY_PARTITION complete dim=0 variable=this->nz_u_idx
+#pragma HLS ARRAY_PARTITION complete dim=0 variable=this->nz_v_idx
+#pragma HLS ARRAY_PARTITION variable=this->tile_idx_stream complete dim=0
   };
   ~SvdStreams() {};
 
