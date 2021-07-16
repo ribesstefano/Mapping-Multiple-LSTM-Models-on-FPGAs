@@ -111,7 +111,7 @@ void InputDMA(const int num_refinements,
     const typename params::ActivationD x_port[params::N][params::I],
     svd::SvdStreams<params> &streams,
     svd::SvdBuffers<params> &buffers) {
-// #pragma HLS INLINE
+#pragma HLS INLINE
   typename params::UnzIdxD tile_idx[params::N][params::G][params::PeU];
 #pragma HLS ARRAY_PARTITION variable=tile_idx complete dim=0
   Store_X_Buffer:
@@ -129,6 +129,7 @@ void InputDMA(const int num_refinements,
   Stream_X_Tiles:
   for (int ii = 0; ii < params::N; ++ii) {
 #pragma HLS UNROLL
+    Stream_X_Tiles_inner:
     for (int i = 0; i < num_refinements; ++i) {
       for (int k = 0; k < params::I / params::Tu; ++k) {
   #pragma HLS PIPELINE II=1

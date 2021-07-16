@@ -7,6 +7,7 @@ exec mkdir -p -- ./hls
 exec mkdir -p -- ./hls/reports
 cd hls
 
+set USE_VITIS 1
 # ==============================================================================
 # Top function name, testbench file
 # ==============================================================================
@@ -85,10 +86,15 @@ set ARGV ""
 # ==============================================================================
 # NOTE(21/02/2019): the '-fno-builtin' is suggested by Xilinx when using
 # the set_directive_resource option.
-if {${cosim}} {
-    set CFLAGS "-O3 -g -std=c++0x -fno-builtin -I${PRJ_PATH}/include/${SRC_DIR}/ -DCOSIM_DESIGN ${DEFINES} -I/usr/local/include"
+if {${USE_VITIS}} {
+    set CXXSTD "-std=c++14" ; #"-std=c++1y"
 } else {
-    set CFLAGS "-O3 -g -std=c++0x -fno-builtin -I${PRJ_PATH}/include/${SRC_DIR}/ ${DEFINES} -I/usr/local/include"
+    set CXXSTD "-std=c++0x -fno-builtin"
+}
+if {${cosim}} {
+    set CFLAGS "-O3 -g ${CXXSTD} -I${PRJ_PATH}/include/${SRC_DIR}/ -DCOSIM_DESIGN ${DEFINES} -I/usr/local/include"
+} else {
+    set CFLAGS "-O3 -g ${CXXSTD} -I${PRJ_PATH}/include/${SRC_DIR}/ ${DEFINES} -I/usr/local/include"
 }
 # ==============================================================================
 # Open Project and Add Files
@@ -113,29 +119,28 @@ set src_files [findFiles "${PRJ_PATH}/src/${SRC_DIR}/" "*.cpp" "${PRJ_PATH}/src/
 set include_files [findFiles "${PRJ_PATH}/include/${SRC_DIR}/" "*.h" "${PRJ_PATH}/include/testbenches"]
 
 if {${reset_project}} {
-    foreach f ${include_files} {
-        # File svd.h contains main()
-        if {${f} eq "${PRJ_PATH}/include/svd.h"} {
-        } else {
-            add_files ${f} -cflags ${CFLAGS}
-        }
-    }
-    foreach f ${src_files} {
-        # File svd.cpp contains main()
-        if {${f} eq "${PRJ_PATH}/src/svd.cpp"} {
-        } else {
-            add_files ${f} -cflags ${CFLAGS}
-        }
-    }
-    # if {llength $SRC_LIST -eq 0} {
-    #     foreach f ${src_files} {
+    add_files ${PRJ_PATH}/src/kernel/u_kernel.cpp -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/src/dma/svd_dma.cpp -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/src/hls_utils/adder_tree.cpp -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/src/hls_utils/hls_metaprogramming.cpp -cflags ${CFLAGS}
+
+    add_files ${PRJ_PATH}/include/kernel/u_kernel.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/dma/svd_dma.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/hls_utils/adder_tree.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/hls_utils/hls_metaprogramming.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/dma/svd_parameters.h -cflags ${CFLAGS}
+
+    # foreach f ${include_files} {
+    #     # File svd.h contains main()
+    #     if {${f} eq "${PRJ_PATH}/include/svd.h"} {
+    #     } else {
     #         add_files ${f} -cflags ${CFLAGS}
     #     }
-    #     foreach f ${include_files} {
-    #         add_files ${f} -cflags ${CFLAGS}
-    #     }
-    # } else {
-    #     foreach f ${SRC_LIST} {
+    # }
+    # foreach f ${src_files} {
+    #     # File svd.cpp contains main()
+    #     if {${f} eq "${PRJ_PATH}/src/svd.cpp"} {
+    #     } else {
     #         add_files ${f} -cflags ${CFLAGS}
     #     }
     # }
@@ -200,7 +205,7 @@ if {${use_zcu104_pynq}} {
 }
 
 config_core DSP48 -latency 3
-config_dataflow -default_channel pingpong
+config_dataflow -default_channel fifo ;#pingpong
 
 # ==============================================================================
 # Start C-Simulation
