@@ -47,8 +47,10 @@
 #define AP_INT_MAX_W 4096
 #endif
 #include "ap_int.h"
-#include "hls_linear_algebra.h"
 #include "ap_axi_sdata.h"
+#ifndef __VITIS_HLS__
+#include "hls_linear_algebra.h"
+#endif
 
 #ifndef __SYNTHESIS__
 #include <chrono>
@@ -75,6 +77,7 @@
 
 namespace svd {
 
+#ifndef __VITIS_HLS__
 // struct MY_CONFIG: hls::matrix_multiply_traits<hls::NoTranspose, hls::NoTranspose,
 //     A_ROWS, A_COLS, B_ROWS, B_COLS, MATRIX_T,  MATRIX_T> {
 //   static const int ARCH = 4;
@@ -141,17 +144,18 @@ struct MatrixConfigFixRecurrent: hls::matrix_multiply_traits <
     static const int N = 1;
     static const int K = HIDDEN_TILE_SIZE;
 };
-
-void svd_fpga_cur_gemm_axi(const AxiD *a, const AxiD *b, AxiD *c);
-
-template <int M, int N, int K, int Tm, int Tn, int Tk>
-void cur_gemm(const ActivationD *a, const ActivationD *b, ActivationD *c);
+#endif
 
 typedef struct {
   ap_uint<FIX_WIDTH> data;
   ap_uint<1> last;
 } AxisPacketD;
 typedef hls::stream<AxisPacketD> DmaInterfaceD;
+
+void svd_fpga_cur_gemm_axi(const AxiD *a, const AxiD *b, AxiD *c);
+
+template <int M, int N, int K, int Tm, int Tn, int Tk>
+void cur_gemm(const ActivationD *a, const ActivationD *b, ActivationD *c);
 
 } // end namespace svd
 

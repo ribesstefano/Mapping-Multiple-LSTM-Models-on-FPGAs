@@ -290,11 +290,10 @@ void gemm_kernel(const bool execute,
         }
         break;
       case 1: {
+#ifndef __VITIS_HLS__
           if (accumulate) {
 #pragma HLS DATAFLOW
             ActivationD c_tmp[M][N];
-// #pragma HLS RESOURCE variable=c_tmp core=RAM_2P
-
             hls::matrix_multiply_top<hls::NoTranspose, hls::NoTranspose,
               M, K, K, N,
               M, N, MatrixConfigFixCurrent, ActivationD,
@@ -306,6 +305,7 @@ void gemm_kernel(const bool execute,
               M, N, MatrixConfigFixCurrent, ActivationD,
               ActivationD>(a, b, c);
           }
+#endif
         }
         break;
       case 2: {

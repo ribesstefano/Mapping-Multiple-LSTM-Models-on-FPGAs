@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+namespace svd {
+
 template <typename Din, typename Dout>
 void StreamSplitter(const int output_size,
     const Din *x,
@@ -70,7 +72,7 @@ void U_Dispatcher(const typename params::UPortD u_port[params::R * params::Prune
 #pragma HLS LOOP_FLATTEN
         for (int g = 0; g < params::G; ++g) {
           streams.u[g][j].write(streams.u_dma[g].read());
-        }        
+        }
       }
     }
   }
@@ -105,7 +107,7 @@ void NzIdxConverter(svd::SvdStreams<params> &streams) {
 }
 
 template <typename params>
-void InputDMA(
+void InputDMA(const int num_refinements,
     const typename params::ActivationD x_port[params::N][params::I],
     svd::SvdStreams<params> &streams,
     svd::SvdBuffers<params> &buffers) {
@@ -127,7 +129,7 @@ void InputDMA(
   Stream_X_Tiles:
   for (int ii = 0; ii < params::N; ++ii) {
 #pragma HLS UNROLL
-    for (int i = 0; i < params::R; ++i) {
+    for (int i = 0; i < num_refinements; ++i) {
       for (int k = 0; k < params::I / params::Tu; ++k) {
   #pragma HLS PIPELINE II=1
         for (int j = 0; j < params::PeU; ++j) {
@@ -187,7 +189,7 @@ void SvdInDMA(
   }
   U_Dispatcher<params>(u_port, streams);
   V_Dispatcher<params>(v_port, streams);
-  InputDMA<params>(x_port, streams, buffers);
+  InputDMA<params>(params::R, x_port, streams, buffers);
 }
 
 template <typename params>
@@ -205,8 +207,6 @@ void SvdOutDMA(
     }
   }
 }
-
-namespace svd {
 
 template <int NumIter, int NumTiles, int NumGates>
 void ZeroTileCombination2LstmDMA(const ap_uint<NumTiles> *comb_port,
