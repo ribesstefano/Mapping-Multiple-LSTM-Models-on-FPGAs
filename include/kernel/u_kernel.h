@@ -6,6 +6,9 @@
 
 #include "hls_stream.h"
 #include "assert.h"
+#ifdef __VITIS_HLS__
+#include "hls_vector.h"
+#endif
 
 namespace svd {
 
@@ -380,5 +383,34 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
 
 } // svd
 
+namespace testu {
+
+static const int kNumInputs = 2;
+static const int kInputSize = 256;
+static const int Tu = 8;
+// NOTE: The rest of the parameters are unused for now.
+static const int kDummySize = 1;
+static const int kDummyRefinements = 1;
+static const int Tv = 1;
+static const int ZTu = 0;
+static const int ZTv = 0;
+static const int G = 4;
+
+typedef svd::SvdParameters<kNumInputs, kInputSize, kDummySize, kDummyRefinements,
+    Tu, Tv, ZTu, ZTv, G, svd::ActivationD, svd::WeightD, svd::AccumD> params;
+
+} // testu
+
+#ifndef __VITIS_HLS__
+void HlsKernelU(const int num_refinements,
+  const typename testu::params::ActivationD x_port[testu::params::N][testu::params::I],
+  const typename testu::params::UPortD u_port[testu::params::R * testu::params::PrunedSizeU],
+  typename testu::params::ActivationD xu_port[testu::params::N][testu::params::G * testu::params::R]);
+#else
+void HlsKernelU(const int num_refinements,
+  hls::vector<typename testu::params::ActivationD, testu::params::N>* x_port,
+  hls::vector<typename testu::params::ActivationD, testu::params::G>* u_port,
+  hls::vector<typename testu::params::ActivationD, testu::params::N>* xu_port);
+#endif
 
 #endif // end KERNEL_U_KERNEL_H_

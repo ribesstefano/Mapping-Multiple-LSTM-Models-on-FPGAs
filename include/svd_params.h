@@ -76,7 +76,6 @@ public:
   typename params::UnzIdxS tile_idx_stream[params::N][params::G][params::PeU];
 
   SvdStreams() {
-#ifndef __VITIS_HLS__
 #pragma HLS STREAM depth=2 variable=this->x
 #pragma HLS STREAM depth=2 variable=this->nz_u
 #pragma HLS STREAM depth=2 variable=this->nz_v
@@ -105,7 +104,6 @@ public:
 #pragma HLS ARRAY_PARTITION complete dim=0 variable=this->nz_u_idx
 #pragma HLS ARRAY_PARTITION complete dim=0 variable=this->nz_v_idx
 #pragma HLS ARRAY_PARTITION variable=this->tile_idx_stream complete dim=0
-#endif
   };
   ~SvdStreams() {};
 
@@ -118,10 +116,8 @@ public:
   typename params::ActivationD x[params::N][params::Tu][params::I / params::Tu];
 
   SvdBuffers() {
-#ifndef __VITIS_HLS__
 #pragma HLS ARRAY_PARTITION variable=x complete dim=1
 #pragma HLS ARRAY_PARTITION variable=x complete dim=2
-#endif
 #pragma HLS RESOURCE variable=x core=RAM_2P_BRAM
   };
   ~SvdBuffers() {};
