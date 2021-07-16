@@ -1,21 +1,30 @@
 cmake_minimum_required(VERSION 3.10)
 # Set the project name
 project(Svd VERSION 1.0)
-# Specify the C++ standard
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# To locate "custom"/manually added libraries
+# To locate "custom", i.e. manually added, libraries
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
-# Locate libraries and headers (see Files in ./cmake/Modules/)
-# find_package(Vitis REQUIRED)
-find_package(Vivado REQUIRED)
+# Locate external libraries and headers (see Files in ./cmake/Modules/)
+# Search for HLS: if Vitis is found, use C++14, else fall back to C++11.
+find_package(Vitis)
+if(DEFINED VITIS_INCLUDE_DIRS)
+	# Specify the C++14 standard
+	message("[INFO] Vitis HLS FOUND.")
+	set(CMAKE_CXX_STANDARD 14)
+	set(CMAKE_CXX_STANDARD_REQUIRED True)
+	set(HLS_INCLUDE_DIRS ${VITIS_INCLUDE_DIRS})
+	add_compile_definitions(__VITIS_HLS__)
+else()
+	find_package(Vivado REQUIRED)
+	# Specify the C++11 standard
+	set(CMAKE_CXX_STANDARD 11)
+	set(CMAKE_CXX_STANDARD_REQUIRED True)
+	set(HLS_INCLUDE_DIRS ${VIVADO_INCLUDE_DIRS})
+endif()
 find_package(OpenCv REQUIRED)
 
-# set(HLS_INCLUDE_DIRS ${VITIS_INCLUDE_DIRS})
-# set(HLS_INCLUDE_DIRS ${VIVADO_INCLUDE_DIRS})
-# message(${HLS_INCLUDE_DIRS})
+message(${HLS_INCLUDE_DIRS})
 
 # Add all definitions
 if (WIN32)

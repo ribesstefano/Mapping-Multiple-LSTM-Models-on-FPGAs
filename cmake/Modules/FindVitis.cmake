@@ -1,7 +1,7 @@
 if (WIN32)
-	set(VITIS_INCLUDE_DIRS D:/Programs/Xilinx/Vitis_HLS/2020.2/include/)
+	set(VITIS_INCLUDE_DIRS D:/Programs/Xilinx/Vitis_HLS/2021.1/include/)
 else()
-	set(VITIS_INCLUDE_DIRS /mnt/d/Programs/Xilinx/Vitis_HLS/2020.2/include/)
+	set(VITIS_INCLUDE_DIRS /mnt/d/Programs/Xilinx/Vitis_HLS/2021.1/include/)
 endif()
 
 # NOTE: It handles the REQUIRED, QUIET and version-related arguments of find_package.

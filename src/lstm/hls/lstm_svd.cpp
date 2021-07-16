@@ -181,6 +181,30 @@ void SvdModel2LstmSDSoCV2(
 #pragma HLS ARRAY_PARTITION variable=h1_streams complete dim=0
 #pragma HLS ARRAY_PARTITION variable=h2_streams complete dim=0
   // ===========================================================================
+  // Zero Combinations DMA
+  // ===========================================================================
+  // NOTE: We divide the FIFO depths by a certain factor to save BRAMs. Be aware
+  // that a wrong factor could lead to deadlocks!
+  const int kFIFOdepthDivider = 8;
+  const int kStreamDepthIter = kNumIter / kFIFOdepthDivider;
+  hlsutils::Log(0, "[INFO] DATAFLOW passed.");
+  hls::stream<ap_uint<kNumTilesV> > nz_v_stream1_cur[kNumCurGates];
+  hls::stream<ap_uint<kNumTilesV> > nz_v_stream1_rec[kNumRecGates];
+  hls::stream<ap_uint<kNumTilesV> > nz_v_stream2_cur[kNumCurGates];
+  hls::stream<ap_uint<kNumTilesV> > nz_v_stream2_rec[kNumRecGates];
+  hls::stream<ap_uint<kNumTilesU> > nz_u_stream1_cur[kNumCurGates];
+  hls::stream<ap_uint<kNumTilesU> > nz_u_stream1_rec[kNumRecGates];
+  hls::stream<ap_uint<kNumTilesU> > nz_u_stream2_cur[kNumCurGates];
+  hls::stream<ap_uint<kNumTilesU> > nz_u_stream2_rec[kNumRecGates];
+#pragma HLS ARRAY_PARTITION variable=nz_v_stream1_cur complete
+#pragma HLS ARRAY_PARTITION variable=nz_v_stream1_rec complete
+#pragma HLS ARRAY_PARTITION variable=nz_v_stream2_cur complete
+#pragma HLS ARRAY_PARTITION variable=nz_v_stream2_rec complete
+#pragma HLS ARRAY_PARTITION variable=nz_u_stream1_cur complete
+#pragma HLS ARRAY_PARTITION variable=nz_u_stream1_rec complete
+#pragma HLS ARRAY_PARTITION variable=nz_u_stream2_cur complete
+#pragma HLS ARRAY_PARTITION variable=nz_u_stream2_rec complete
+  // ===========================================================================
   // Streams Depth Sizing
   // ===========================================================================
   // NOTE: We divide the FIFO depths by a certain factor to save BRAMs. Be aware
@@ -190,6 +214,17 @@ void SvdModel2LstmSDSoCV2(
   const int kStreamDepthURecurrent = kNumIter * kNumElemsTileURecur / kFIFOdepthFactor == 0 ? 2 : kNumIter * kNumElemsTileURecur / kFIFOdepthFactor;
   const int kStreamDepthV = kNumIter * kNumTilesV / kFIFOdepthFactor == 0 ? 2 : kNumIter * kNumTilesV / kFIFOdepthFactor;
   const int kTileAccStreamDepth = 2;
+  const int kOutStreamDepth = 2; // kNumIter * kNumElemsTileV;
+
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream1_cur
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream1_rec
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream2_cur
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream2_rec
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream1_cur
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream1_rec
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream2_cur
+#pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream2_rec
+
 #pragma HLS STREAM variable=x1_streams depth=kStreamDepthUCurrent dim=2
 #pragma HLS STREAM variable=x2_streams depth=kStreamDepthUCurrent dim=2
 #pragma HLS STREAM variable=h1_streams depth=kStreamDepthURecurrent dim=2
@@ -217,39 +252,6 @@ void SvdModel2LstmSDSoCV2(
 #pragma HLS STREAM variable=rec_out1_streams depth=kOutStreamDepth dim=2
 #pragma HLS STREAM variable=rec_out2_streams depth=kOutStreamDepth dim=2
   hlsutils::Log(0, "[INFO] Depth sizing passed.");
-
-  // ===========================================================================
-  // Zero Combinations DMA
-  // ===========================================================================
-  // NOTE: We divide the FIFO depths by a certain factor to save BRAMs. Be aware
-  // that a wrong factor could lead to deadlocks!
-  const int kFIFOdepthDivider = 8;
-  const int kStreamDepthIter = kNumIter / kFIFOdepthDivider;
-  hlsutils::Log(0, "[INFO] DATAFLOW passed.");
-  hls::stream<ap_uint<kNumTilesV> > nz_v_stream1_cur[kNumCurGates];
-  hls::stream<ap_uint<kNumTilesV> > nz_v_stream1_rec[kNumRecGates];
-  hls::stream<ap_uint<kNumTilesV> > nz_v_stream2_cur[kNumCurGates];
-  hls::stream<ap_uint<kNumTilesV> > nz_v_stream2_rec[kNumRecGates];
-  hls::stream<ap_uint<kNumTilesU> > nz_u_stream1_cur[kNumCurGates];
-  hls::stream<ap_uint<kNumTilesU> > nz_u_stream1_rec[kNumRecGates];
-  hls::stream<ap_uint<kNumTilesU> > nz_u_stream2_cur[kNumCurGates];
-  hls::stream<ap_uint<kNumTilesU> > nz_u_stream2_rec[kNumRecGates];
-#pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream1_cur
-#pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream1_rec
-#pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream2_cur
-#pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream2_rec
-#pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream1_cur
-#pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream1_rec
-#pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream2_cur
-#pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream2_rec
-#pragma HLS ARRAY_PARTITION variable=nz_v_stream1_cur complete
-#pragma HLS ARRAY_PARTITION variable=nz_v_stream1_rec complete
-#pragma HLS ARRAY_PARTITION variable=nz_v_stream2_cur complete
-#pragma HLS ARRAY_PARTITION variable=nz_v_stream2_rec complete
-#pragma HLS ARRAY_PARTITION variable=nz_u_stream1_cur complete
-#pragma HLS ARRAY_PARTITION variable=nz_u_stream1_rec complete
-#pragma HLS ARRAY_PARTITION variable=nz_u_stream2_cur complete
-#pragma HLS ARRAY_PARTITION variable=nz_u_stream2_rec complete
 
   hlsutils::Log(0, "Starting ZeroTileCombinationDMA");
   hlsutils::Log(0, "Starting ZeroTileCombinationDMA");
