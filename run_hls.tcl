@@ -9,14 +9,6 @@ cd hls
 
 set USE_VITIS 1
 # ==============================================================================
-# Top function name, testbench file
-# ==============================================================================
-# NOTE: The namespace must also be included.
-set TOP "HlsKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
-set TB ""
-set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
-set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
-# ==============================================================================
 # Setups
 # ==============================================================================
 set reset_project 1
@@ -49,10 +41,18 @@ if {${use_zedboard}} {
 # ==============================================================================
 
 # ==============================================================================
+# Top function name, testbench file
+# ==============================================================================
+# NOTE: The namespace must also be included.
+set TOP "HlsVectorKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
+set TB ""
+set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
+set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
+# ==============================================================================
 # Project name
 # ==============================================================================
 set prefix ":"
-set TOP_NO_NAMESPACE "HlsKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
+set TOP_NO_NAMESPACE "HlsVectorKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
 puts ${TOP_NO_NAMESPACE}
 set PROJECT_NAME "vitis_${board_name}_${TOP_NO_NAMESPACE}"
 # ==============================================================================

@@ -209,7 +209,97 @@ void HlsKernelU(const int num_refinements,
     }
   }
 #endif
+}
 
+
+
+void HlsVectorKernelU(const int num_refinements,
+  hls::vector<typename testu::params::ActivationD, testu::params::Tu>* x_port,
+  hls::vector<typename testu::params::ActivationD, testu::params::Tu>* u_port,
+  hls::vector<typename testu::params::ActivationD, testu::params::N>* xu_port) {
+#pragma HLS INTERFACE s_axilite port=return bundle=ctrl
+#pragma HLS INTERFACE s_axilite port=num_refinements bundle=ctrl
+#pragma HLS INTERFACE m_axi port=x_port offset=slave bundle=x_dmem depth=testu::params::N*testu::params::I/testu::params::Tu
+#pragma HLS INTERFACE m_axi port=u_port offset=slave bundle=u_dmem depth=num_refinements*testu::params::PrunedSizeU
+#pragma HLS INTERFACE m_axi port=xu_port offset=slave bundle=xu_dmem depth=num_refinements*testu::params::G
+#pragma HLS DATAFLOW
+  typedef hls::vector<typename testu::params::ActivationD, testu::params::Tu> VectTuAct_Type;
+  typedef hls::vector<typename testu::params::ActivationD, testu::params::N> VectN_Type;
+  const int R_test = 8;
+  const int kNumTilesU = testu::params::I / testu::params::Tu;
+
+  hls::stream<VectTuAct_Type> x_streams[testu::params::N];
+  hls::stream<VectTuAct_Type> u_streams[testu::params::G];
+  hls::stream<VectTuAct_Type> xu_streams[testu::params::N][testu::params::G];
+  VectTuAct_Type x_buffer[testu::params::N][kNumTilesU];
+  VectTuAct_Type xu[testu::params::N][testu::params::G];
+#pragma HLS ARRAY_PARTITION variable=x_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=u_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=xu_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=1
+#pragma HLS ARRAY_PARTITION variable=xu complete dim=0
+  
+  Store_X_Buffer:
+  for (int i = 0; i < testu::params::N; ++i) {
+    for (int j = 0; j < kNumTilesU; ++j) {
+#pragma HLS PIPELINE II=1
+#pragma HLS LOOP_FLATTEN
+      x_buffer[i][j] = x_port[i * kNumTilesU + j];
+    }
+  }
+  Stream_X_Tiles:
+  for (int i = 0; i < R_test; ++i) {
+    for (int j = 0; j < kNumTilesU; ++j) {
+#pragma HLS PIPELINE II=1
+      for (int k = 0; k < testu::params::N; ++k) {
+        x_streams[k] << x_buffer[k][j];
+      }
+    }
+  }
+  U_Dispatcher:
+  for (int i = 0; i < R_test; ++i) {
+    for (int j = 0; j < kNumTilesU; ++j) {
+      for (int k = 0; k < testu::params::G; ++k) {
+#pragma HLS PIPELINE II=1
+        u_streams[k] << u_port[i * kNumTilesU * testu::params::G + j * testu::params::G + k];
+      }
+    }
+  }
+  U_Kernel:
+  for (int i = 0; i < R_test; ++i) {
+    for (int j = 0; j < kNumTilesU; ++j) {
+#pragma HLS PIPELINE II=1
+      VectTuAct_Type x[testu::params::N];
+#pragma HLS ARRAY_PARTITION variable=x complete dim=0
+      for (int ii = 0; ii < testu::params::N; ++ii) {
+        x[ii] = x_streams[ii].read();
+      }
+      for (int g = 0; g < testu::params::G; ++g) {
+        VectTuAct_Type u = u_streams[g].read();
+        for (int ii = 0; ii < testu::params::N; ++ii) {
+          if (j == 0) {
+            xu[ii][g] = VectTuAct_Type(0);
+          }
+          xu[ii][g] += u * x[ii][j];
+          if (j == kNumTilesU - 1) {
+            xu_streams[ii][g] << xu[ii][g];
+          }
+        }
+      }
+    }
+  }
+  XU_DMA:
+  for (int i = 0; i < R_test; ++i) {
+#pragma HLS PIPELINE II=1
+    for (int j = 0; j < testu::params::G; ++j) {
+      VectN_Type xu;
+      for (int k = 0; k < testu::params::N; ++k) {
+        VectTuAct_Type xu = xu_streams[k][j].read();
+        xu[k] = xu.reduce_add();
+      }
+      xu_port[i * testu::params::G + j] = xu;
+    }
+  }
 }
 #endif
 
