@@ -7,8 +7,8 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
 # Locate external libraries and headers (see Files in ./cmake/Modules/)
 # Search for HLS: if Vitis is found, use C++14, else fall back to C++11.
-find_package(Vitis)
-if(DEFINED VITIS_INCLUDE_DIRS)
+find_package(Vitis REQUIRED)
+if (Vitis_FOUND)
 	# Specify the C++14 standard
 	message("[INFO] Vitis HLS FOUND.")
 	set(CMAKE_CXX_STANDARD 14)
@@ -16,6 +16,7 @@ if(DEFINED VITIS_INCLUDE_DIRS)
 	set(HLS_INCLUDE_DIRS ${VITIS_INCLUDE_DIRS})
 	add_compile_definitions(__VITIS_HLS__)
 else()
+	message("[INFO] Vivado HLS FOUND.")
 	find_package(Vivado REQUIRED)
 	# Specify the C++11 standard
 	set(CMAKE_CXX_STANDARD 11)

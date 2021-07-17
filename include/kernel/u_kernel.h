@@ -387,7 +387,7 @@ namespace testu {
 
 static const int kNumInputs = 2;
 static const int kInputSize = 256;
-static const int Tu = 8;
+static const int Tu = 4;
 // NOTE: The rest of the parameters are unused for now.
 static const int kDummySize = 1;
 static const int kDummyRefinements = 1;
