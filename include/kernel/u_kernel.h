@@ -411,6 +411,11 @@ void HlsKernelU(const int num_refinements,
   hls::vector<typename testu::params::ActivationD, testu::params::N>* x_port,
   hls::vector<typename testu::params::ActivationD, testu::params::G>* u_port,
   hls::vector<typename testu::params::ActivationD, testu::params::N>* xu_port);
+
+void HlsVectorKernelU(const int num_refinements,
+  hls::vector<typename testu::params::ActivationD, testu::params::Tu>* x_port,
+  hls::vector<typename testu::params::ActivationD, testu::params::Tu>* u_port,
+  hls::vector<typename testu::params::ActivationD, testu::params::N>* xu_port);
 #endif
 
 #endif // end KERNEL_U_KERNEL_H_
