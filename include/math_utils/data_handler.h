@@ -136,7 +136,7 @@ public:
             this->z_idx_.push_back(j);
           } else {
             for (int k = 0; k < this->num_tile_elems_; ++k) {
-              FloatType tmp = rand();
+              FloatType tmp = 0.00001 * rand();
               this->data_.push_back(tmp);
               this->pruned_data_.push_back(tmp);
               this->fix_data_.push_back(FixType(tmp));
@@ -148,7 +148,7 @@ public:
       }
     } else {
       for (int i = 0; i < this->total_size_; ++i) {
-        FloatType tmp = rand();
+        FloatType tmp = 0.00001 * rand();
         this->data_.push_back(tmp);
         this->pruned_data_.push_back(tmp);
         this->fix_data_.push_back(FixType(tmp));

@@ -314,7 +314,7 @@ private:
     for (int i = 0; i < num_inputs; ++i) {
       fix_y[i] = svd::AllocateContiguously<FixType>(size);
       for (int j = 0; j < size; ++j) {
-        FloatType tmp = init_random ? rand() : 0;
+        FloatType tmp = init_random ? 0.00001 * rand() : 0;
         y[i][j] = tmp;
         fix_y[i][j] = FixType(tmp);
       }

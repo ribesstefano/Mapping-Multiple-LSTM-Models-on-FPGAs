@@ -220,11 +220,12 @@ void HlsVectorKernelU(const int num_refinements,
 #pragma HLS INTERFACE s_axilite port=return bundle=ctrl
 #pragma HLS INTERFACE s_axilite port=num_refinements bundle=ctrl
 #pragma HLS INTERFACE m_axi port=x_port offset=slave bundle=x_dmem depth=testu::params::N*testu::params::I/testu::params::Tu
-#pragma HLS INTERFACE m_axi port=u_port offset=slave bundle=u_dmem depth=num_refinements*testu::params::PrunedSizeU
+#pragma HLS INTERFACE m_axi port=u_port offset=slave bundle=u_dmem depth=num_refinements*testu::params::PrunedSizeU/testu::params::Tu
 #pragma HLS INTERFACE m_axi port=xu_port offset=slave bundle=xu_dmem depth=num_refinements*testu::params::G
 #pragma HLS DATAFLOW
-  typedef hls::vector<typename testu::params::ActivationD, testu::params::Tu> VectTuAct_Type;
-  typedef hls::vector<typename testu::params::ActivationD, testu::params::N> VectN_Type;
+  typedef typename testu::params::ActivationD ActivationType;
+  typedef hls::vector<ActivationType, testu::params::Tu> VectTuAct_Type;
+  typedef hls::vector<ActivationType, testu::params::N> VectN_Type;
   const int R_test = 8;
   const int kNumTilesU = testu::params::I / testu::params::Tu;
 
@@ -256,12 +257,14 @@ void HlsVectorKernelU(const int num_refinements,
       }
     }
   }
-  U_Dispatcher:
+
+  U_DMA:
   for (int i = 0; i < R_test; ++i) {
     for (int j = 0; j < kNumTilesU; ++j) {
       for (int k = 0; k < testu::params::G; ++k) {
 #pragma HLS PIPELINE II=1
-        u_streams[k] << u_port[i * kNumTilesU * testu::params::G + j * testu::params::G + k];
+        int u_idx = i * kNumTilesU * testu::params::G + j * testu::params::G + k;
+        u_streams[k] << u_port[u_idx];
       }
     }
   }
@@ -272,7 +275,7 @@ void HlsVectorKernelU(const int num_refinements,
       VectTuAct_Type x[testu::params::N];
 #pragma HLS ARRAY_PARTITION variable=x complete dim=0
       for (int ii = 0; ii < testu::params::N; ++ii) {
-        x[ii] = x_streams[ii].read();
+        x_streams[ii] >> x[ii];
       }
       for (int g = 0; g < testu::params::G; ++g) {
         VectTuAct_Type u = u_streams[g].read();
@@ -292,12 +295,11 @@ void HlsVectorKernelU(const int num_refinements,
   for (int i = 0; i < R_test; ++i) {
 #pragma HLS PIPELINE II=1
     for (int j = 0; j < testu::params::G; ++j) {
-      VectN_Type xu;
+      VectN_Type xu_out;
       for (int k = 0; k < testu::params::N; ++k) {
-        VectTuAct_Type xu = xu_streams[k][j].read();
-        xu[k] = xu.reduce_add();
+        xu_out[k] = xu_streams[k][j].read().reduce_add();
       }
-      xu_port[i * testu::params::G + j] = xu;
+      xu_port[i * testu::params::G + j] = xu_out;
     }
   }
 }
