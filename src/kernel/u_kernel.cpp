@@ -166,6 +166,8 @@ void HlsKernelU(const int num_refinements,
 #pragma HLS PIPELINE II=1
 #pragma HLS LOOP_FLATTEN
         u_streams[j] << u_port[i * testu::params::PrunedSizeU + j * testu::params::PrunedSizeU / testu::params::PeU + k];
+        hlsutils::PrintVector(
+          u_port[i * testu::params::PrunedSizeU + j * testu::params::PrunedSizeU / testu::params::PeU + k]);
       }
     }
   }
@@ -226,7 +228,7 @@ void HlsVectorKernelU(const int num_refinements,
   typedef typename testu::params::ActivationD ActivationType;
   typedef hls::vector<ActivationType, testu::params::Tu> VectTuAct_Type;
   typedef hls::vector<ActivationType, testu::params::N> VectN_Type;
-  const int R_test = 8;
+  const int R_test = num_refinements;
   const int kNumTilesU = testu::params::I / testu::params::Tu;
 
   hls::stream<VectTuAct_Type> x_streams[testu::params::N];
@@ -257,7 +259,6 @@ void HlsVectorKernelU(const int num_refinements,
       }
     }
   }
-
   U_DMA:
   for (int i = 0; i < R_test; ++i) {
     for (int j = 0; j < kNumTilesU; ++j) {
@@ -275,17 +276,17 @@ void HlsVectorKernelU(const int num_refinements,
       VectTuAct_Type x[testu::params::N];
 #pragma HLS ARRAY_PARTITION variable=x complete dim=0
       for (int ii = 0; ii < testu::params::N; ++ii) {
-        x_streams[ii] >> x[ii];
+        x[ii] = x_streams[ii].read();
       }
-      for (int g = 0; g < testu::params::G; ++g) {
-        VectTuAct_Type u = u_streams[g].read();
+      for (int k = 0; k < testu::params::G; ++k) {
+        VectTuAct_Type u = u_streams[k].read();
         for (int ii = 0; ii < testu::params::N; ++ii) {
           if (j == 0) {
-            xu[ii][g] = VectTuAct_Type(0);
+            xu[ii][k] = VectTuAct_Type(0);
           }
-          xu[ii][g] += u * x[ii][j];
+          xu[ii][k] += u * x[ii];
           if (j == kNumTilesU - 1) {
-            xu_streams[ii][g] << xu[ii][g];
+            xu_streams[ii][k] << xu[ii][k];
           }
         }
       }

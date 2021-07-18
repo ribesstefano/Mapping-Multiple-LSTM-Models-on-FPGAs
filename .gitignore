@@ -9,4 +9,5 @@ data/windows*
 vivado_hls.log
 vitis_hls.log
 hls/
+vivado/
 ./token
