@@ -3,6 +3,7 @@
 
 #include "svd_params.h"
 #include "hls_utils/hls_metaprogramming.h"
+#include "hls_utils/hls_debugging.h"
 
 #include "hls_stream.h"
 #include "assert.h"
@@ -386,7 +387,7 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
 namespace testu {
 
 static const int kNumInputs = 2;
-static const int kInputSize = 256;
+static const int kInputSize = 1024;
 static const int Tu = 4;
 // NOTE: The rest of the parameters are unused for now.
 static const int kDummySize = 1;

@@ -6,7 +6,7 @@
 
 source D:/Programs/Xilinx/Vitis_HLS/2020.2/scripts/vitis_hls/hls.tcl -notrace
 INFO: [HLS 200-10] Running 'D:/Programs/Xilinx/Vitis_HLS/2020.2/bin/unwrapped/win64.o/vitis_hls.exe'
-INFO: [HLS 200-10] For user 'ste' on host 'desktop-m9rjbi2' (Windows NT_amd64 version 6.2) on Sat Jul 17 16:12:28 +0200 2021
+INFO: [HLS 200-10] For user 'ste' on host 'desktop-m9rjbi2' (Windows NT_amd64 version 6.2) on Sun Jul 18 14:16:12 +0200 2021
 INFO: [HLS 200-10] In directory 'C:/Users/ste/phd/hls_projects/hls_svd'
 Sourcing Tcl script '.\run_hls.tcl'
 HlsVectorKernelU
@@ -52,7 +52,7 @@ INFO: [XFORM 203-701] Set the default channel type in dataflow to FIFO.
 INFO: [HLS 200-1510] Running: csynth_design 
 WARNING: [HLS 200-40] Cannot find source file C:/Users/ste/phd/hls_projects/hls_svd/include/dma/svd_parameters.h; skipping it.
 WARNING: [HLS 200-40] Cannot find source file C:/Users/ste/phd/hls_projects/hls_svd/src/hls_utils/hls_metaprogramming.cpp; skipping it.
-INFO: [HLS 200-111] Finished File checks and directory preparation: CPU user time: 0 seconds. CPU system time: 1 seconds. Elapsed time: 0.043 seconds; current allocated memory: 472.830 MB.
+INFO: [HLS 200-111] Finished File checks and directory preparation: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.038 seconds; current allocated memory: 472.830 MB.
 INFO: [HLS 200-10] Analyzing design file 'C:/Users/ste/phd/hls_projects/hls_svd/src/hls_utils/adder_tree.cpp' ... 
 WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:64:9
 WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:68:9
@@ -73,26 +73,28 @@ WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical 
 Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
 WARNING: [HLS 214-169] There are a total of 4 such instances of non-canonical statements in the dataflow region: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:59:2
 Resolution: For help on HLS 214-169 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-169.html
-WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:242:2
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:245:2
 Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
-WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:250:3
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:253:3
 Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
-WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:259:3
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:262:3
 Resolution: For help on HLS 214-114 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-114.html
-WARNING: [HLS 214-169] There are a total of 5 such instances of non-canonical statements in the dataflow region: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:226:2
+WARNING: [HLS 214-169] There are a total of 5 such instances of non-canonical statements in the dataflow region: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:228:2
 Resolution: For help on HLS 214-169 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=214-169.html
 WARNING: [HLS 200-471] Dataflow form checks found 8 issue(s) in file C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp
 Resolution: For help on HLS 200-471 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=200-471.html
 WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\svd_params.h:121:9
-WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:39:9
-WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:99:9
+WARNING: [HLS 207-5301] unused parameter 'verbose_level': C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/hls_debugging.h:21:20
+WARNING: [HLS 207-5301] unused parameter 'str': C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/hls_debugging.h:21:44
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:40:9
 WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:100:9
-WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:185:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:101:9
 WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:186:9
-WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:193:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:187:9
 WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:194:9
-WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:222:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:195:9
 WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:223:9
+WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\kernel/u_kernel.h:224:9
 WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:64:9
 WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:68:9
 WARNING: [HLS 207-5510] 'Resource pragma' is deprecated, and it will be removed in future release. It is suggested to replace it with 'bind_op/bind_storage pragma'.: C:/Users/ste/phd/hls_projects/hls_svd/include//.\hls_utils/adder_tree.h:137:9
@@ -105,7 +107,7 @@ WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used i
 WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:55:9
 WARNING: [HLS 207-5524] Ignore interface attribute or pragma which is not used in top function: C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:54:9
 WARNING: [HLS 207-5335] Only for/while loops support the 'Unroll ': D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:70:9
-INFO: [HLS 200-111] Finished Source Code Analysis and Preprocessing: CPU user time: 2 seconds. CPU system time: 0 seconds. Elapsed time: 21.174 seconds; current allocated memory: 86.429 MB.
+INFO: [HLS 200-111] Finished Source Code Analysis and Preprocessing: CPU user time: 3 seconds. CPU system time: 0 seconds. Elapsed time: 22.784 seconds; current allocated memory: 86.578 MB.
 INFO: [HLS 200-777] Using interface defaults for 'Vivado' flow target.
 INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::write(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' into 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::operator<<(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_stream_39.h:129:9)
 INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::read(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>&)' into 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::read()' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_stream_39.h:156:9)
@@ -120,7 +122,6 @@ INFO: [HLS 214-131] Inlining function 'ap_int_base<32, false>::ap_int_base(int)'
 INFO: [HLS 214-131] Inlining function 'ap_fixed_base<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0>& ap_fixed_base<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0>::operator=<32, 32, true, (ap_q_mode)5, (ap_o_mode)3, 0>(ap_fixed_base<32, 32, true, (ap_q_mode)5, (ap_o_mode)3, 0> const&)' into 'ap_fixed_base<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0>::ap_fixed_base(int)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\ap_fixed_base.h:541:146)
 INFO: [HLS 214-131] Inlining function 'ap_fixed_base<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0>::ap_fixed_base(int)' into 'ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>::ap_fixed(int)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\ap_fixed.h:183:59)
 INFO: [HLS 214-131] Inlining function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::pragma() const' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::vector(ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0> const&)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:68:5)
-INFO: [HLS 214-131] Inlining function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::pragma() const' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:92:5)
 INFO: [HLS 214-131] Inlining function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::pragma() const' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long) const' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:96:5)
 INFO: [HLS 214-131] Inlining function 'ap_fixed<32, 14, (ap_q_mode)5, (ap_o_mode)3, 0>::ap_fixed<32, 14, true, (ap_q_mode)5, (ap_o_mode)3, 0>(ap_fixed_base<32, 14, true, (ap_q_mode)5, (ap_o_mode)3, 0> const&)' into 'ap_fixed_base<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0>::RType<16, 7, true>::mult ap_fixed_base<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0>::operator*<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0>(ap_fixed_base<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0> const&) const' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\ap_fixed_base.h:1119:12)
 INFO: [HLS 214-131] Inlining function 'ap_fixed_base<32, 14, true, (ap_q_mode)5, (ap_o_mode)3, 0>::operator!() const' into 'ap_fixed_base<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0>& ap_fixed_base<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0>::operator=<32, 14, true, (ap_q_mode)5, (ap_o_mode)3, 0>(ap_fixed_base<32, 14, true, (ap_q_mode)5, (ap_o_mode)3, 0> const&)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\ap_fixed_base.h:698:9)
@@ -152,110 +153,110 @@ INFO: [HLS 214-131] Inlining function 'ap_fixed_base<16, 7, true, (ap_q_mode)5, 
 INFO: [HLS 214-131] Inlining function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::pragma() const' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator+=(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:137:58)
 INFO: [HLS 214-131] Inlining function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::pragma() const' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::reduce_add() const' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:159:26)
 INFO: [HLS 214-131] Inlining function 'ap_fixed_base<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0>& ap_fixed_base<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0>::operator+=<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0>(ap_fixed_base<16, 7, true, (ap_q_mode)5, (ap_o_mode)2, 0> const&)' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::reduce_add() const' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:159:6)
-INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::stream()' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231:31)
-INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::stream()' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:232:31)
-INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::stream()' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:233:31)
-INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::read()' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:297:46)
-INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::operator<<(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:285:31)
-INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::operator<<(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:255:22)
-INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::operator<<(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:264:15)
-INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::read()' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:275:31)
-INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::read()' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:278:41)
-INFO: [HLS 214-131] Inlining function 'ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>::ap_fixed(int)' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:281:40)
+INFO: [HLS 214-131] Inlining function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>::pragma() const' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>::operator[](unsigned long)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:92:5)
+INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::stream()' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234:31)
+INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::stream()' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:235:31)
+INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::stream()' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:236:31)
+INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::read()' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:301:38)
+INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::operator<<(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:289:31)
+INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::operator<<(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:258:22)
+INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::operator<<(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:268:22)
+INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::read()' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:279:31)
+INFO: [HLS 214-131] Inlining function 'ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>::ap_fixed(int)' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:285:40)
+INFO: [HLS 214-131] Inlining function 'hls::stream<hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, 0>::read()' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:282:41)
 INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_137_1' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:137:86) in function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator+=' completely with a factor of 4 (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:137:86)
 INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_159_1' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:159:71) in function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::reduce_add' completely with a factor of 3 (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:159:71)
 INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_139_1' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:139:86) in function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator*=' completely with a factor of 4 (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:139:86)
 INFO: [HLS 214-178] Inlining function 'std::__array_traits<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::_S_ptr(ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0> const (&) [4])' into 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::data()' (D:/Programs/Xilinx/Vitis_HLS/2020.2/tps/mingw/6.2.0/win64.o/nt\lib\gcc\x86_64-w64-mingw32\6.2.0\include\c++\array:231:0)
 INFO: [HLS 214-178] Inlining function 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::data()' into 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::begin()' (D:/Programs/Xilinx/Vitis_HLS/2020.2/tps/mingw/6.2.0/win64.o/nt\lib\gcc\x86_64-w64-mingw32\6.2.0\include\c++\array:123:0)
 INFO: [HLS 214-178] Inlining function 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::data()' into 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::end()' (D:/Programs/Xilinx/Vitis_HLS/2020.2/tps/mingw/6.2.0/win64.o/nt\lib\gcc\x86_64-w64-mingw32\6.2.0\include\c++\array:131:0)
-INFO: [HLS 214-178] Inlining function 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::begin()' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::vector(ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0> const&) (.6)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:67:0)
-INFO: [HLS 214-178] Inlining function 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::end()' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::vector(ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0> const&) (.6)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:67:0)
-INFO: [HLS 214-178] Inlining function 'std::__array_traits<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::_S_ref(ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0> const (&) [4], unsigned long)' into 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/tps/mingw/6.2.0/win64.o/nt\lib\gcc\x86_64-w64-mingw32\6.2.0\include\c++\array:182:0)
-INFO: [HLS 214-178] Inlining function 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long)' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:91:0)
 INFO: [HLS 214-178] Inlining function 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::begin()' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::vector(ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0> const&)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:67:0)
 INFO: [HLS 214-178] Inlining function 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::end()' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::vector(ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0> const&)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:67:0)
 INFO: [HLS 214-178] Inlining function 'std::__array_traits<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::_S_ref(ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0> const (&) [4], unsigned long)' into 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long) const' (D:/Programs/Xilinx/Vitis_HLS/2020.2/tps/mingw/6.2.0/win64.o/nt\lib\gcc\x86_64-w64-mingw32\6.2.0\include\c++\array:186:0)
 INFO: [HLS 214-178] Inlining function 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long) const' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long) const' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:95:0)
+INFO: [HLS 214-178] Inlining function 'std::__array_traits<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::_S_ref(ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0> const (&) [4], unsigned long)' into 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/tps/mingw/6.2.0/win64.o/nt\lib\gcc\x86_64-w64-mingw32\6.2.0\include\c++\array:182:0)
 INFO: [HLS 214-178] Inlining function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long) const' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator*=(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:139:0)
 INFO: [HLS 214-178] Inlining function 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long)' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator*=(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:139:0)
 INFO: [HLS 214-178] Inlining function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator*=(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' into 'hls::operator*(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:206:0)
 INFO: [HLS 214-178] Inlining function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long) const' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator+=(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:137:0)
 INFO: [HLS 214-178] Inlining function 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long)' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator+=(hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul> const&)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:137:0)
 INFO: [HLS 214-178] Inlining function 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[](unsigned long) const' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::reduce_add() const' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:159:0)
+INFO: [HLS 214-178] Inlining function 'std::__array_traits<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>::_S_ref(ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0> const (&) [2], unsigned long)' into 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>::operator[](unsigned long)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/tps/mingw/6.2.0/win64.o/nt\lib\gcc\x86_64-w64-mingw32\6.2.0\include\c++\array:182:0)
+INFO: [HLS 214-178] Inlining function 'std::array<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>::operator[](unsigned long)' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>::operator[](unsigned long)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:91:0)
 WARNING: [HLS 214-250] Ignore array partition/reshape applied to 'xu' in struct. Please apply disaggregate or aggregate pragma.
 WARNING: [HLS 214-250] Ignore array partition/reshape applied to 'x' in struct. Please apply disaggregate or aggregate pragma.
 WARNING: [HLS 214-250] Ignore array partition/reshape applied to 'xu_streams' in struct. Please apply disaggregate or aggregate pragma.
 WARNING: [HLS 214-250] Ignore array partition/reshape applied to 'u_streams' in struct. Please apply disaggregate or aggregate pragma.
 WARNING: [HLS 214-250] Ignore array partition/reshape applied to 'x_streams' in struct. Please apply disaggregate or aggregate pragma.
-WARNING: [HLS 214-205] The INTERFACE pragma must have a max_widen_bitwidth setting that is both a power of 2 and in the range [0, 1024]. The current value of '0' will be ignored, in 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:219:0)
-INFO: [HLS 214-115] Multiple burst reads of length 64 and bit width 64 in loop 'VITIS_LOOP_244_1'(C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:244:23) has been inferred on port 'x_dmem' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:244:23)
-INFO: [HLS 214-131] Inlining function '_llvm.fpga.unpack.none.s_struct.ap_fixeds.i16' into 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::vector(ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0> const&) (.1)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:71:7)
+WARNING: [HLS 214-205] The INTERFACE pragma must have a max_widen_bitwidth setting that is both a power of 2 and in the range [0, 1024]. The current value of '0' will be ignored, in 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:221:0)
+INFO: [HLS 214-115] Multiple burst reads of length 256 and bit width 64 in loop 'VITIS_LOOP_247_1'(C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:247:23) has been inferred on port 'x_dmem' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:247:23)
 INFO: [HLS 214-131] Inlining function '_llvm.fpga.unpack.none.s_class.hls::vector.0s.i64' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_stream_39.h:174:9)
-INFO: [HLS 200-111] Finished Compiling Optimization and Transform: CPU user time: 2 seconds. CPU system time: 0 seconds. Elapsed time: 8.542 seconds; current allocated memory: 89.302 MB.
-INFO: [HLS 200-111] Finished Checking Pragmas: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.014 seconds; current allocated memory: 89.304 MB.
+INFO: [HLS 214-131] Inlining function '_llvm.fpga.pack.none.i32.s_class.hls::vectors' into 'HlsVectorKernelU(int, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>*, hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>*)' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:303:41)
+INFO: [HLS 200-111] Finished Compiling Optimization and Transform: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 8.727 seconds; current allocated memory: 89.364 MB.
+INFO: [HLS 200-111] Finished Checking Pragmas: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.014 seconds; current allocated memory: 89.365 MB.
 INFO: [HLS 200-10] Starting code transformations ...
-INFO: [XFORM 203-603] Inlining function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[]' into 'HlsVectorKernelU' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:298).
-INFO: [HLS 200-111] Finished Standard Transforms: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.278 seconds; current allocated memory: 103.005 MB.
+INFO: [XFORM 203-603] Inlining function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 2ul>::operator[]' into 'HlsVectorKernelU' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:301).
+INFO: [HLS 200-111] Finished Standard Transforms: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.252 seconds; current allocated memory: 100.144 MB.
 INFO: [HLS 200-10] Checking synthesizability ...
-WARNING: [XFORM 203-1102] Ignored multiple data pack pragma for variable '__range._M_elems.V.1'.
 WARNING: [XFORM 203-1102] Ignored multiple data pack pragma for variable 'agg.tmp'.
-INFO: [XFORM 203-1101] Packing variable 'xu.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:235) into a 64-bit variable.
-WARNING: [XFORM 203-1102] Ignored multiple data pack pragma for variable 'ref.tmp104'.
-WARNING: [XFORM 203-1102] Ignored multiple data pack pragma for variable 'tmp.data._M_elems.V' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_stream_39.h:155).
+WARNING: [XFORM 203-1102] Ignored multiple data pack pragma for variable 'x.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:276).
+INFO: [XFORM 203-1101] Packing variable 'x.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:276) into a 64-bit variable.
+INFO: [XFORM 203-1101] Packing variable 'xu.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:238) into a 64-bit variable.
+WARNING: [XFORM 203-1102] Ignored multiple data pack pragma for variable 'ref.tmp105'.
 INFO: [XFORM 203-1101] Packing variable 'tmp.data._M_elems.V' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_stream_39.h:155) into a 64-bit variable.
+INFO: [XFORM 203-1101] Packing variable 'xu_out.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:299) into a 32-bit variable.
 WARNING: [SYNCHK 200-23] D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:71: variable-indexed range selection may cause suboptimal QoR.
-WARNING: [SYNCHK 200-77] The top function 'HlsVectorKernelU' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:216) has no outputs. Possible cause(s) are: (1) Output parameters are passed by value; (2) intended outputs (parameters or global variables) are never written; (3) there are infinite loops.
-INFO: [SYNCHK 200-10] 0 error(s), 2 warning(s).
-INFO: [HLS 200-111] Finished Checking Synthesizability: CPU user time: 1 seconds. CPU system time: 1 seconds. Elapsed time: 0.572 seconds; current allocated memory: 122.179 MB.
-WARNING: [XFORM 203-1102] Ignored multiple data pack pragma for variable '__range._M_elems.V.1'.
+INFO: [SYNCHK 200-10] 0 error(s), 1 warning(s).
+INFO: [HLS 200-111] Finished Checking Synthesizability: CPU user time: 0 seconds. CPU system time: 1 seconds. Elapsed time: 0.584 seconds; current allocated memory: 115.000 MB.
 WARNING: [XFORM 203-1102] Ignored multiple data pack pragma for variable 'agg.tmp'.
-INFO: [XFORM 203-1101] Packing variable 'xu.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:235) into a 64-bit variable.
-WARNING: [XFORM 203-1102] Ignored multiple data pack pragma for variable 'ref.tmp104'.
-WARNING: [XFORM 203-1102] Ignored multiple data pack pragma for variable 'tmp.data._M_elems.V' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_stream_39.h:155).
+WARNING: [XFORM 203-1102] Ignored multiple data pack pragma for variable 'x.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:276).
+INFO: [XFORM 203-1101] Packing variable 'x.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:276) into a 64-bit variable.
+INFO: [XFORM 203-1101] Packing variable 'xu.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:238) into a 64-bit variable.
+WARNING: [XFORM 203-1102] Ignored multiple data pack pragma for variable 'ref.tmp105'.
 INFO: [XFORM 203-1101] Packing variable 'tmp.data._M_elems.V' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot/hls_stream_39.h:155) into a 64-bit variable.
+INFO: [XFORM 203-1101] Packing variable 'xu_out.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:299) into a 32-bit variable.
 INFO: [XFORM 203-502] Unrolling all loops for pipelining in function 'hls::operator*' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:206).
-INFO: [XFORM 203-502] Unrolling all sub-loops inside loop 'VITIS_LOOP_252_2' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:252) in function 'HlsVectorKernelU' for pipelining.
-INFO: [XFORM 203-502] Unrolling all sub-loops inside loop 'VITIS_LOOP_270_6' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:272) in function 'HlsVectorKernelU' for pipelining.
-INFO: [XFORM 203-502] Unrolling all sub-loops inside loop 'XU_DMA' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:294) in function 'HlsVectorKernelU' for pipelining.
+INFO: [XFORM 203-502] Unrolling all sub-loops inside loop 'VITIS_LOOP_255_2' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:255) in function 'HlsVectorKernelU' for pipelining.
+INFO: [XFORM 203-502] Unrolling all sub-loops inside loop 'VITIS_LOOP_274_6' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:276) in function 'HlsVectorKernelU' for pipelining.
+INFO: [XFORM 203-502] Unrolling all sub-loops inside loop 'XU_DMA' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:298) in function 'HlsVectorKernelU' for pipelining.
 INFO: [HLS 200-489] Unrolling loop 'Loop-1' in function 'hls::operator*' completely with a factor of 3.
-INFO: [HLS 200-489] Unrolling loop 'VITIS_LOOP_254_3' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:254) in function 'HlsVectorKernelU' completely with a factor of 2.
-INFO: [HLS 200-489] Unrolling loop 'VITIS_LOOP_274_7' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:274) in function 'HlsVectorKernelU' completely with a factor of 2.
-INFO: [HLS 200-489] Unrolling loop 'VITIS_LOOP_277_8' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:277) in function 'HlsVectorKernelU' completely with a factor of 4.
-INFO: [HLS 200-489] Unrolling loop 'VITIS_LOOP_279_9' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:279) in function 'HlsVectorKernelU' completely with a factor of 2.
+INFO: [HLS 200-489] Unrolling loop 'VITIS_LOOP_257_3' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:257) in function 'HlsVectorKernelU' completely with a factor of 2.
+INFO: [HLS 200-489] Unrolling loop 'VITIS_LOOP_278_7' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:278) in function 'HlsVectorKernelU' completely with a factor of 2.
+INFO: [HLS 200-489] Unrolling loop 'VITIS_LOOP_281_8' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:281) in function 'HlsVectorKernelU' completely with a factor of 4.
+INFO: [HLS 200-489] Unrolling loop 'VITIS_LOOP_283_9' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:283) in function 'HlsVectorKernelU' completely with a factor of 2.
 INFO: [HLS 200-489] Unrolling loop 'Loop-4.1.2.1.1' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:69) in function 'HlsVectorKernelU' completely with a factor of 4.
-INFO: [HLS 200-489] Unrolling loop 'Loop-4.1.2.1.2' (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:69) in function 'HlsVectorKernelU' completely with a factor of 4.
-INFO: [HLS 200-489] Unrolling loop 'VITIS_LOOP_294_10' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:294) in function 'HlsVectorKernelU' completely with a factor of 4.
-INFO: [HLS 200-489] Unrolling loop 'VITIS_LOOP_296_11' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:297) in function 'HlsVectorKernelU' completely with a factor of 2.
+INFO: [HLS 200-489] Unrolling loop 'VITIS_LOOP_298_10' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:299) in function 'HlsVectorKernelU' completely with a factor of 4.
+INFO: [HLS 200-489] Unrolling loop 'VITIS_LOOP_300_11' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:300) in function 'HlsVectorKernelU' completely with a factor of 2.
 INFO: [XFORM 203-102] Partitioning array 'lhs.data._M_elems.V.buf' automatically.
-INFO: [XFORM 203-102] Automatically partitioning streamed array 'x_streams.V.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) .
+INFO: [XFORM 203-102] Automatically partitioning streamed array 'x_streams.V.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) .
 INFO: [XFORM 203-102] Automatically partitioning streamed array 'u_streams' .
 INFO: [XFORM 203-102] Automatically partitioning streamed array 'xu_streams' .
-INFO: [XFORM 203-101] Partitioning array 'x' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:272) in dimension 1 completely.
-INFO: [XFORM 203-101] Partitioning array 'x_streams.V.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) in dimension 1 completely.
+INFO: [XFORM 203-101] Partitioning array 'x_streams.V.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) in dimension 1 completely.
 INFO: [XFORM 203-101] Partitioning array 'u_streams'  in dimension 1 completely.
 INFO: [XFORM 203-101] Partitioning array 'xu_streams'  in dimension 1 completely.
-INFO: [XFORM 203-101] Partitioning array 'x_buffer.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) in dimension 1 completely.
-INFO: [XFORM 203-101] Partitioning array 'xu.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:235) in dimension 1 completely.
-INFO: [XFORM 203-101] Partitioning array 'x_streams.V.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) in dimension 2 completely.
+INFO: [XFORM 203-101] Partitioning array 'x_buffer.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:237) in dimension 1 completely.
+INFO: [XFORM 203-101] Partitioning array 'xu.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:238) in dimension 1 completely.
+INFO: [XFORM 203-101] Partitioning array 'x.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:276) in dimension 1 completely.
+INFO: [XFORM 203-101] Partitioning array 'x_streams.V.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) in dimension 2 completely.
 INFO: [XFORM 203-101] Partitioning array 'u_streams'  in dimension 2 completely.
 INFO: [XFORM 203-101] Partitioning array 'xu_streams'  in dimension 2 completely.
-INFO: [XFORM 203-101] Partitioning array 'xu.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:235) in dimension 2 completely.
+INFO: [XFORM 203-101] Partitioning array 'xu.data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:238) in dimension 2 completely.
 INFO: [XFORM 203-101] Partitioning array 'xu_streams'  in dimension 3 completely.
-INFO: [XFORM 203-102] Partitioning array 'x_buffer.data._M_elems.V.0' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) in dimension 2 automatically.
-INFO: [XFORM 203-102] Partitioning array 'x_buffer.data._M_elems.V.1' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) in dimension 2 automatically.
-INFO: [XFORM 203-721] Changing loop 'Loop_Store_X_Buffer_proc' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:244) to a process function for dataflow in function 'HlsVectorKernelU'.
-INFO: [XFORM 203-721] Changing loop 'Loop_Stream_X_Tiles_proc' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:252) to a process function for dataflow in function 'HlsVectorKernelU'.
-INFO: [XFORM 203-721] Changing loop 'Loop_U_Dispatcher_proc' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:261) to a process function for dataflow in function 'HlsVectorKernelU'.
-INFO: [XFORM 203-721] Changing loop 'Loop_U_Kernel_proc' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:270) to a process function for dataflow in function 'HlsVectorKernelU'.
-INFO: [XFORM 203-721] Changing loop 'Loop_XU_DMA_proc' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:294) to a process function for dataflow in function 'HlsVectorKernelU'.
-WARNING: [HLS 200-805] An internal stream 'x_streams[0].V.data._M_elems[0].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
-WARNING: [HLS 200-805] An internal stream 'x_streams[0].V.data._M_elems[1].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
-WARNING: [HLS 200-805] An internal stream 'x_streams[0].V.data._M_elems[2].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
-WARNING: [HLS 200-805] An internal stream 'x_streams[0].V.data._M_elems[3].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
-WARNING: [HLS 200-805] An internal stream 'x_streams[1].V.data._M_elems[0].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
-WARNING: [HLS 200-805] An internal stream 'x_streams[1].V.data._M_elems[1].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
-WARNING: [HLS 200-805] An internal stream 'x_streams[1].V.data._M_elems[2].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
-WARNING: [HLS 200-805] An internal stream 'x_streams[1].V.data._M_elems[3].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
+INFO: [XFORM 203-102] Partitioning array 'x_buffer.data._M_elems.V.0' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:237) in dimension 2 automatically.
+INFO: [XFORM 203-102] Partitioning array 'x_buffer.data._M_elems.V.1' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:237) in dimension 2 automatically.
+INFO: [XFORM 203-721] Changing loop 'Loop_Store_X_Buffer_proc' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:247) to a process function for dataflow in function 'HlsVectorKernelU'.
+INFO: [XFORM 203-721] Changing loop 'Loop_Stream_X_Tiles_proc' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:255) to a process function for dataflow in function 'HlsVectorKernelU'.
+INFO: [XFORM 203-721] Changing loop 'Loop_U_DMA_proc' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:264) to a process function for dataflow in function 'HlsVectorKernelU'.
+INFO: [XFORM 203-721] Changing loop 'Loop_U_Kernel_proc' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:274) to a process function for dataflow in function 'HlsVectorKernelU'.
+INFO: [XFORM 203-721] Changing loop 'Loop_XU_DMA_proc' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:298) to a process function for dataflow in function 'HlsVectorKernelU'.
+WARNING: [HLS 200-805] An internal stream 'x_streams[0].V.data._M_elems[0].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
+WARNING: [HLS 200-805] An internal stream 'x_streams[0].V.data._M_elems[1].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
+WARNING: [HLS 200-805] An internal stream 'x_streams[0].V.data._M_elems[2].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
+WARNING: [HLS 200-805] An internal stream 'x_streams[0].V.data._M_elems[3].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
+WARNING: [HLS 200-805] An internal stream 'x_streams[1].V.data._M_elems[0].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
+WARNING: [HLS 200-805] An internal stream 'x_streams[1].V.data._M_elems[1].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
+WARNING: [HLS 200-805] An internal stream 'x_streams[1].V.data._M_elems[2].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
+WARNING: [HLS 200-805] An internal stream 'x_streams[1].V.data._M_elems[3].V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234) with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
 WARNING: [HLS 200-805] An internal stream 'u_streams.0.0' with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
 WARNING: [HLS 200-805] An internal stream 'u_streams.0.1' with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
 WARNING: [HLS 200-805] An internal stream 'u_streams.0.2' with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
@@ -304,95 +305,95 @@ WARNING: [HLS 200-805] An internal stream 'xu_streams.1.3.0' with default size c
 WARNING: [HLS 200-805] An internal stream 'xu_streams.1.3.1' with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
 WARNING: [HLS 200-805] An internal stream 'xu_streams.1.3.2' with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
 WARNING: [HLS 200-805] An internal stream 'xu_streams.1.3.3' with default size can result in deadlock. Please consider resizing the stream using the directive 'set_directive_stream' or the 'HLS stream' pragma.
-WARNING: [HLS 200-786] Detected dataflow-on-top in function  'HlsVectorKernelU' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:216)  with default interface mode 'ap_ctrl_hs'. Overlapped execution of successive kernel calls will not happen unless interface mode 'ap_ctrl_chain' is used (or 'ap_ctrl_none' for a purely data-driven design).
+WARNING: [HLS 200-786] Detected dataflow-on-top in function  'HlsVectorKernelU' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:218)  with default interface mode 'ap_ctrl_hs'. Overlapped execution of successive kernel calls will not happen unless interface mode 'ap_ctrl_chain' is used (or 'ap_ctrl_none' for a purely data-driven design).
 Resolution: For help on HLS 200-786 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=200-786.html
-INFO: [XFORM 203-712] Applying dataflow to function 'HlsVectorKernelU' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:216), detected/extracted 6 process function(s): 
-	 'HlsVectorKernelU.entry59'
+INFO: [XFORM 203-712] Applying dataflow to function 'HlsVectorKernelU' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:218), detected/extracted 6 process function(s): 
+	 'HlsVectorKernelU.entry62'
 	 'Loop_Store_X_Buffer_proc'
-	 'Loop_Stream_X_Tiles_proc55'
-	 'Loop_U_Dispatcher_proc56'
-	 'Loop_U_Kernel_proc57'
-	 'Loop_XU_DMA_proc58'.
-WARNING: [XFORM 203-124] Array  'x_buffer[1][0].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
-WARNING: [XFORM 203-124] Array  'x_buffer[0][0].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
-WARNING: [XFORM 203-124] Array  'x_buffer[1][1].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
-WARNING: [XFORM 203-124] Array  'x_buffer[0][1].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
-WARNING: [XFORM 203-124] Array  'x_buffer[1][2].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
-WARNING: [XFORM 203-124] Array  'x_buffer[0][2].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
-WARNING: [XFORM 203-124] Array  'x_buffer[1][3].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
-WARNING: [XFORM 203-124] Array  'x_buffer[0][3].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:234): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
+	 'Loop_Stream_X_Tiles_proc58'
+	 'Loop_U_DMA_proc59'
+	 'Loop_U_Kernel_proc60'
+	 'Loop_XU_DMA_proc61'.
+WARNING: [XFORM 203-124] Array  'x_buffer[1][0].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:237): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
+WARNING: [XFORM 203-124] Array  'x_buffer[0][0].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:237): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
+WARNING: [XFORM 203-124] Array  'x_buffer[1][1].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:237): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
+WARNING: [XFORM 203-124] Array  'x_buffer[0][1].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:237): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
+WARNING: [XFORM 203-124] Array  'x_buffer[1][2].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:237): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
+WARNING: [XFORM 203-124] Array  'x_buffer[0][2].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:237): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
+WARNING: [XFORM 203-124] Array  'x_buffer[1][3].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:237): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
+WARNING: [XFORM 203-124] Array  'x_buffer[0][3].data._M_elems.V' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:237): may have improper streaming access(es), possible reasons: (1) some entries are accessed more than once; (2) some entries are not used; (3) the entries are not accessed in sequential order.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:0) to (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:159:20) in function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::reduce_add'... converting 13 basic blocks.
 INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator+='... converting 29 basic blocks.
 INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:206:54) to (D:/Programs/Xilinx/Vitis_HLS/2020.2/common/technology/autopilot\hls_vector.h:206:89) in function 'hls::operator*'... converting 17 basic blocks.
-INFO: [XFORM 203-602] Inlining function 'hls::vector<ap_fixed<16, 7, (ap_q_mode)5, (ap_o_mode)2, 0>, 4ul>::operator[].1' into 'Loop_U_Kernel_proc57' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:283->C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:228) automatically.
-INFO: [HLS 200-111] Finished Loop, function and other optimizations: CPU user time: 4 seconds. CPU system time: 0 seconds. Elapsed time: 5.345 seconds; current allocated memory: 165.405 MB.
-INFO: [XFORM 203-541] Flattening a loop nest 'U_Kernel' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:270:32) in function 'Loop_U_Kernel_proc57'.
-INFO: [XFORM 203-541] Flattening a loop nest 'VITIS_LOOP_261_4' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:261:32) in function 'Loop_U_Dispatcher_proc56'.
-INFO: [XFORM 203-541] Flattening a loop nest 'U_Dispatcher' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:261:32) in function 'Loop_U_Dispatcher_proc56'.
-INFO: [XFORM 203-541] Flattening a loop nest 'Stream_X_Tiles' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:252:32) in function 'Loop_Stream_X_Tiles_proc55'.
-WARNING: [HLS 200-960] Cannot flatten loop 'Store_X_Buffer' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:244:32) in function 'Loop_Store_X_Buffer_proc' the outer loop is not a perfect loop.
+INFO: [HLS 200-111] Finished Loop, function and other optimizations: CPU user time: 5 seconds. CPU system time: 0 seconds. Elapsed time: 5.614 seconds; current allocated memory: 151.502 MB.
+INFO: [XFORM 203-541] Flattening a loop nest 'U_Kernel' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:274:32) in function 'Loop_U_Kernel_proc60'.
+INFO: [XFORM 203-541] Flattening a loop nest 'VITIS_LOOP_264_4' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:264:32) in function 'Loop_U_DMA_proc59'.
+INFO: [XFORM 203-541] Flattening a loop nest 'U_DMA' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:264:32) in function 'Loop_U_DMA_proc59'.
+INFO: [XFORM 203-541] Flattening a loop nest 'Stream_X_Tiles' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:255:32) in function 'Loop_Stream_X_Tiles_proc58'.
+WARNING: [HLS 200-960] Cannot flatten loop 'Store_X_Buffer' (C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:247:32) in function 'Loop_Store_X_Buffer_proc' the outer loop is not a perfect loop.
 Resolution: For help on HLS 200-960 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=200-960.html
 WARNING: [HLS 200-1449] Process Loop_Store_X_Buffer_proc has both a predecessor and reads an input from its caller (see the GUI dataflow viewer). This may lead to lower throughput. Consider copying this input via a predecessor process.
-INFO: [HLS 200-111] Finished Architecture Synthesis: CPU user time: 3 seconds. CPU system time: 0 seconds. Elapsed time: 3.345 seconds; current allocated memory: 249.649 MB.
+INFO: [HLS 200-111] Finished Architecture Synthesis: CPU user time: 3 seconds. CPU system time: 0 seconds. Elapsed time: 3.54 seconds; current allocated memory: 245.350 MB.
 INFO: [HLS 200-10] Starting hardware synthesis ...
 INFO: [HLS 200-10] Synthesizing 'HlsVectorKernelU' ...
-WARNING: [SYN 201-103] Legalizing function name 'HlsVectorKernelU.entry59' to 'HlsVectorKernelU_entry59'.
+WARNING: [SYN 201-103] Legalizing function name 'HlsVectorKernelU.entry62' to 'HlsVectorKernelU_entry62'.
 WARNING: [SYN 201-103] Legalizing function name 'operator*' to 'operator_mul'.
 WARNING: [SYN 201-103] Legalizing function name 'operator+=' to 'operator_add_assign'.
 INFO: [SYN 201-201] Setting up clock 'default' with a period of 10ns.
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [HLS 200-42] -- Implementing module 'HlsVectorKernelU_entry59' 
+INFO: [HLS 200-42] -- Implementing module 'HlsVectorKernelU_entry62' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [SCHED 204-11] Starting scheduling ...
 INFO: [SCHED 204-11] Finished scheduling.
-INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.242 seconds; current allocated memory: 250.102 MB.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.249 seconds; current allocated memory: 245.812 MB.
 INFO: [BIND 205-100] Starting micro-architecture generation ...
 INFO: [BIND 205-101] Performing variable lifetime analysis.
 INFO: [BIND 205-101] Exploring resource sharing.
 INFO: [BIND 205-101] Binding ...
 INFO: [BIND 205-100] Finished micro-architecture generation.
-INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.117 seconds; current allocated memory: 250.191 MB.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.126 seconds; current allocated memory: 245.901 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [HLS 200-42] -- Implementing module 'Loop_Store_X_Buffer_proc' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [SCHED 204-11] Starting scheduling ...
-INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_244_1'.
-INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 3, loop 'VITIS_LOOP_244_1'
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_247_1'.
+INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 3, loop 'VITIS_LOOP_247_1'
 INFO: [SCHED 204-11] Finished scheduling.
-INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.189 seconds; current allocated memory: 250.405 MB.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.19 seconds; current allocated memory: 246.115 MB.
 INFO: [BIND 205-100] Starting micro-architecture generation ...
 INFO: [BIND 205-101] Performing variable lifetime analysis.
 INFO: [BIND 205-101] Exploring resource sharing.
 INFO: [BIND 205-101] Binding ...
 INFO: [BIND 205-100] Finished micro-architecture generation.
-INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.19 seconds; current allocated memory: 250.666 MB.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.193 seconds; current allocated memory: 246.377 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [HLS 200-42] -- Implementing module 'Loop_Stream_X_Tiles_proc55' 
+INFO: [HLS 200-42] -- Implementing module 'Loop_Stream_X_Tiles_proc58' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [SCHED 204-11] Starting scheduling ...
-INFO: [SCHED 204-61] Pipelining loop 'Stream_X_Tiles_VITIS_LOOP_252_2'.
-INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 2, loop 'Stream_X_Tiles_VITIS_LOOP_252_2'
+INFO: [SCHED 204-61] Pipelining loop 'Stream_X_Tiles_VITIS_LOOP_255_2'.
+INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 2, loop 'Stream_X_Tiles_VITIS_LOOP_255_2'
 INFO: [SCHED 204-11] Finished scheduling.
-INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.201 seconds; current allocated memory: 250.786 MB.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.213 seconds; current allocated memory: 246.497 MB.
 INFO: [BIND 205-100] Starting micro-architecture generation ...
 INFO: [BIND 205-101] Performing variable lifetime analysis.
 INFO: [BIND 205-101] Exploring resource sharing.
 INFO: [BIND 205-101] Binding ...
 INFO: [BIND 205-100] Finished micro-architecture generation.
-INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.142 seconds; current allocated memory: 251.052 MB.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.137 seconds; current allocated memory: 246.763 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [HLS 200-42] -- Implementing module 'Loop_U_Dispatcher_proc56' 
+INFO: [HLS 200-42] -- Implementing module 'Loop_U_DMA_proc59' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [SCHED 204-11] Starting scheduling ...
-INFO: [SCHED 204-61] Pipelining loop 'U_Dispatcher_VITIS_LOOP_261_4_VITIS_LOOP_262_5'.
-INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 2, loop 'U_Dispatcher_VITIS_LOOP_261_4_VITIS_LOOP_262_5'
+INFO: [SCHED 204-61] Pipelining loop 'U_DMA_VITIS_LOOP_264_4_VITIS_LOOP_265_5'.
+INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 2, loop 'U_DMA_VITIS_LOOP_264_4_VITIS_LOOP_265_5'
 INFO: [SCHED 204-11] Finished scheduling.
-INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.194 seconds; current allocated memory: 251.236 MB.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.206 seconds; current allocated memory: 246.946 MB.
 INFO: [BIND 205-100] Starting micro-architecture generation ...
 INFO: [BIND 205-101] Performing variable lifetime analysis.
 INFO: [BIND 205-101] Exploring resource sharing.
 INFO: [BIND 205-101] Binding ...
 INFO: [BIND 205-100] Finished micro-architecture generation.
-INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.159 seconds; current allocated memory: 251.632 MB.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.16 seconds; current allocated memory: 247.342 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [HLS 200-42] -- Implementing module 'operator_mul' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
@@ -404,13 +405,13 @@ INFO: [HLS 200-486] Changing DSP48 latency (root=r_V_8) to 3 in order to utilize
 INFO: [SCHED 204-61] Pipelining function 'operator*'.
 INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 5, function 'operator*'
 INFO: [SCHED 204-11] Finished scheduling.
-INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.335 seconds; current allocated memory: 251.990 MB.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.342 seconds; current allocated memory: 247.700 MB.
 INFO: [BIND 205-100] Starting micro-architecture generation ...
 INFO: [BIND 205-101] Performing variable lifetime analysis.
 INFO: [BIND 205-101] Exploring resource sharing.
 INFO: [BIND 205-101] Binding ...
 INFO: [BIND 205-100] Finished micro-architecture generation.
-INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.279 seconds; current allocated memory: 252.385 MB.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.277 seconds; current allocated memory: 248.096 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [HLS 200-42] -- Implementing module 'operator_add_assign' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
@@ -418,117 +419,136 @@ INFO: [SCHED 204-11] Starting scheduling ...
 INFO: [SCHED 204-61] Pipelining function 'operator+='.
 INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 1, function 'operator+='
 INFO: [SCHED 204-11] Finished scheduling.
-INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.474 seconds; current allocated memory: 252.639 MB.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.488 seconds; current allocated memory: 248.350 MB.
 INFO: [BIND 205-100] Starting micro-architecture generation ...
 INFO: [BIND 205-101] Performing variable lifetime analysis.
 INFO: [BIND 205-101] Exploring resource sharing.
 INFO: [BIND 205-101] Binding ...
 INFO: [BIND 205-100] Finished micro-architecture generation.
-INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.2 seconds; current allocated memory: 252.880 MB.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.198 seconds; current allocated memory: 248.591 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [HLS 200-42] -- Implementing module 'Loop_U_Kernel_proc57' 
+INFO: [HLS 200-42] -- Implementing module 'Loop_U_Kernel_proc60' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [SCHED 204-11] Starting scheduling ...
-INFO: [SCHED 204-61] Pipelining loop 'U_Kernel_VITIS_LOOP_270_6'.
-INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 10, loop 'U_Kernel_VITIS_LOOP_270_6'
+INFO: [SCHED 204-61] Pipelining loop 'U_Kernel_VITIS_LOOP_274_6'.
+INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 9, loop 'U_Kernel_VITIS_LOOP_274_6'
 WARNING: [HLS 200-871] Estimated clock period (8.781ns) exceeds the target (target clock period: 10ns, clock uncertainty: 2.7ns, effective delay budget: 7.3ns).
 Resolution: For help on HLS 200-871 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=200-871.html
-WARNING: [HLS 200-1016] The critical path in module 'Loop_U_Kernel_proc57' consists of the following:	'load' operation ('xu_1_1_data_M_elems_V_1_load', C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:280->C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:228) on local variable 'xu[1][1].data._M_elems.V' [277]  (0 ns)
-	'select' operation ('select_ln280_3', C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:280->C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:228) [278]  (1.48 ns)
-	'call' operation ('xu[1][1].data._M_elems.V', C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:280->C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:228) to 'operator+=' [280]  (7.3 ns)
+WARNING: [HLS 200-1016] The critical path in module 'Loop_U_Kernel_proc60' consists of the following:	'load' operation ('xu_1_3_data_M_elems_V_1_load', C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:284->C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) on local variable 'xu[1][3].data._M_elems.V' [333]  (0 ns)
+	'select' operation ('select_ln284_7', C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:284->C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) [334]  (1.48 ns)
+	'call' operation ('xu[1][3].data._M_elems.V', C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:284->C:/Users/ste/phd/hls_projects/hls_svd/src/kernel/u_kernel.cpp:231) to 'operator+=' [336]  (7.3 ns)
 
 Resolution: For help on HLS 200-1016 see www.xilinx.com/cgi-bin/docs/rdoc?v=2020.2;t=hls+guidance;d=200-1016.html
 INFO: [SCHED 204-11] Finished scheduling.
-INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.494 seconds; current allocated memory: 253.535 MB.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.48 seconds; current allocated memory: 249.213 MB.
 INFO: [BIND 205-100] Starting micro-architecture generation ...
 INFO: [BIND 205-101] Performing variable lifetime analysis.
 INFO: [BIND 205-101] Exploring resource sharing.
 INFO: [BIND 205-101] Binding ...
 INFO: [BIND 205-100] Finished micro-architecture generation.
-INFO: [HLS 200-111] Finished Binding: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 1.383 seconds; current allocated memory: 254.895 MB.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 1.407 seconds; current allocated memory: 250.511 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [HLS 200-42] -- Implementing module 'Loop_XU_DMA_proc58' 
+INFO: [HLS 200-42] -- Implementing module 'reduce_add' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining function 'reduce_add'.
+INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 4, function 'reduce_add'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 3 seconds. CPU system time: 0 seconds. Elapsed time: 2.945 seconds; current allocated memory: 250.757 MB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.213 seconds; current allocated memory: 250.974 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'Loop_XU_DMA_proc61' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [SCHED 204-11] Starting scheduling ...
 INFO: [SCHED 204-61] Pipelining loop 'XU_DMA'.
-INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 2, loop 'XU_DMA'
+INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 7, loop 'XU_DMA'
 INFO: [SCHED 204-11] Finished scheduling.
-INFO: [HLS 200-111] Finished Scheduling: CPU user time: 3 seconds. CPU system time: 0 seconds. Elapsed time: 3.045 seconds; current allocated memory: 255.053 MB.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.351 seconds; current allocated memory: 251.177 MB.
 INFO: [BIND 205-100] Starting micro-architecture generation ...
 INFO: [BIND 205-101] Performing variable lifetime analysis.
 INFO: [BIND 205-101] Exploring resource sharing.
 INFO: [BIND 205-101] Binding ...
 INFO: [BIND 205-100] Finished micro-architecture generation.
-INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.153 seconds; current allocated memory: 255.557 MB.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.256 seconds; current allocated memory: 251.726 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [HLS 200-42] -- Implementing module 'HlsVectorKernelU' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [SCHED 204-11] Starting scheduling ...
 INFO: [SCHED 204-11] Finished scheduling.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_0_0 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_0_1 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_0_2 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_0_3 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_1_0 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_1_1 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_1_2 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_1_3 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_2_0 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_2_1 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_2_2 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_2_3 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_3_0 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_3_1 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_3_2 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_3_3 (from Loop_U_Dispatcher_proc56_U0 to Loop_U_Kernel_proc57_U0) to 3 to improve performance and/or avoid deadlocks.
-INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.476 seconds; current allocated memory: 255.929 MB.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_0_0 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_0_1 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_0_2 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_0_3 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_1_0 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_1_1 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_1_2 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_1_3 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_2_0 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_2_1 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_2_2 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_2_3 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_3_0 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_3_1 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_3_2 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+WARNING: [HLS 200-1018] Consider increasing the depth of FIFO u_streams_3_3 (from Loop_U_DMA_proc59_U0 to Loop_U_Kernel_proc60_U0) to 3 to improve performance and/or avoid deadlocks.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.746 seconds; current allocated memory: 252.098 MB.
 INFO: [BIND 205-100] Starting micro-architecture generation ...
 INFO: [BIND 205-101] Performing variable lifetime analysis.
 INFO: [BIND 205-101] Exploring resource sharing.
 INFO: [BIND 205-101] Binding ...
 INFO: [BIND 205-100] Finished micro-architecture generation.
-INFO: [HLS 200-111] Finished Binding: CPU user time: 3 seconds. CPU system time: 0 seconds. Elapsed time: 2.851 seconds; current allocated memory: 257.233 MB.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 5 seconds. CPU system time: 0 seconds. Elapsed time: 4.507 seconds; current allocated memory: 253.433 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [HLS 200-10] -- Generating RTL for module 'HlsVectorKernelU_entry59' 
+INFO: [HLS 200-10] -- Generating RTL for module 'HlsVectorKernelU_entry62' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [RTGEN 206-100] Finished creating RTL model for 'HlsVectorKernelU_entry59'.
-INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 2 seconds. CPU system time: 0 seconds. Elapsed time: 2.729 seconds; current allocated memory: 257.384 MB.
+INFO: [RTGEN 206-100] Finished creating RTL model for 'HlsVectorKernelU_entry62'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 3 seconds. CPU system time: 0 seconds. Elapsed time: 3.291 seconds; current allocated memory: 253.553 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [HLS 200-10] -- Generating RTL for module 'Loop_Store_X_Buffer_proc' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [RTGEN 206-100] Finished creating RTL model for 'Loop_Store_X_Buffer_proc'.
-INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.184 seconds; current allocated memory: 258.081 MB.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.185 seconds; current allocated memory: 254.250 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [HLS 200-10] -- Generating RTL for module 'Loop_Stream_X_Tiles_proc55' 
+INFO: [HLS 200-10] -- Generating RTL for module 'Loop_Stream_X_Tiles_proc58' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [RTGEN 206-100] Finished creating RTL model for 'Loop_Stream_X_Tiles_proc55'.
-INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 1 seconds. CPU system time: 1 seconds. Elapsed time: 0.389 seconds; current allocated memory: 259.244 MB.
+INFO: [RTGEN 206-100] Finished creating RTL model for 'Loop_Stream_X_Tiles_proc58'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.415 seconds; current allocated memory: 255.441 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [HLS 200-10] -- Generating RTL for module 'Loop_U_Dispatcher_proc56' 
+INFO: [HLS 200-10] -- Generating RTL for module 'Loop_U_DMA_proc59' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [RTGEN 206-100] Finished creating RTL model for 'Loop_U_Dispatcher_proc56'.
-INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.303 seconds; current allocated memory: 260.176 MB.
+INFO: [RTGEN 206-100] Finished creating RTL model for 'Loop_U_DMA_proc59'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.722 seconds; current allocated memory: 256.344 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [HLS 200-10] -- Generating RTL for module 'operator_mul' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [RTGEN 206-100] Generating core module 'mul_mul_16s_16s_32_4_0': 4 instance(s).
 INFO: [RTGEN 206-100] Finished creating RTL model for 'operator_mul'.
-INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.455 seconds; current allocated memory: 261.719 MB.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 0 seconds. CPU system time: 1 seconds. Elapsed time: 0.477 seconds; current allocated memory: 257.888 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [HLS 200-10] -- Generating RTL for module 'operator_add_assign' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [RTGEN 206-100] Finished creating RTL model for 'operator_add_assign'.
-INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 1.107 seconds; current allocated memory: 263.617 MB.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 1.091 seconds; current allocated memory: 259.818 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [HLS 200-10] -- Generating RTL for module 'Loop_U_Kernel_proc57' 
+INFO: [HLS 200-10] -- Generating RTL for module 'Loop_U_Kernel_proc60' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [RTGEN 206-100] Finished creating RTL model for 'Loop_U_Kernel_proc57'.
-INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.881 seconds; current allocated memory: 266.428 MB.
+INFO: [RTGEN 206-100] Finished creating RTL model for 'Loop_U_Kernel_proc60'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.907 seconds; current allocated memory: 262.461 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [HLS 200-10] -- Generating RTL for module 'Loop_XU_DMA_proc58' 
+INFO: [HLS 200-10] -- Generating RTL for module 'reduce_add' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
-INFO: [RTGEN 206-100] Finished creating RTL model for 'Loop_XU_DMA_proc58'.
-INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 3 seconds. CPU system time: 1 seconds. Elapsed time: 3.667 seconds; current allocated memory: 269.692 MB.
+INFO: [RTGEN 206-100] Finished creating RTL model for 'reduce_add'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 3 seconds. CPU system time: 0 seconds. Elapsed time: 3.688 seconds; current allocated memory: 265.506 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'Loop_XU_DMA_proc61' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [RTGEN 206-100] Finished creating RTL model for 'Loop_XU_DMA_proc61'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 0 seconds. CPU system time: 1 seconds. Elapsed time: 0.77 seconds; current allocated memory: 267.045 MB.
 INFO: [HLS 200-10] ----------------------------------------------------------------
 INFO: [HLS 200-10] -- Generating RTL for module 'HlsVectorKernelU' 
 INFO: [HLS 200-10] ----------------------------------------------------------------
@@ -537,26 +557,24 @@ INFO: [RTGEN 206-500] Setting interface mode on port 'HlsVectorKernelU/x_dmem' t
 INFO: [RTGEN 206-500] Setting interface mode on port 'HlsVectorKernelU/num_refinements' to 's_axilite & ap_none'.
 INFO: [RTGEN 206-500] Setting interface mode on port 'HlsVectorKernelU/x_port' to 's_axilite & ap_none'.
 INFO: [RTGEN 206-500] Setting interface mode on port 'HlsVectorKernelU/u_port' to 'ap_none'.
-INFO: [RTGEN 206-500] Setting interface mode on port 'HlsVectorKernelU/xu_port' to 'ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'HlsVectorKernelU/xu_port' to 'ap_vld'.
 INFO: [RTGEN 206-500] Setting interface mode on function 'HlsVectorKernelU' to 's_axilite & ap_ctrl_hs'.
 INFO: [RTGEN 206-100] Bundling port 'x_port' to AXI-Lite port control.
 INFO: [RTGEN 206-100] Bundling port 'num_refinements' and 'return' to AXI-Lite port ctrl.
-WARNING: [RTGEN 206-101] Port 'HlsVectorKernelU/xu_port' has no fanin or fanout and is left dangling.
-               Please use C simulation to confirm this function argument can be read from or written to.
 INFO: [RTGEN 206-100] Finished creating RTL model for 'HlsVectorKernelU'.
-INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.694 seconds; current allocated memory: 273.370 MB.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.977 seconds; current allocated memory: 270.939 MB.
 INFO: [RTMG 210-285] Implementing FIFO 'num_refinements_c_U(HlsVectorKernelU_fifo_w32_d3_S)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'num_refinements_c1086_U(HlsVectorKernelU_fifo_w32_d2_S)' using Shift Registers.
+INFO: [RTMG 210-285] Implementing FIFO 'num_refinements_c1051_U(HlsVectorKernelU_fifo_w32_d2_S)' using Shift Registers.
 INFO: [RTMG 210-285] Implementing FIFO 'x_port_c_U(HlsVectorKernelU_fifo_w64_d2_S)' using Shift Registers.
 INFO: [RTMG 210-285] Implementing FIFO 'u_port_c_U(HlsVectorKernelU_fifo_w64_d2_S)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_0_3_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d64_S)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_1_3_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d64_S)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_0_2_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d64_S)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_1_2_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d64_S)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_0_1_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d64_S)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_1_1_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d64_S)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_0_0_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d64_S)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_1_0_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d64_S)' using Shift Registers.
+INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_0_3_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d256_A)' using Vivado Default RAMs.
+INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_1_3_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d256_A)' using Vivado Default RAMs.
+INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_0_2_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d256_A)' using Vivado Default RAMs.
+INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_1_2_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d256_A)' using Vivado Default RAMs.
+INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_0_1_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d256_A)' using Vivado Default RAMs.
+INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_1_1_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d256_A)' using Vivado Default RAMs.
+INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_0_0_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d256_A)' using Vivado Default RAMs.
+INFO: [RTMG 210-285] Implementing FIFO 'x_buffer_1_0_data_M_elems_V_U(HlsVectorKernelU_fifo_w16_d256_A)' using Vivado Default RAMs.
 INFO: [RTMG 210-285] Implementing FIFO 'x_streams_0_V_data_M_elems_0_V_U(HlsVectorKernelU_fifo_w16_d2_S)' using Shift Registers.
 INFO: [RTMG 210-285] Implementing FIFO 'x_streams_0_V_data_M_elems_1_V_U(HlsVectorKernelU_fifo_w16_d2_S)' using Shift Registers.
 INFO: [RTMG 210-285] Implementing FIFO 'x_streams_0_V_data_M_elems_2_V_U(HlsVectorKernelU_fifo_w16_d2_S)' using Shift Registers.
@@ -565,7 +583,7 @@ INFO: [RTMG 210-285] Implementing FIFO 'x_streams_1_V_data_M_elems_0_V_U(HlsVect
 INFO: [RTMG 210-285] Implementing FIFO 'x_streams_1_V_data_M_elems_1_V_U(HlsVectorKernelU_fifo_w16_d2_S)' using Shift Registers.
 INFO: [RTMG 210-285] Implementing FIFO 'x_streams_1_V_data_M_elems_2_V_U(HlsVectorKernelU_fifo_w16_d2_S)' using Shift Registers.
 INFO: [RTMG 210-285] Implementing FIFO 'x_streams_1_V_data_M_elems_3_V_U(HlsVectorKernelU_fifo_w16_d2_S)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'num_refinements_c1087_U(HlsVectorKernelU_fifo_w32_d2_S)' using Shift Registers.
+INFO: [RTMG 210-285] Implementing FIFO 'num_refinements_c1052_U(HlsVectorKernelU_fifo_w32_d2_S)' using Shift Registers.
 INFO: [RTMG 210-285] Implementing FIFO 'u_streams_0_0_U(HlsVectorKernelU_fifo_w16_d2_S)' using Shift Registers.
 INFO: [RTMG 210-285] Implementing FIFO 'u_streams_0_1_U(HlsVectorKernelU_fifo_w16_d2_S)' using Shift Registers.
 INFO: [RTMG 210-285] Implementing FIFO 'u_streams_0_2_U(HlsVectorKernelU_fifo_w16_d2_S)' using Shift Registers.
@@ -614,18 +632,18 @@ INFO: [RTMG 210-285] Implementing FIFO 'xu_streams_1_3_0_U(HlsVectorKernelU_fifo
 INFO: [RTMG 210-285] Implementing FIFO 'xu_streams_1_3_1_U(HlsVectorKernelU_fifo_w16_d2_S)' using Shift Registers.
 INFO: [RTMG 210-285] Implementing FIFO 'xu_streams_1_3_2_U(HlsVectorKernelU_fifo_w16_d2_S)' using Shift Registers.
 INFO: [RTMG 210-285] Implementing FIFO 'xu_streams_1_3_3_U(HlsVectorKernelU_fifo_w16_d2_S)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'num_refinements_c1088_U(HlsVectorKernelU_fifo_w32_d2_S)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'start_for_Loop_Stream_X_Tiles_proc55_U0_U(HlsVectorKernelU_start_for_Loop_Stream_X_Tiles_proc55_U0)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'start_for_Loop_U_Dispatcher_proc56_U0_U(HlsVectorKernelU_start_for_Loop_U_Dispatcher_proc56_U0)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'start_for_Loop_U_Kernel_proc57_U0_U(HlsVectorKernelU_start_for_Loop_U_Kernel_proc57_U0)' using Shift Registers.
-INFO: [RTMG 210-285] Implementing FIFO 'start_for_Loop_XU_DMA_proc58_U0_U(HlsVectorKernelU_start_for_Loop_XU_DMA_proc58_U0)' using Shift Registers.
-INFO: [HLS 200-111] Finished Generating all RTL models: CPU user time: 7 seconds. CPU system time: 3 seconds. Elapsed time: 10.357 seconds; current allocated memory: 282.755 MB.
+INFO: [RTMG 210-285] Implementing FIFO 'num_refinements_c1053_U(HlsVectorKernelU_fifo_w32_d2_S)' using Shift Registers.
+INFO: [RTMG 210-285] Implementing FIFO 'start_for_Loop_Stream_X_Tiles_proc58_U0_U(HlsVectorKernelU_start_for_Loop_Stream_X_Tiles_proc58_U0)' using Shift Registers.
+INFO: [RTMG 210-285] Implementing FIFO 'start_for_Loop_U_DMA_proc59_U0_U(HlsVectorKernelU_start_for_Loop_U_DMA_proc59_U0)' using Shift Registers.
+INFO: [RTMG 210-285] Implementing FIFO 'start_for_Loop_U_Kernel_proc60_U0_U(HlsVectorKernelU_start_for_Loop_U_Kernel_proc60_U0)' using Shift Registers.
+INFO: [RTMG 210-285] Implementing FIFO 'start_for_Loop_XU_DMA_proc61_U0_U(HlsVectorKernelU_start_for_Loop_XU_DMA_proc61_U0)' using Shift Registers.
+INFO: [HLS 200-111] Finished Generating all RTL models: CPU user time: 7 seconds. CPU system time: 3 seconds. Elapsed time: 11.165 seconds; current allocated memory: 280.418 MB.
 INFO: [VHDL 208-304] Generating VHDL RTL for HlsVectorKernelU.
 INFO: [VLOG 209-307] Generating Verilog RTL for HlsVectorKernelU.
 INFO: [HLS 200-1603] Design has MAXI bursts, see Vitis HLS GUI synthesis summary report for detailed information.
 INFO: [HLS 200-790] **** Loop Constraint Status: All loop constraints were satisfied.
 INFO: [HLS 200-789] **** Estimated Fmax: 113.88 MHz
-INFO: [HLS 200-111] Finished Command csynth_design CPU user time: 38 seconds. CPU system time: 7 seconds. Elapsed time: 71.901 seconds; current allocated memory: 284.839 MB.
+INFO: [HLS 200-111] Finished Command csynth_design CPU user time: 43 seconds. CPU system time: 6 seconds. Elapsed time: 79.661 seconds; current allocated memory: 282.518 MB.
 ================================================================
 [INFO] Reporting information
 ================================================================
@@ -654,20 +672,35 @@ INFO: [HLS 200-111] Finished Command csynth_design CPU user time: 38 seconds. CP
 +-----------------+---------+-----+--------+-------+-----+
 |DSP              |        -|    -|       -|      -|    -|
 |Expression       |        -|    -|       0|     14|    -|
-|FIFO             |        -|    -|    6930|   5168|    -|
-|Instance         |        4|   32|    5495|  10960|    -|
+|FIFO             |        8|    -|    7410|   4832|    -|
+|Instance         |        4|   32|    5845|  11285|    -|
 |Memory           |        -|    -|       -|      -|    -|
 |Multiplexer      |        -|    -|       -|     18|    -|
 |Register         |        -|    -|       2|      -|    -|
 +-----------------+---------+-----+--------+-------+-----+
-|Total            |        4|   32|   12427|  16160|    0|
+|Total            |       12|   32|   13257|  16149|    0|
 +-----------------+---------+-----+--------+-------+-----+
 |Available        |      280|  220|  106400|  53200|    0|
 +-----------------+---------+-----+--------+-------+-----+
-|Utilization (%)  |        1|   14|      11|     30|    0|
+|Utilization (%)  |        4|   14|      12|     30|    0|
 +-----------------+---------+-----+--------+-------+-----+
+INFO: [HLS 200-1510] Running: export_design -format ip_catalog 
+INFO: [IMPL 213-8] Exporting RTL as a Vivado IP.
+
+****** Vivado v2020.2 (64-bit)
+  **** SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+  **** IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+source run_ippack.tcl -notrace
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'D:/Programs/Xilinx/Vivado/2020.2/data/ip'.
+INFO: [Common 17-206] Exiting Vivado at Sun Jul 18 14:19:18 2021...
+INFO: [HLS 200-802] Generated output file vitis_ZedBoard_HlsVectorKernelU/solution_HlsVectorKernelU/impl/export.zip
+INFO: [HLS 200-111] Finished Command export_design CPU user time: 2 seconds. CPU system time: 2 seconds. Elapsed time: 111.965 seconds; current allocated memory: 287.679 MB.
 ================================================================
 [INFO] Closing project: ./hls/vitis_ZedBoard_HlsVectorKernelU
 ================================================================
-INFO: [HLS 200-112] Total CPU user time: 39 seconds. Total CPU system time: 8 seconds. Total elapsed time: 73.612 seconds; peak allocated memory: 472.830 MB.
-INFO: [Common 17-206] Exiting vitis_hls at Sat Jul 17 16:13:42 2021...
+INFO: [HLS 200-112] Total CPU user time: 47 seconds. Total CPU system time: 10 seconds. Total elapsed time: 193.521 seconds; peak allocated memory: 472.830 MB.
+INFO: [Common 17-206] Exiting vitis_hls at Sun Jul 18 14:19:25 2021...

@@ -16,7 +16,7 @@ int main(int argc, char const *argv[]) {
 #ifndef __VITIS_HLS__
   return 0;
 #else
-  const int num_refinements = 8;
+  const int num_refinements = 16;
   const int kNumTilesU = testu::params::I / testu::params::Tu;
   typedef typename testu::params::ActivationD ActivationType;
   typedef hls::vector<ActivationType, testu::params::N> VectN_Type;
@@ -65,6 +65,7 @@ int main(int argc, char const *argv[]) {
     for (int j = 0; j < testu::params::N; ++j) {
       for (int k = 0; k < testu::params::G; ++k) {
         xu_gold[i * testu::params::G + k][j] = xu[i][j][k];
+        xu_port[i * testu::params::G + k][j] = 0;
       }
     }
   }
@@ -101,11 +102,6 @@ int main(int argc, char const *argv[]) {
   //     u_port[i][j] = 0.0001 * rand();
   //   }
   // }
-
-
-  for (int i = 0; i < num_refinements * testu::params::G; ++i) {
-    xu_port[i] = VectN_Type(0);
-  }
 
   std::cout << "Starting HlsVectorKernelU." << std::endl;
   // HlsKernelU(num_refinements, x_port, u_port, xu_port);
