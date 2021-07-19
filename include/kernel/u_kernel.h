@@ -387,11 +387,11 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
 namespace testu {
 
 static const int kNumInputs = 2;
-static const int kInputSize = 1024;
+static const int kInputSize = 256;
 static const int Tu = 4;
 // NOTE: The rest of the parameters are unused for now.
 static const int kDummySize = 1;
-static const int kDummyRefinements = 1;
+static const int kDummyRefinements = 8;
 static const int Tv = 1;
 static const int ZTu = 0;
 static const int ZTv = 0;
@@ -414,8 +414,8 @@ void HlsKernelU(const int num_refinements,
   hls::vector<typename testu::params::ActivationD, testu::params::N>* xu_port);
 
 void HlsVectorKernelU(const int num_refinements,
-  hls::vector<typename testu::params::ActivationD, testu::params::Tu>* x_port,
-  hls::vector<typename testu::params::ActivationD, testu::params::Tu>* u_port,
+  const hls::vector<typename testu::params::ActivationD, testu::params::Tu>* x_port,
+  const hls::vector<typename testu::params::ActivationD, testu::params::Tu>* u_port,
   hls::vector<typename testu::params::ActivationD, testu::params::N>* xu_port);
 #endif
 

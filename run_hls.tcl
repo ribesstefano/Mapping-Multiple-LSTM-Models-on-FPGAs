@@ -15,8 +15,8 @@ set reset_project 1
 set csim 0
 set build_only 0
 set synth 1
-set cosim 0
-set export 1
+set cosim 1
+set export 0
 set place_and_route 0
 set report_info 1
 # ==============================================================================
@@ -45,7 +45,7 @@ if {${use_zedboard}} {
 # ==============================================================================
 # NOTE: The namespace must also be included.
 set TOP "HlsVectorKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
-set TB ""
+set TB "test_u_kernel"
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
 # ==============================================================================
@@ -156,7 +156,11 @@ if {${reset_project}} {
     }
 }
 
-open_solution "solution_${TOP_NO_NAMESPACE}"
+if {${USE_VITIS}} {
+    open_solution -flow_target vivado -reset "solution_${TOP_NO_NAMESPACE}"
+} else {
+    open_solution "solution_${TOP_NO_NAMESPACE}"
+}
 # ==============================================================================
 # Set Part
 # ==============================================================================
@@ -193,28 +197,31 @@ if {${reset_project}} {
 # Configure HLS
 # ==============================================================================
 if {${relax_ii}} {
-    config_schedule -effort ${scheduler_effort} -relax_ii_for_timing
+    config_schedule -effort ${scheduler_effort} -relax_ii_for_timing=1
 } else {
     config_schedule -effort ${scheduler_effort} -relax_ii_for_timing=0
 }
 
 # config_sdx -target sdx ;# -optimization_level 3
 
-if {${use_zcu104_pynq}} {
-    config_interface -m_axi_addr64
+if {${use_zedboard}} {
+    config_interface -m_axi_addr64=0
+}
+if {${USE_VITIS}} {
+    config_interface -m_axi_auto_max_ports=1 -m_axi_offset=slave
 }
 
 config_core DSP48 -latency 3
-config_dataflow -default_channel fifo ;#pingpong
+# config_dataflow -default_channel fifo ;#pingpong
 
 # ==============================================================================
 # Start C-Simulation
 # ==============================================================================
 if {${csim}} {
     if {${build_only}} {
-        csim_design -clean -O -compiler gcc -ldflags ${LDFLAGS} -argv ${ARGV} -setup
+        csim_design -clean -O -ldflags ${LDFLAGS} -argv ${ARGV} -setup
     } else {
-        csim_design -clean -O -compiler gcc -ldflags ${LDFLAGS} -argv ${ARGV}
+        csim_design -clean -O -ldflags ${LDFLAGS} -argv ${ARGV}
     }
 }
 # ==============================================================================
@@ -244,7 +251,17 @@ if {${synth}} {
 # Start Cosimulation
 # ==============================================================================
 if {${cosim}} {
-    cosim_design -trace_level port -ldflags ${LDFLAGS} -argv ${ARGV} ;#-tool auto -wave_debug
+
+    if {${USE_VITIS}} {
+        cosim_design -trace_level none -ldflags ${LDFLAGS} -argv ${ARGV} \
+            -enable_dataflow_profiling
+            # -enable_fifo_sizing
+            # -disable_deadlock_detection
+            # -disable_dependency_check
+    } else {
+        cosim_design -trace_level port -ldflags ${LDFLAGS} -argv ${ARGV} ;#-tool auto -wave_debug
+    }
+
 
     if {${report_info}} {
         puts "================================================================"
