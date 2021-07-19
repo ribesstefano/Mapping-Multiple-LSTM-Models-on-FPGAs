@@ -216,26 +216,41 @@ void HlsKernelU(const int num_refinements,
 
 
 void HlsVectorKernelU(const int num_refinements,
-  hls::vector<typename testu::params::ActivationD, testu::params::Tu>* x_port,
-  hls::vector<typename testu::params::ActivationD, testu::params::Tu>* u_port,
+  const hls::vector<typename testu::params::ActivationD, testu::params::Tu>* x_port,
+  const hls::vector<typename testu::params::ActivationD, testu::params::Tu>* u_port,
   hls::vector<typename testu::params::ActivationD, testu::params::N>* xu_port) {
-#pragma HLS INTERFACE s_axilite port=return bundle=ctrl
-#pragma HLS INTERFACE s_axilite port=num_refinements bundle=ctrl
-#pragma HLS INTERFACE m_axi port=x_port offset=slave bundle=x_dmem depth=testu::params::N*testu::params::I/testu::params::Tu
-#pragma HLS INTERFACE m_axi port=u_port offset=slave bundle=u_dmem depth=num_refinements*testu::params::PrunedSizeU/testu::params::Tu
-#pragma HLS INTERFACE m_axi port=xu_port offset=slave bundle=xu_dmem depth=num_refinements*testu::params::G
+  const int R_test = num_refinements;
+  const int kNumTilesU = testu::params::I / testu::params::Tu;
+  const int kDepth_X = testu::params::N * kNumTilesU;
+  const int kDepth_U = num_refinements * kNumTilesU * testu::params::G;
+  const int kDepth_XU = num_refinements * testu::params::G;
+
+#pragma HLS INTERFACE m_axi port=x_port bundle=x_dmem depth=kDepth_X
+#pragma HLS INTERFACE m_axi port=u_port bundle=u_dmem depth=kDepth_U
+#pragma HLS INTERFACE m_axi port=xu_port bundle=xu_dmem depth=kDepth_XU
+#pragma HLS INTERFACE s_axilite port=x_port
+#pragma HLS INTERFACE s_axilite port=u_port
+#pragma HLS INTERFACE s_axilite port=xu_port
+
+// #pragma HLS INTERFACE axis port=x_port depth=kDepth_X bundle=x_dmem
+// #pragma HLS INTERFACE axis port=u_port depth=kDepth_U bundle=u_dmem
+// #pragma HLS INTERFACE axis port=xu_port depth=kDepth_XU bundle=xu_dmem
+
+#pragma HLS INTERFACE s_axilite port=return
+#pragma HLS INTERFACE s_axilite port=num_refinements
 #pragma HLS DATAFLOW
   typedef typename testu::params::ActivationD ActivationType;
   typedef hls::vector<ActivationType, testu::params::Tu> VectTuAct_Type;
   typedef hls::vector<ActivationType, testu::params::N> VectN_Type;
-  const int R_test = num_refinements;
-  const int kNumTilesU = testu::params::I / testu::params::Tu;
 
   hls::stream<VectTuAct_Type> x_streams[testu::params::N];
   hls::stream<VectTuAct_Type> u_streams[testu::params::G];
   hls::stream<VectTuAct_Type> xu_streams[testu::params::N][testu::params::G];
   VectTuAct_Type x_buffer[testu::params::N][kNumTilesU];
   VectTuAct_Type xu[testu::params::N][testu::params::G];
+#pragma HLS STREAM variable=x_streams depth=2
+#pragma HLS STREAM variable=u_streams depth=2
+#pragma HLS STREAM variable=xu_streams depth=2
 #pragma HLS ARRAY_PARTITION variable=x_streams complete dim=0
 #pragma HLS ARRAY_PARTITION variable=u_streams complete dim=0
 #pragma HLS ARRAY_PARTITION variable=xu_streams complete dim=0
