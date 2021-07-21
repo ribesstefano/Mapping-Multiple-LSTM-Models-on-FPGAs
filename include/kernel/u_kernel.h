@@ -402,10 +402,12 @@ static const int G = 4;
 typedef svd::SvdParameters<kNumInputs, kInputSize, kDummySize, kDummyRefinements,
     Tu, Tv, ZTu, ZTv, G, svd::ActivationD, svd::WeightD, svd::AccumD> params;
 
+static const int VectTuAxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::Tu;
+static const int VectN_AxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::N;
 typedef hls::vector<typename params::ActivationD, params::Tu> VectTuType;
 typedef hls::vector<typename params::ActivationD, params::N> VectN_Type;
-typedef ap_axiu<hlsutils::Bitwidth<typename params::ActivationD>::value * params::Tu, 0, 0, 0> VectTuAxiType;
-typedef ap_axiu<hlsutils::Bitwidth<typename params::ActivationD>::value * params::N, 0, 0, 0> VectN_AxiType;
+typedef ap_axiu<VectTuAxiBitwidth, 0, 0, 0> VectTuAxiType;
+typedef ap_axiu<VectN_AxiBitwidth, 0, 0, 0> VectN_AxiType;
 
 } // testu
 

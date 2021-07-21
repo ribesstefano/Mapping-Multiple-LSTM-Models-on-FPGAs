@@ -16,6 +16,8 @@
 #include "hls_vector.h"
 #endif
 
+namespace svd {
+
 /**
  * @brief      This class describes an AXI stream interface.
  *
@@ -243,8 +245,8 @@ public:
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     AxiuPacketType packet;
     for (int i = 0; i < N; ++i) {
-      constexpr const int kHi = (i + 1) * Bitwidth - 1;
-      constexpr const int kLo = i * Bitwidth;
+      const int kHi = (i + 1) * Bitwidth - 1;
+      const int kLo = i * Bitwidth;
       packet.data.range(kHi, kLo) = *((ap_uint<Bitwidth>*)&x[i]);
     }
     packet.last = is_last? 1 : 0;
@@ -265,8 +267,8 @@ public:
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     AxiuPacketType packet;
     for (int i = 0; i < N; ++i) {
-      constexpr const int kHi = (i + 1) * Bitwidth - 1;
-      constexpr const int kLo = i * Bitwidth;
+      const int kHi = (i + 1) * Bitwidth - 1;
+      const int kLo = i * Bitwidth;
       packet.data.range(kHi, kLo) = *((ap_uint<Bitwidth>*)&x[i]);
     }
     packet.last = 1;
@@ -289,9 +291,10 @@ public:
     packet = this->_port.read();
     hls::vector<T, N> y;
     for (int i = 0; i < N; ++i) {
-      constexpr const int kHi = (i + 1) * Bitwidth - 1;
-      constexpr const int kLo = i * Bitwidth;
-      y[i] = *((T*)&packet.data.range(kHi, kLo));
+      const int kHi = (i + 1) * Bitwidth - 1;
+      const int kLo = i * Bitwidth;
+      auto tmp = packet.data.range(kHi, kLo);
+      y[i] = *((T*)&tmp);
     }
     return y;
   }
@@ -316,9 +319,10 @@ public:
     AxiuPacketType packet;
     packet = this->_port.read();
     for (int i = 0; i < N; ++i) {
-      constexpr const int kHi = (i + 1) * Bitwidth - 1;
-      constexpr const int kLo = i * Bitwidth;
-      y[i] = *((T*)&packet.data.range(kHi, kLo));
+      const int kHi = (i + 1) * Bitwidth - 1;
+      const int kLo = i * Bitwidth;
+      auto tmp = packet.data.range(kHi, kLo);
+      y[i] = *((T*)&tmp);
     }
     return packet.last == 1 ? true : false;
   }
@@ -334,5 +338,7 @@ private:
   std::string _name;
 #endif
 };
+
+} // svd
 
 #endif // end DMA_AXIS_LIB_H_

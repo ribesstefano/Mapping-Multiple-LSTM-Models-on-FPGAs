@@ -1,6 +1,7 @@
 #include "kernel/u_kernel.h"
 #include "hls_utils/adder_tree.h"
 #include "dma/svd_dma.h"
+#include "dma/axis_lib.h"
 
 #include "hls_stream.h"
 #ifdef __VITIS_HLS__
@@ -335,7 +336,6 @@ void HlsVectorKernelU_V2(const int num_refinements,
   const int kDepth_X = testu::params::N * kNumTilesU;
   const int kDepth_U = num_refinements * kNumTilesU * testu::params::G;
   const int kDepth_XU = num_refinements * testu::params::G;
-
 // #pragma HLS INTERFACE m_axi port=x_port bundle=x_dmem depth=kDepth_X offset=slave
 // #pragma HLS INTERFACE m_axi port=u_port bundle=u_dmem depth=kDepth_U offset=slave
 // #pragma HLS INTERFACE m_axi port=xu_port bundle=xu_dmem depth=kDepth_XU offset=slave
@@ -353,6 +353,13 @@ void HlsVectorKernelU_V2(const int num_refinements,
   typedef typename testu::params::ActivationD ActivationType;
   typedef hls::vector<ActivationType, testu::params::Tu> VectTuAct_Type;
   typedef hls::vector<ActivationType, testu::params::N> VectN_Type;
+
+
+  auto x_axis = svd::AxiStreamInterface<testu::VectTuAxiBitwidth>(x_port);
+  auto u_axis = svd::AxiStreamInterface<testu::VectTuAxiBitwidth>(u_port);
+  auto xu_axis = svd::AxiStreamInterface<testu::VectN_AxiBitwidth>(xu_port);
+
+  auto x_vec = x_axis.PopVector<ActivationType, testu::params::Tu>();
 
   hls::stream<VectTuAct_Type> x_streams[testu::params::N];
   hls::stream<VectTuAct_Type> u_streams[testu::params::G];
