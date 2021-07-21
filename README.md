@@ -47,7 +47,44 @@ cmake ..
 make all
 ```
 
-## HLS Vector Patch
+## Notes on Using Vitis
+
+### Implementing AXIS Interfaces
+
+In order to implement AXIS interfaces, avoid using `depth` in the pragma, as follows:
+```c++
+const int kAxiBitwidth = 128;
+
+void HlsVectorKernelU_V2(hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& x_port,
+  											 hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& y_port) {
+#pragma HLS INTERFACE axis port=x_port // depth=... <- NO DEPTH!
+#pragma HLS INTERFACE axis port=y_port // depth=... <- NO DEPTH!
+	// ...
+}
+```
+The type `ap_axiu` must now be used to generate AXIS with side channels. Note: for using external DMAs, we just need the TLAST signal.
+
+The `AxiStreamInterface` class in `axis_lib.h` can also be used with `hls::vector` types, like:
+
+```c++
+const int kAxiBitwidth = 128;
+
+void HlsVectorKernelU_V2(hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& x_port,
+  											 hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& y_port) {
+#pragma HLS INTERFACE axis port=x_port // depth=... <- NO DEPTH!
+#pragma HLS INTERFACE axis port=y_port // depth=... <- NO DEPTH!
+  auto x_axis = svd::AxiStreamInterface<kAxiBitwidth>(x_port);
+  auto y_axis = svd::AxiStreamInterface<kAxiBitwidth>(y_port);
+  // ...
+  auto x_vec = x_axis.PopVector<float, 4>(); // This will pop a float vector of 4 elements.
+  // ...
+  hls::vector<float, 4> y_vec(3.14);
+  y_axis.PushVector<float, 4>(y_vec); // This will pop a float vector of 4 elements.
+	// ...
+}
+```
+
+### HLS Vector Patch
 
 If the project will be compiled with the Vitis HLS libraries, it needs a patch in the `hls::vector` class.
 
@@ -80,4 +117,4 @@ List of TODOs:
 ## Bugs
 
 List of possible bugs:
-* Having not squared images in games generates distorted images.
+* Constructing data handler storage might lead to segmentation faults. More checks needed.
