@@ -4,7 +4,9 @@
 #include "svd_params.h"
 #include "hls_utils/hls_metaprogramming.h"
 #include "hls_utils/hls_debugging.h"
+#include "dma/axis_lib.h"
 
+#include "ap_axi_sdata.h"
 #include "hls_stream.h"
 #include "assert.h"
 #ifdef __VITIS_HLS__
@@ -400,6 +402,11 @@ static const int G = 4;
 typedef svd::SvdParameters<kNumInputs, kInputSize, kDummySize, kDummyRefinements,
     Tu, Tv, ZTu, ZTv, G, svd::ActivationD, svd::WeightD, svd::AccumD> params;
 
+typedef hls::vector<typename params::ActivationD, params::Tu> VectTuType;
+typedef hls::vector<typename params::ActivationD, params::N> VectN_Type;
+typedef ap_axiu<hlsutils::Bitwidth<typename params::ActivationD>::value * params::Tu, 0, 0, 0> VectTuAxiType;
+typedef ap_axiu<hlsutils::Bitwidth<typename params::ActivationD>::value * params::N, 0, 0, 0> VectN_AxiType;
+
 } // testu
 
 #ifndef __VITIS_HLS__
@@ -414,9 +421,14 @@ void HlsKernelU(const int num_refinements,
   hls::vector<typename testu::params::ActivationD, testu::params::N>* xu_port);
 
 void HlsVectorKernelU(const int num_refinements,
-  const hls::vector<typename testu::params::ActivationD, testu::params::Tu>* x_port,
-  const hls::vector<typename testu::params::ActivationD, testu::params::Tu>* u_port,
-  hls::vector<typename testu::params::ActivationD, testu::params::N>* xu_port);
+  hls::stream<hls::vector<typename testu::params::ActivationD, testu::params::Tu> >& x_port,
+  hls::stream<hls::vector<typename testu::params::ActivationD, testu::params::Tu> >& u_port,
+  hls::stream<hls::vector<typename testu::params::ActivationD, testu::params::N> >& xu_port);
+
+void HlsVectorKernelU_V2(const int num_refinements,
+  hls::stream<typename testu::VectTuAxiType>& x_port,
+  hls::stream<typename testu::VectTuAxiType>& u_port,
+  hls::stream<typename testu::VectN_AxiType>& xu_port);
 #endif
 
 #endif // end KERNEL_U_KERNEL_H_

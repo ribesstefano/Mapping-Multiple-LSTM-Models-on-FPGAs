@@ -16,7 +16,7 @@ int main(int argc, char const *argv[]) {
 #ifndef __VITIS_HLS__
   return 0;
 #else
-  const int num_refinements = 16;
+  const int num_refinements = testu::params::R;
   const int kNumTilesU = testu::params::I / testu::params::Tu;
   typedef typename testu::params::ActivationD ActivationType;
   typedef hls::vector<ActivationType, testu::params::N> VectN_Type;
@@ -28,7 +28,9 @@ int main(int argc, char const *argv[]) {
   ActivationType u[num_refinements][testu::params::PrunedSizeU][testu::params::G];
   ActivationType xu[num_refinements][testu::params::N][testu::params::G];
 
-  VectN_Type xu_port[num_refinements * testu::params::G];
+  hls::stream<VectTuAct_Type> x_port; //[testu::params::N * kNumTilesU];
+  hls::stream<VectTuAct_Type> u_port; //[num_refinements * kNumTilesU * testu::params::G];
+  hls::stream<VectN_Type> xu_port; //[num_refinements * testu::params::G];
   VectN_Type xu_gold[num_refinements * testu::params::G];
 
   for (int i = 0; i < testu::params::N; ++i) {
@@ -65,27 +67,31 @@ int main(int argc, char const *argv[]) {
     for (int j = 0; j < testu::params::N; ++j) {
       for (int k = 0; k < testu::params::G; ++k) {
         xu_gold[i * testu::params::G + k][j] = xu[i][j][k];
-        xu_port[i * testu::params::G + k][j] = 0;
+        // xu_port[i * testu::params::G + k][j] = 0;
       }
     }
   }
   
-  VectTuAct_Type x_port[testu::params::N * kNumTilesU];
-  VectTuAct_Type u_port[num_refinements * kNumTilesU * testu::params::G];
   for (int i = 0; i < testu::params::N; ++i) {
     for (int j = 0; j < kNumTilesU; ++j) {
+      VectTuAct_Type x_val;
       for (int k = 0; k < testu::params::Tu; ++k) {
-        x_port[i * kNumTilesU + j][k] = x[i][j * testu::params::Tu + k];
+        x_val[k] = x[i][j * testu::params::Tu + k];
       }
+      // x_port[i * kNumTilesU + j][k] = x_val;
+      x_port << x_val;
     }
   }
   for (int i = 0; i < num_refinements; ++i) {
     for (int j = 0; j < kNumTilesU; ++j) {
       for (int k = 0; k < testu::params::G; ++k) {
+        VectTuAct_Type u_val;
         for (int ii = 0; ii < testu::params::Tu; ++ii) {
-          int u_idx = i * kNumTilesU * testu::params::G + j * testu::params::G + k;
-          u_port[u_idx][ii] = u[i][j * testu::params::Tu + ii][k];
+          u_val[ii] = u[i][j * testu::params::Tu + ii][k];
         }
+        // int u_idx = i * kNumTilesU * testu::params::G + j * testu::params::G + k;
+        // u_port[u_idx] = u_val;
+        u_port << u_val;
       }
     }
   }
@@ -121,10 +127,11 @@ int main(int argc, char const *argv[]) {
 
   int num_errors = 0;
   for (int i = 0; i < num_refinements * testu::params::G; ++i) {
+    VectN_Type xu_val = xu_port.read(); // [i];
     for (int j = 0; j < testu::params::N; ++j) {
-      std::cout << i << ") test/gold: " << xu_port[i][j] << " / "
+      std::cout << i << ") test/gold: " << xu_val[j] << " / "
                 << xu_gold[i][j] << std::endl;
-      if (xu_port[i][j] != xu_gold[i][j]) {
+      if (xu_val[j] != xu_gold[i][j]) {
         ++num_errors;
       }
     }
