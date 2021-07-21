@@ -3,6 +3,7 @@
 #include "dma/svd_dma.h"
 #include "dma/axis_lib.h"
 
+#include "ap_axi_sdata.h"
 #include "hls_stream.h"
 #ifdef __VITIS_HLS__
 #include "hls_vector.h"
@@ -51,11 +52,18 @@ void HlsKernelU(const int num_refinements,
   hls::vector<typename testu::params::ActivationD, testu::params::N>* x_port,
   hls::vector<typename testu::params::ActivationD, testu::params::G>* u_port,
   hls::vector<typename testu::params::ActivationD, testu::params::N>* xu_port) {
+#pragma HLS aggregate variable=x_port compact=auto
+#pragma HLS aggregate variable=u_port compact=auto
+#pragma HLS aggregate variable=xu_port compact=auto
+
 #pragma HLS INTERFACE s_axilite port=return bundle=ctrl
 #pragma HLS INTERFACE s_axilite port=num_refinements bundle=ctrl
-#pragma HLS INTERFACE m_axi port=x_port offset=slave bundle=x_dmem depth=testu::params::I
-#pragma HLS INTERFACE m_axi port=u_port offset=slave bundle=u_dmem depth=num_refinements*testu::params::PrunedSizeU
-#pragma HLS INTERFACE m_axi port=xu_port offset=slave bundle=xu_dmem depth=num_refinements*testu::params::G
+#pragma HLS INTERFACE m_axi port=x_port bundle=x // depth=testu::params::I
+#pragma HLS INTERFACE m_axi port=u_port bundle=u // depth=num_refinements*testu::params::PrunedSizeU
+#pragma HLS INTERFACE m_axi port=xu_port bundle=xu // depth=num_refinements*testu::params::G
+#pragma HLS INTERFACE s_axilite port=x_port
+#pragma HLS INTERFACE s_axilite port=u_port
+#pragma HLS INTERFACE s_axilite port=xu_port
 #pragma HLS DATAFLOW
   typedef hls::vector<typename testu::params::ActivationD, testu::params::N> VectN_Type;
   typedef hls::vector<typename testu::params::ActivationD, testu::params::G> VectG_Type;
@@ -226,16 +234,16 @@ void HlsVectorKernelU(const int num_refinements,
   const int kDepth_U = num_refinements * kNumTilesU * testu::params::G;
   const int kDepth_XU = num_refinements * testu::params::G;
 
-// #pragma HLS INTERFACE m_axi port=x_port bundle=x_dmem depth=kDepth_X offset=slave
-// #pragma HLS INTERFACE m_axi port=u_port bundle=u_dmem depth=kDepth_U offset=slave
-// #pragma HLS INTERFACE m_axi port=xu_port bundle=xu_dmem depth=kDepth_XU offset=slave
+// #pragma HLS INTERFACE m_axi port=x_port bundle=x depth=kDepth_X offset=slave
+// #pragma HLS INTERFACE m_axi port=u_port bundle=u depth=kDepth_U offset=slave
+// #pragma HLS INTERFACE m_axi port=xu_port bundle=xu depth=kDepth_XU offset=slave
 // #pragma HLS INTERFACE s_axilite port=x_port
 // #pragma HLS INTERFACE s_axilite port=u_port
 // #pragma HLS INTERFACE s_axilite port=xu_port
 
-#pragma HLS INTERFACE axis port=x_port depth=kDepth_X bundle=x_dmem
-#pragma HLS INTERFACE axis port=u_port depth=kDepth_U bundle=u_dmem
-#pragma HLS INTERFACE axis port=xu_port depth=kDepth_XU bundle=xu_dmem
+// #pragma HLS INTERFACE axis port=x_port depth=kDepth_X bundle=x_dmem
+// #pragma HLS INTERFACE axis port=u_port depth=kDepth_U bundle=u_dmem
+// #pragma HLS INTERFACE axis port=xu_port depth=kDepth_XU bundle=xu_dmem
 
 #pragma HLS INTERFACE s_axilite port=return
 #pragma HLS INTERFACE s_axilite port=num_refinements
@@ -336,19 +344,11 @@ void HlsVectorKernelU_V2(const int num_refinements,
   const int kDepth_X = testu::params::N * kNumTilesU;
   const int kDepth_U = num_refinements * kNumTilesU * testu::params::G;
   const int kDepth_XU = num_refinements * testu::params::G;
-// #pragma HLS INTERFACE m_axi port=x_port bundle=x_dmem depth=kDepth_X offset=slave
-// #pragma HLS INTERFACE m_axi port=u_port bundle=u_dmem depth=kDepth_U offset=slave
-// #pragma HLS INTERFACE m_axi port=xu_port bundle=xu_dmem depth=kDepth_XU offset=slave
-// #pragma HLS INTERFACE s_axilite port=x_port
-// #pragma HLS INTERFACE s_axilite port=u_port
-// #pragma HLS INTERFACE s_axilite port=xu_port
-
-#pragma HLS INTERFACE mode=axis port=x_port depth=kDepth_X bundle=x_dmem
-#pragma HLS INTERFACE mode=axis port=u_port depth=kDepth_U bundle=u_dmem
-#pragma HLS INTERFACE mode=axis port=xu_port depth=kDepth_XU bundle=xu_dmem
-
-#pragma HLS INTERFACE mode=s_axilite port=return
-#pragma HLS INTERFACE mode=s_axilite port=num_refinements
+#pragma HLS INTERFACE axis port=x_port
+#pragma HLS INTERFACE axis port=u_port
+#pragma HLS INTERFACE axis port=xu_port
+#pragma HLS INTERFACE s_axilite port=return
+#pragma HLS INTERFACE s_axilite port=num_refinements
 #pragma HLS DATAFLOW
   typedef typename testu::params::ActivationD ActivationType;
   typedef hls::vector<ActivationType, testu::params::Tu> VectTuAct_Type;
@@ -359,7 +359,6 @@ void HlsVectorKernelU_V2(const int num_refinements,
   auto u_axis = svd::AxiStreamInterface<testu::VectTuAxiBitwidth>(u_port);
   auto xu_axis = svd::AxiStreamInterface<testu::VectN_AxiBitwidth>(xu_port);
 
-  auto x_vec = x_axis.PopVector<ActivationType, testu::params::Tu>();
 
   hls::stream<VectTuAct_Type> x_streams[testu::params::N];
   hls::stream<VectTuAct_Type> u_streams[testu::params::G];
@@ -380,13 +379,7 @@ void HlsVectorKernelU_V2(const int num_refinements,
     for (int j = 0; j < kNumTilesU; ++j) {
 #pragma HLS PIPELINE II=1
 #pragma HLS LOOP_FLATTEN
-      auto x_packet = x_port.read().data;
-      VectTuAct_Type x_val;
-      for (int k = 0; k < testu::params::Tu; ++k) {
-        x_val[k].range() = x_packet.range(k * kBitwidth, (k + 1) * kBitwidth - 1);
-      }
-      // x_buffer[i][j] = x_port.read(); // [i * kNumTilesU + j];
-      x_buffer[i][j] = x_val;
+      x_buffer[i][j] = x_axis.PopVector<ActivationType, testu::params::Tu>();
     }
   }
   Stream_X_Tiles:
@@ -405,14 +398,7 @@ void HlsVectorKernelU_V2(const int num_refinements,
     for (int j = 0; j < kNumTilesU; ++j) {
       for (int k = 0; k < testu::params::G; ++k) {
 #pragma HLS PIPELINE II=1
-        // int u_idx = i * kNumTilesU * testu::params::G + j * testu::params::G + k;
-        // u_streams[k] << u_port.read(); // [u_idx];
-        auto u_packet = u_port.read().data; // [u_idx];
-        VectTuAct_Type u_val;
-        for (int ii = 0; ii < testu::params::Tu; ++ii) {
-          u_val[ii].range() = u_packet.range(ii * kBitwidth, (ii + 1) * kBitwidth - 1);
-        }
-        u_streams[k] << u_val;
+        u_streams[k] << u_axis.PopVector<ActivationType, testu::params::Tu>();
       }
     }
   }
@@ -449,14 +435,8 @@ void HlsVectorKernelU_V2(const int num_refinements,
       for (int k = 0; k < testu::params::N; ++k) {
         xu_out[k] = xu_streams[k][j].read().reduce_add();
       }
-      // xu_port[i * testu::params::G + j] = xu_out;
-      // xu_port << xu_out;
-      testu::VectN_AxiType xu_packet;
-      for (int ii = 0; ii < testu::params::N; ++ii) {
-        xu_packet.data.range(ii * kBitwidth, (ii + 1) * kBitwidth - 1) = xu_out[ii].range();
-      }
-      xu_packet.last = (i == R_test - 1 && j == testu::params::G - 1) ? 1 : 0;
-      xu_port << xu_packet;
+      const bool kIsLast = (i == R_test - 1 && j == testu::params::G - 1) ? 1 : 0;
+      xu_axis.PushVector<ActivationType, testu::params::N>(xu_out, kIsLast);
     }
   }
 }

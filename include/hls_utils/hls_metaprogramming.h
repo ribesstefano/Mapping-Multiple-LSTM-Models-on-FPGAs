@@ -47,6 +47,11 @@ struct Bitwidth {
 };
 
 template<>
+struct Bitwidth<char> {
+  static const int value = 8;
+};
+
+template<>
 struct Bitwidth<int> {
   static const int value = 32;
 };
@@ -59,6 +64,11 @@ struct Bitwidth<short> {
 template<>
 struct Bitwidth<long long> {
   static const int value = 64;
+};
+
+template<>
+struct Bitwidth<unsigned char> {
+  static const int value = 8;
 };
 
 template<>
