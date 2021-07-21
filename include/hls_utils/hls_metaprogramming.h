@@ -47,6 +47,36 @@ struct Bitwidth {
 };
 
 template<>
+struct Bitwidth<int> {
+  static const int value = 32;
+};
+
+template<>
+struct Bitwidth<short> {
+  static const int value = 16;
+};
+
+template<>
+struct Bitwidth<long long> {
+  static const int value = 64;
+};
+
+template<>
+struct Bitwidth<unsigned int> {
+  static const int value = 32;
+};
+
+template<>
+struct Bitwidth<unsigned short> {
+  static const int value = 16;
+};
+
+template<>
+struct Bitwidth<unsigned long long> {
+  static const int value = 64;
+};
+
+template<>
 struct Bitwidth<float> {
   static const int value = 32;
 };
@@ -56,9 +86,10 @@ struct Bitwidth<double> {
   static const int value = 64;
 };
 
-template<int X, int N, int T, int ZT>
+
+template<int X, int R, int T, int ZT>
 struct PrunedSize {
-  static const int value = N * X / T * (T - ZT);
+  static const int value = R * X / T * (T - ZT);
 };
 
 

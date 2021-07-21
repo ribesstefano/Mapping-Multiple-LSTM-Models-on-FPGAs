@@ -47,15 +47,35 @@ cmake ..
 make all
 ```
 
+## HLS Vector Patch
+
+If the project will be compiled with the Vitis HLS libraries, it needs a patch in the `hls::vector` class.
+
+Simply add the following line in the `vector` class after the `public:` statement:
+```c++
+public:
+  static const int width = N;
+```
+
+In this way, one can access the number of elements in a `hls::vector` at compile/synthesis time by doing:
+
+```c++
+hls::vector<int, 5> a;
+std::cout << "Number of elements in a: " << a::width << std::endl;
+
+// > Number of elements in a: 5
+```
+
+
 ## TODOs
 
 List of TODOs:
-	* Import u, s, v new kernels
-	* Import (and clean up?) u, s, v old kernels
-	* Import DMA functions
-	* Import and clean up HLS SVD-model-Bouganis
-	* Import and clean up HLS SVD-model-2LSTM
-	* Import some testbenches to try compile something
+	* ~Import u, s, v new kernels~
+	* ~Import (and clean up?) u, s, v old kernels~
+	* ~Import DMA functions~
+	* ~Import and clean up HLS SVD-model-Bouganis~
+	* ~Import and clean up HLS SVD-model-2LSTM~
+	* ~Import some testbenches to try compile something~
 
 ## Bugs
 

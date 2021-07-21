@@ -15,7 +15,7 @@ set reset_project 1
 set csim 0
 set build_only 0
 set synth 1
-set cosim 1
+set cosim 0
 set export 0
 set place_and_route 0
 set report_info 1
@@ -58,7 +58,7 @@ set PROJECT_NAME "vitis_${board_name}_${TOP_NO_NAMESPACE}"
 # ==============================================================================
 # Defines
 # ==============================================================================
-# The HLS_NO_XIL_FPO_LIB flag is used to compile hlaf precision numbers.
+# The HLS_NO_XIL_FPO_LIB flag is used to compile half precision numbers.
 set DEFINES "-DHLS_NO_XIL_FPO_LIB"
 append DEFINES ""
 
@@ -87,14 +87,14 @@ set ARGV ""
 # NOTE(21/02/2019): the '-fno-builtin' is suggested by Xilinx when using
 # the set_directive_resource option.
 if {${USE_VITIS}} {
-    set CXXSTD "-std=c++14" ; #"-std=c++1y"
+    set CXXSTD "-std=c++1y  -fno-builtin" ; #"-std=c++1y"
 } else {
     set CXXSTD "-std=c++0x -fno-builtin"
 }
 if {${cosim}} {
-    set CFLAGS "-O3 -g ${CXXSTD} -I${PRJ_PATH}/include/${SRC_DIR}/ -DCOSIM_DESIGN ${DEFINES} -I/usr/local/include"
+    set CFLAGS "-O3 ${CXXSTD} -I${PRJ_PATH}/include/${SRC_DIR}/ -DCOSIM_DESIGN ${DEFINES} -I/usr/local/include"
 } else {
-    set CFLAGS "-O3 -g ${CXXSTD} -I${PRJ_PATH}/include/${SRC_DIR}/ ${DEFINES} -I/usr/local/include"
+    set CFLAGS "-O3 ${CXXSTD} -I${PRJ_PATH}/include/${SRC_DIR}/ ${DEFINES} -I/usr/local/include"
 }
 # ==============================================================================
 # Open Project and Add Files
@@ -110,7 +110,7 @@ set_top ${TOP}
 set HLS_REPORT_PATH "${PROJECT_NAME}/solution_${TOP}/syn/report/"
 set REPORT_DIR "${PRJ_PATH}/hls/reports"
 set REPORT_FILE_PATH "${PRJ_PATH}/hls/reports/"
-set VIVADO_LIB "C:/Xilinx/Vivado/2018.3/include/"
+# set VIVADO_LIB "C:/Xilinx/Vivado/2018.3/include/"
 set BLAS_LIB "C:/Users/ste/.caffe/dependencies/libraries_v140_x64_py27_1.1.0/libraries/lib/libopenblas.a"
 set BLAS_LIB_DIR "C:/Users/ste/.caffe/dependencies/libraries_v140_x64_py27_1.1.0/libraries/lib"
 
@@ -144,9 +144,6 @@ if {${reset_project}} {
     #         add_files ${f} -cflags ${CFLAGS}
     #     }
     # }
-
-    # add_files ${PRJ_PATH}/src/axis_lib.cpp -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/include/axis_lib.h -cflags ${CFLAGS}
 
     # Add Testbench Files
     if {${csim} || ${cosim}} {

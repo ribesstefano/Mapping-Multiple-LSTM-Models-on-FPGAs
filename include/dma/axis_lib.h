@@ -1,6 +1,8 @@
 #ifndef DMA_AXIS_LIB_H_
 #define DMA_AXIS_LIB_H_
 
+#include "hls_utils/hls_metaprogramming.h"
+
 #include "ap_axi_sdata.h"
 #include "ap_int.h"
 #include "hls_stream.h"
@@ -8,28 +10,26 @@
 #include <cstdio>
 #include <iostream>
 #include <cstring>
+#include <cassert>
 
-template<int D>
-struct axiu_packet {
-  ap_uint<D> data;
-  ap_uint<1> last = 0;
-  // ap_uint<4> keep = 0xF;
-};
-
-template <int D>
-using ap_ufifo = hls::stream<axiu_packet<D> >;
+#ifdef __VITIS_HLS__
+#include "hls_vector.h"
+#endif
 
 /**
- * @brief      This class describes an AXI stream interface. The function using
- *             this class must apply the respective HLS directive in order
- *             to synthesize a proper AXI stream interface.
+ * @brief      This class describes an AXI stream interface.
+ *
+ *             The function using this class must apply the respective HLS
+ *             directive in order to synthesize a proper AXI stream interface.
  *
  * @tparam     D     The bitwidth of the interface.
  */
-template <int D>
+template <int Bitwidth>
 class AxiStreamInterface {
 public:
-  AxiStreamInterface(hls::stream<axiu_packet<D> > &port) : _port(port) {};
+  typedef ap_axiu<Bitwidth, 0, 0, 0> AxiuPacketType;
+
+  AxiStreamInterface(hls::stream<AxiuPacketType>& port) : _port(port) {};
 
   ~AxiStreamInterface() {};
 
@@ -73,8 +73,8 @@ public:
    */
   template<typename T>
   void Push(const T &x, bool is_last = false) {
-    axiu_packet<D> packet;
-    packet.data = *((ap_uint<D>*)&x);
+    AxiuPacketType packet;
+    packet.data = *((ap_uint<Bitwidth>*)&x);
     packet.last = is_last? 1 : 0;
     this->_port.write(packet);
   }
@@ -88,8 +88,8 @@ public:
    */
   template<typename T>
   void PushLast(const T &x) {
-    axiu_packet<D> packet;
-    packet.data = *((ap_uint<D>*)&x);
+    AxiuPacketType packet;
+    packet.data = *((ap_uint<Bitwidth>*)&x);
     packet.last = 1;
     this->_port.write(packet);
   }
@@ -104,10 +104,10 @@ public:
    */
   template<typename T>
   void PushFromBuffer(const int size, const T *x) {
-    axiu_packet<D> packet;
+    AxiuPacketType packet;
     for (int i = 0; i < size; ++i) {
 #pragma HLS PIPELINE II=1
-      packet.data = *((ap_uint<D>*)&x[i]);
+      packet.data = *((ap_uint<Bitwidth>*)&x[i]);
       if (i == size - 1) { // The last packet needs special care.
         packet.last = 1;
       }
@@ -125,11 +125,11 @@ public:
    */
   template<typename T>
   void PushFromStream(const int size, const hls::stream<T> &x) {
-    axiu_packet<D> packet;
+    AxiuPacketType packet;
     for (int i = 0; i < size; ++i) {
 #pragma HLS PIPELINE II=1
       T x_val = x.read();
-      packet.data = *((ap_uint<D>*)&x_val);
+      packet.data = *((ap_uint<Bitwidth>*)&x_val);
       if (i == size - 1) { // The last packet needs special care.
         packet.last = 1;
       }
@@ -146,15 +146,15 @@ public:
    */
   template<typename T>
   T Pop() {
-    axiu_packet<D> packet;
+    AxiuPacketType packet;
     packet = this->_port.read();
     return *((T*)&packet.data);
   }
 
   /**
-   * @brief      Determines whether the specified y is the last value to pop,
-   *             i.e. with TLAST set high. It also converts the read value to
-   *             the specified type.
+   * @brief      Read value and return true if the specified y is the last value
+   *             to pop, i.e. with TLAST set high. It also converts the read
+   *             value to the specified type.
    *
    * @param      y     The value read from the FIFO
    *
@@ -165,7 +165,7 @@ public:
    */
   template<typename T>
   bool isLastPop(T &y) {
-    axiu_packet<D> packet;
+    AxiuPacketType packet;
     packet = this->_port.read();
     y = *((T*)&packet.data);
     return packet.last == 1 ? true : false;
@@ -182,7 +182,7 @@ public:
    */
   template<typename T>
   void PopToBuffer(const int size, T *y) {
-    axiu_packet<D> packet;
+    AxiuPacketType packet;
     for (int i = 0; i < size; ++i) {
 #pragma HLS PIPELINE II=1
       packet = this->_port.read();
@@ -201,7 +201,7 @@ public:
    */
   template<typename T>
   void PopToStream(const int size, hls::stream<T> &y) {
-    axiu_packet<D> packet;
+    AxiuPacketType packet;
     for (int i = 0; i < size; ++i) {
 #pragma HLS PIPELINE II=1
       packet = this->_port.read();
@@ -209,12 +209,127 @@ public:
     }
   }
 
-  hls::stream<axiu_packet<D> >& get_port() {
+#ifdef __VITIS_HLS__
+    /**
+     * @brief      Push a vector into the FIFO with default TLAST set to low.
+     *             From the AXIS specification: The following options are
+     *             available:
+     *             * Set TLAST LOW. This indicates that all transfers are within
+     *               the same packet. This option provides maximum opportunity
+     *               for merging and upsizing but means that transfers could be
+     *               delayed in a stream with intermittent bursts. A permanently
+     *               LOW TLAST signal might also affect the interleaving of
+     *               streams across a shared channel because the interconnect
+     *               can use the TLAST signal to influence the arbitration
+     *               process.
+     *             * Set TLAST HIGH. This indicates that all transfers are
+     *               individual packets. This option ensures that transfers do
+     *               not get delayed in the infrastructure. It also ensures that
+     *               the stream does not unnecessarily block the use of a shared
+     *               channel by influencing the arbitration scheme. This option
+     *               prevents merging on streams from masters that have this
+     *               default setting and prevents efficient upsizing.
+     *
+     * @param[in]  x        The vector to push
+     * @param[in]  is_last  Indicates if last packet to push. Default false.
+     *
+     * @tparam     T        The type of the vector, its type must be of the same
+     *                      size of the FIFO.
+     * @tparam     N        Number of elements in the vector
+     */
+  template<typename T, int N>
+  void PushVector(const hls::vector<T, N>& x, bool is_last = false) {
+    static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
+    assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
+    AxiuPacketType packet;
+    for (int i = 0; i < N; ++i) {
+      constexpr const int kHi = (i + 1) * Bitwidth - 1;
+      constexpr const int kLo = i * Bitwidth;
+      packet.data.range(kHi, kLo) = *((ap_uint<Bitwidth>*)&x[i]);
+    }
+    packet.last = is_last? 1 : 0;
+    this->_port.write(packet);
+  }
+
+  /**
+   * @brief      Pushes the last vector, i.e. a packet with TLAST set to high.
+   *
+   * @param[in]  x     The vector to push on the FIFO
+   *
+   * @tparam     T     The type of the vector
+   * @tparam     N     Number of elements in the vector
+   */
+  template<typename T, int N>
+  void PushLastVector(const hls::vector<T, N>& x) {
+    static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
+    assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
+    AxiuPacketType packet;
+    for (int i = 0; i < N; ++i) {
+      constexpr const int kHi = (i + 1) * Bitwidth - 1;
+      constexpr const int kLo = i * Bitwidth;
+      packet.data.range(kHi, kLo) = *((ap_uint<Bitwidth>*)&x[i]);
+    }
+    packet.last = 1;
+    this->_port.write(packet);
+  }
+
+  /**
+   * @brief      Pops a vector from the FIFO and converts it.
+   *
+   * @tparam     T     The type of the returned vector
+   * @tparam     N     The number of elements in the vector
+   *
+   * @return     The vector from the FIFO
+   */
+  template<typename T, int N>
+  hls::vector<T, N> PopVector() {
+    static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
+    assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
+    AxiuPacketType packet;
+    packet = this->_port.read();
+    hls::vector<T, N> y;
+    for (int i = 0; i < N; ++i) {
+      constexpr const int kHi = (i + 1) * Bitwidth - 1;
+      constexpr const int kLo = i * Bitwidth;
+      y[i] = *((T*)&packet.data.range(kHi, kLo));
+    }
+    return y;
+  }
+
+  /**
+   * @brief      Read vector and return true if the specified y is the last
+   *             vector to pop, i.e. with TLAST set high. It also converts the
+   *             read vector to the specified type.
+   *
+   * @param      y     The vector read from the FIFO
+   *
+   * @tparam     T     The type of the read vector
+   * @tparam     N     The number of elements in the vector.
+   *
+   * @return     True if the specified y is the last vector to pop, False
+   *             otherwise.
+   */
+  template<typename T, int N>
+  bool isLastPopVector(hls::vector<T, N>& y) {
+    static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
+    assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
+    AxiuPacketType packet;
+    packet = this->_port.read();
+    for (int i = 0; i < N; ++i) {
+      constexpr const int kHi = (i + 1) * Bitwidth - 1;
+      constexpr const int kLo = i * Bitwidth;
+      y[i] = *((T*)&packet.data.range(kHi, kLo));
+    }
+    return packet.last == 1 ? true : false;
+  }
+#endif
+
+  hls::stream<AxiuPacketType>& get_port() {
     return this->_port;
   }
 
 private:
-  hls::stream<axiu_packet<D> > &_port;
+  hls::stream<AxiuPacketType>& _port;
 #ifndef __SYNTHESIS__
   std::string _name;
 #endif
