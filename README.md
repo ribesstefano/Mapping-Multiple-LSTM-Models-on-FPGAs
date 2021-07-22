@@ -56,7 +56,7 @@ In order to implement AXIS interfaces, avoid using `depth` in the pragma, as fol
 const int kAxiBitwidth = 128;
 
 void HlsVectorKernelU_V2(hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& x_port,
-  											 hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& y_port) {
+                         hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& y_port) {
 #pragma HLS INTERFACE axis port=x_port // depth=... <- NO DEPTH!
 #pragma HLS INTERFACE axis port=y_port // depth=... <- NO DEPTH!
 	// ...
@@ -70,7 +70,7 @@ The `AxiStreamInterface` class in `axis_lib.h` can also be used with `hls::vecto
 const int kAxiBitwidth = 128;
 
 void HlsVectorKernelU_V2(hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& x_port,
-  											 hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& y_port) {
+                         hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& y_port) {
 #pragma HLS INTERFACE axis port=x_port // depth=... <- NO DEPTH!
 #pragma HLS INTERFACE axis port=y_port // depth=... <- NO DEPTH!
   auto x_axis = svd::AxiStreamInterface<kAxiBitwidth>(x_port);
@@ -79,7 +79,7 @@ void HlsVectorKernelU_V2(hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& x_port,
   auto x_vec = x_axis.PopVector<float, 4>(); // This will pop a float vector of 4 elements.
   // ...
   hls::vector<float, 4> y_vec(3.14);
-  y_axis.PushVector<float, 4>(y_vec); // This will pop a float vector of 4 elements.
+  y_axis.PushVector<float, 4>(y_vec); // This will push a float vector of 4 elements.
 	// ...
 }
 ```
@@ -107,6 +107,7 @@ std::cout << "Number of elements in a: " << a::width << std::endl;
 ## TODOs
 
 List of TODOs:
+
 	* ~Import u, s, v new kernels~
 	* ~Import (and clean up?) u, s, v old kernels~
 	* ~Import DMA functions~
@@ -117,4 +118,5 @@ List of TODOs:
 ## Bugs
 
 List of possible bugs:
+
 * Constructing data handler storage might lead to segmentation faults. More checks needed.
