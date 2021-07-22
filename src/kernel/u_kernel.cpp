@@ -334,7 +334,7 @@ void HlsVectorKernelU(const int num_refinements,
   }
 }
 
-void HlsVectorKernelU_V2(const int num_refinements,
+void HlsAxisKernelU(const int num_refinements,
   hls::stream<typename testu::VectTuAxiType>& x_port,
   hls::stream<typename testu::VectTuAxiType>& u_port,
   hls::stream<typename testu::VectN_AxiType>& xu_port) {

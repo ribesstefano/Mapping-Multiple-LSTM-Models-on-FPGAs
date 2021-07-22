@@ -253,12 +253,13 @@ public:
 #pragma HLS INLINE
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamInterface must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
+    const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
     AxiuPacketType packet;
     for (int i = 0; i < N; ++i) {
-      const int kHi = (i + 1) * Bitwidth - 1;
-      const int kLo = i * Bitwidth;
+      const int kHi = (i + 1) * kElemBitwidth - 1;
+      const int kLo = i * kElemBitwidth;
       auto tmp = x[i];
-      packet.data.range(kHi, kLo) = *((ap_uint<Bitwidth>*)&tmp);
+      packet.data.range(kHi, kLo) = *((ap_uint<kElemBitwidth>*)&tmp);
     }
     packet.last = is_last? 1 : 0;
     this->_port.write(packet);
@@ -277,12 +278,13 @@ public:
 #pragma HLS INLINE
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamInterface must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
+    const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
     AxiuPacketType packet;
     for (int i = 0; i < N; ++i) {
-      const int kHi = (i + 1) * Bitwidth - 1;
-      const int kLo = i * Bitwidth;
+      const int kHi = (i + 1) * kElemBitwidth - 1;
+      const int kLo = i * kElemBitwidth;
       auto tmp = x[i];
-      packet.data.range(kHi, kLo) = *((ap_uint<Bitwidth>*)&tmp);
+      packet.data.range(kHi, kLo) = *((ap_uint<kElemBitwidth>*)&tmp);
     }
     packet.last = 1;
     this->_port.write(packet);
@@ -300,13 +302,14 @@ public:
   hls::vector<T, N> PopVector() {
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamInterface must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
+    const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
     AxiuPacketType packet;
     packet = this->_port.read();
     hls::vector<T, N> y;
     for (int i = 0; i < N; ++i) {
-      const int kHi = (i + 1) * Bitwidth - 1;
-      const int kLo = i * Bitwidth;
-      auto tmp = packet.data.range(kHi, kLo);
+      const int kHi = (i + 1) * kElemBitwidth - 1;
+      const int kLo = i * kElemBitwidth;
+      ap_uint<kElemBitwidth> tmp = packet.data.range(kHi, kLo);
       y[i] = *((T*)&tmp);
     }
     return y;
@@ -329,12 +332,13 @@ public:
   bool isLastPopVector(hls::vector<T, N>& y) {
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamInterface must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
+    const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
     AxiuPacketType packet;
     packet = this->_port.read();
     for (int i = 0; i < N; ++i) {
-      const int kHi = (i + 1) * Bitwidth - 1;
-      const int kLo = i * Bitwidth;
-      auto tmp = packet.data.range(kHi, kLo);
+      const int kHi = (i + 1) * kElemBitwidth - 1;
+      const int kLo = i * kElemBitwidth;
+      ap_uint<kElemBitwidth> tmp = packet.data.range(kHi, kLo);
       y[i] = *((T*)&tmp);
     }
     return packet.last == 1 ? true : false;

@@ -15,7 +15,7 @@ set reset_project 1
 set csim 0
 set build_only 0
 set synth 1
-set cosim 0
+set cosim 1
 set export 0
 set place_and_route 0
 set report_info 1
@@ -44,7 +44,7 @@ if {${use_zedboard}} {
 # Top function name, testbench file
 # ==============================================================================
 # NOTE: The namespace must also be included.
-set TOP "HlsVectorKernelU_V2" ;#"svd::SvdModel2LstmSDSoCV2"
+set TOP "HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
 set TB "test_u_kernel"
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
@@ -52,7 +52,7 @@ set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
 # Project name
 # ==============================================================================
 set prefix ":"
-set TOP_NO_NAMESPACE "HlsVectorKernelU_V2" ;# [ regsub ***=${prefix} ${TOP} "" string ]
+set TOP_NO_NAMESPACE "HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
 puts ${TOP_NO_NAMESPACE}
 set PROJECT_NAME "vitis_${board_name}_${TOP_NO_NAMESPACE}"
 # ==============================================================================
