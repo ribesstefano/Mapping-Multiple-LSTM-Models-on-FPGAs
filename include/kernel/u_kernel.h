@@ -389,25 +389,27 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
 namespace testu {
 
 static const int kNumInputs = 2;
-static const int kInputSize = 256;
+static const int kInputSize = 512;
 static const int Tu = 4;
 // NOTE: The rest of the parameters are unused for now.
 static const int kDummySize = 1;
-static const int kDummyRefinements = 8;
+static const int R = 8;
 static const int Tv = 1;
 static const int ZTu = 0;
 static const int ZTv = 0;
-static const int G = 4;
+static const int G = 1;
 
-typedef svd::SvdParameters<kNumInputs, kInputSize, kDummySize, kDummyRefinements,
-    Tu, Tv, ZTu, ZTv, G, svd::ActivationD, svd::WeightD, svd::AccumD> params;
+typedef svd::SvdParameters<kNumInputs, kInputSize, kDummySize, R,
+    Tu, Tv, ZTu, ZTv, G, short, short, short> params; // svd::ActivationD, svd::WeightD, svd::AccumD> params;
 
 static const int VectTuAxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::Tu;
 static const int VectN_AxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::N;
+static const int VectGN_AxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::G * params::N;
 typedef hls::vector<typename params::ActivationD, params::Tu> VectTuType;
 typedef hls::vector<typename params::ActivationD, params::N> VectN_Type;
 typedef ap_axiu<VectTuAxiBitwidth, 0, 0, 0> VectTuAxiType;
 typedef ap_axiu<VectN_AxiBitwidth, 0, 0, 0> VectN_AxiType;
+typedef ap_axiu<VectGN_AxiBitwidth, 0, 0, 0> VectGN_AxiType;
 
 } // testu
 
@@ -430,7 +432,7 @@ void HlsVectorKernelU(const int num_refinements,
 void HlsAxisKernelU(const int num_refinements,
   hls::stream<typename testu::VectTuAxiType>& x_port,
   hls::stream<typename testu::VectTuAxiType>& u_port,
-  hls::stream<typename testu::VectN_AxiType>& xu_port);
+  hls::stream<typename testu::VectGN_AxiType>& xu_port);
 #endif
 
 #endif // end KERNEL_U_KERNEL_H_

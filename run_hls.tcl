@@ -16,7 +16,7 @@ set csim 0
 set build_only 0
 set synth 1
 set cosim 1
-set export 0
+set export 1
 set place_and_route 0
 set report_info 1
 # ==============================================================================
@@ -250,7 +250,7 @@ if {${synth}} {
 if {${cosim}} {
 
     if {${USE_VITIS}} {
-        cosim_design -trace_level none -ldflags ${LDFLAGS} -argv ${ARGV} \
+        cosim_design -trace_level port -ldflags ${LDFLAGS} -argv ${ARGV} \
             -enable_dataflow_profiling
             # -enable_fifo_sizing
             # -disable_deadlock_detection
