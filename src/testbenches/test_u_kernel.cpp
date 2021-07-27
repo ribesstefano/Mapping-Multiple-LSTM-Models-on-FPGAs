@@ -32,9 +32,9 @@ int main(int argc, char const *argv[]) {
   hls::stream<VectTuAct_Type> x_port; //[testu::params::N * kNumTilesU];
   hls::stream<VectTuAct_Type> u_port; //[num_refinements * kNumTilesU * testu::params::G];
   hls::stream<VectN_Type> xu_port; //[num_refinements * testu::params::G];
-  hls::stream<typename testu::VectTuAxiType> x_axis;
-  hls::stream<typename testu::VectTuAxiType> u_axis;
-  hls::stream<typename testu::VectGN_AxiType> xu_axis;
+  hls::stream<typename testu::VectTuAxiType> x_axis("x_axis");
+  hls::stream<typename testu::VectTuAxiType> u_axis("u_axis");
+  hls::stream<typename testu::VectGN_AxiType> xu_axis("xu_axis");
   VectN_Type xu_gold[num_refinements * testu::params::G];
 
   auto x_axis_interface = svd::AxiStreamInterface<testu::VectTuAxiBitwidth>(x_axis);
@@ -111,7 +111,7 @@ int main(int argc, char const *argv[]) {
     HlsAxisKernelU(num_refinements, x_axis, u_axis, xu_axis);
 
     for (int i = 0; i < num_refinements; ++i) {
-      auto xu_val = xu_axis_interface.PopVector<ActivationType, testu::params::N>();
+      auto xu_val = xu_axis_interface.PopVector<ActivationType, testu::params::G * testu::params::N>();
       for (int j = 0; j < testu::params::G; ++j) {
         auto tmp = xu_port.read();
         for (int k = 0; k < testu::params::N; ++k) {

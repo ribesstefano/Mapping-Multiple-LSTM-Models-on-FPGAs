@@ -397,19 +397,22 @@ static const int R = 8;
 static const int Tv = 1;
 static const int ZTu = 0;
 static const int ZTv = 0;
-static const int G = 1;
+static const int G = 4;
 
-typedef svd::SvdParameters<kNumInputs, kInputSize, kDummySize, R,
-    Tu, Tv, ZTu, ZTv, G, short, short, short> params; // svd::ActivationD, svd::WeightD, svd::AccumD> params;
+typedef svd::SvdParameters<testu::kNumInputs, testu::kInputSize,
+    testu::kDummySize, testu::R, testu::Tu, testu::Tv, testu::ZTu, testu::ZTv,
+    testu::G,
+    // svd::ActivationD, svd::WeightD, svd::AccumD> params;
+    short, short, short> params;
 
 static const int VectTuAxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::Tu;
 static const int VectN_AxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::N;
 static const int VectGN_AxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::G * params::N;
 typedef hls::vector<typename params::ActivationD, params::Tu> VectTuType;
 typedef hls::vector<typename params::ActivationD, params::N> VectN_Type;
-typedef ap_axiu<VectTuAxiBitwidth, 0, 0, 0> VectTuAxiType;
-typedef ap_axiu<VectN_AxiBitwidth, 0, 0, 0> VectN_AxiType;
-typedef ap_axiu<VectGN_AxiBitwidth, 0, 0, 0> VectGN_AxiType;
+typedef svd::AxiStreamInterface<VectTuAxiBitwidth>::AxiuPacketType VectTuAxiType;
+typedef svd::AxiStreamInterface<VectN_AxiBitwidth>::AxiuPacketType VectN_AxiType;
+typedef svd::AxiStreamInterface<VectGN_AxiBitwidth>::AxiuPacketType VectGN_AxiType;
 
 } // testu
 

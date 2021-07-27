@@ -49,6 +49,31 @@ make all
 
 ## Notes on Using Vitis
 
+### AXIS Interface and DMA
+
+Vitis to include the TLAST side channel if and only if TKEEP and TSTRB are also included.
+
+In order to attach the port to a Xilinx DMA, the TLAST signal must be properly set HIGH at the end of the data transmission.
+
+The TKEEP and TSTRB signals must be *always* set to HIGH, as indicated in the [AXIS documentation](https://developer.arm.com/documentation/ihi0051/a/Interface-Signals/Byte-qualifiers/TKEEP-and-TSTRB-combinations).
+
+
+### Partitioning hls::vector Arrays
+
+A standard way of partitioning an array is:
+```c++
+  hls::stream<hls::vector<int, 4> > x_streams[M][N];
+#pragma HLS ARRAY_PARTITION variable=x_streams complete dim=0
+```
+However, since we are dealing with a `hls::vector` type, setting `dim=0` (all dimensions) will partition the array on the vector dimension too.
+
+In the example above, Vitis will create `M * N * 4` different streams (instead of just `M * N`). To fix it, manually specify the partitioning on the dimensions, like so:
+```c++
+  hls::stream<hls::vector<int, 4> > x_streams[M][N];
+#pragma HLS ARRAY_PARTITION variable=x_streams complete dim=1
+#pragma HLS ARRAY_PARTITION variable=x_streams complete dim=2
+```
+
 ### Implementing AXIS Interfaces
 
 In order to implement AXIS interfaces, avoid using `depth` in the pragma, as follows:
@@ -102,6 +127,21 @@ std::cout << "Number of elements in a: " << a::width << std::endl;
 
 // > Number of elements in a: 5
 ```
+
+## Notes on PYNQ Design
+
+### Vivado Project
+
+#### Xilinx DMA
+
+The DMA should be configured in the following way:
+
+* Max burst length to maximum
+* Register buffer width to maximum
+
+#### HP Ports
+
+All HP ports should be set to 64bit width (to avoid receiving data interleaved by zeroes).
 
 
 ## TODOs

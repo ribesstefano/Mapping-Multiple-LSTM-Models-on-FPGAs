@@ -161,7 +161,7 @@ void V_Dispatcher(const typename params::VPortD v_port[params::R * params::Prune
 #pragma HLS LOOP_FLATTEN
         for (int g = 0; g < params::G; ++g) {
           streams.v[g][j].write(streams.v_dma[g].read());
-        }        
+        }
       }
     }
   }

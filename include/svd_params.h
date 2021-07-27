@@ -4,7 +4,11 @@
 #include "hls_utils/hls_metaprogramming.h"
 
 #include "ap_int.h"
+#include "ap_axi_sdata.h"
 #include "hls_stream.h"
+#ifdef __VITIS_HLS__
+#include "hls_vector.h"
+#endif
 
 #include <cstdint>
 
@@ -54,6 +58,19 @@ struct SvdParameters {
   static const int ActivationWidth = hlsutils::Bitwidth<ActivationD>::value;
   static const int WeightWidth = hlsutils::Bitwidth<WeightD>::value;
   static const int AccumulationWidth = hlsutils::Bitwidth<AccumulationD>::value;
+  static const int VectTuAxiWidth = ActivationWidth * Tu;
+  static const int VectTvAxiWidth = ActivationWidth * Tv;
+  static const int VectN_AxiWidth = ActivationWidth * N;
+  static const int VectGN_AxiWidth = ActivationWidth * G * N;
+  typedef ap_axiu<VectTuAxiWidth, 0, 0, 0> VectTuAxiType;
+  typedef ap_axiu<VectTvAxiWidth, 0, 0, 0> VectTvAxiType;
+  typedef ap_axiu<VectN_AxiWidth, 0, 0, 0> VectN_AxiType;
+  typedef ap_axiu<VectGN_AxiWidth, 0, 0, 0> VectGN_AxiType;
+#ifdef __VITIS_HLS__
+  typedef hls::vector<ActivationD, Tu> VectTuType;
+  typedef hls::vector<ActivationD, Tv> VectTvType;
+  typedef hls::vector<ActivationD, N> VectN_Type;
+#endif
 };
 
 template<typename params>
