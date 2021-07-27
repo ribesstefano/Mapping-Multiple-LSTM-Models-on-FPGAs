@@ -18,6 +18,13 @@
 
 namespace svd {
 
+template<int Bitwidth>
+struct AxiuPacketTlastOnlyType {
+  ap_uint<Bitwidth> data;
+  ap_uint<1> last = 0;
+  // ap_uint<4> keep = 0xF;
+};
+
 /**
  * @brief      Wrapper class for an AXI stream interface.
  *
@@ -25,14 +32,20 @@ namespace svd {
  *             HLS directive in order to synthesize a proper AXI stream
  *             interface.
  *
+ *             For documentation on TKEEP and TSTRB, please visit:
+ *             https://developer.arm.com/documentation/ihi0051/a/Interface-Signals/Byte-qualifiers/TKEEP-and-TSTRB-combinations
+ *
  * @tparam     Bitwidth  The bitwidth of the interface.
  */
 template <int Bitwidth>
 class AxiStreamInterface {
 public:
+  // typedef AxiuPacketTlastOnlyType<Bitwidth> AxiuPacketType;
   typedef ap_axiu<Bitwidth, 0, 0, 0> AxiuPacketType;
+  typedef ap_uint<hls::bytewidth<ap_uint<Bitwidth> > > SideChannelsType;
 
-  AxiStreamInterface(hls::stream<AxiuPacketType>& port) : _port(port) {
+  AxiStreamInterface(hls::stream<AxiuPacketType>& port) : _port(port),
+    _all_ones(~(SideChannelsType(0))) {
 #pragma HLS INLINE
   };
 
@@ -82,6 +95,9 @@ public:
     AxiuPacketType packet;
     packet.data = *((ap_uint<Bitwidth>*)&x);
     packet.last = is_last? 1 : 0;
+    // NOTE: If TKEEP and TSTRB both high, the packet is a data type.
+    packet.keep = this->_all_ones; // Set TKEEP to all ones.
+    packet.strb = this->_all_ones; // Set TSTRB to all ones.
     this->_port.write(packet);
   }
 
@@ -98,6 +114,9 @@ public:
     AxiuPacketType packet;
     packet.data = *((ap_uint<Bitwidth>*)&x);
     packet.last = 1;
+    // NOTE: If TKEEP and TSTRB both high, the packet is a data type.
+    packet.keep = this->_all_ones; // Set TKEEP to all ones.
+    packet.strb = this->_all_ones; // Set TSTRB to all ones.
     this->_port.write(packet);
   }
 
@@ -119,6 +138,9 @@ public:
       if (i == size - 1) { // The last packet needs special care.
         packet.last = 1;
       }
+      // NOTE: If TKEEP and TSTRB both high, the packet is a data type.
+      packet.keep = this->_all_ones; // Set TKEEP to all ones.
+      packet.strb = this->_all_ones; // Set TSTRB to all ones.
       this->_port.write(packet);
     }
   }
@@ -142,6 +164,9 @@ public:
       if (i == size - 1) { // The last packet needs special care.
         packet.last = 1;
       }
+      // NOTE: If TKEEP and TSTRB both high, the packet is a data type.
+      packet.keep = this->_all_ones; // Set TKEEP to all ones.
+      packet.strb = this->_all_ones; // Set TSTRB to all ones.
       this->_port.write(packet);
     }
   }
@@ -262,6 +287,9 @@ public:
       packet.data.range(kHi, kLo) = *((ap_uint<kElemBitwidth>*)&tmp);
     }
     packet.last = is_last? 1 : 0;
+    // NOTE: If TKEEP and TSTRB both high, the packet is a data type.
+    packet.keep = this->_all_ones; // Set TKEEP to all ones.
+    packet.strb = this->_all_ones; // Set TSTRB to all ones.
     this->_port.write(packet);
   }
 
@@ -287,6 +315,9 @@ public:
       packet.data.range(kHi, kLo) = *((ap_uint<kElemBitwidth>*)&tmp);
     }
     packet.last = 1;
+    // NOTE: If TKEEP and TSTRB both high, the packet is a data type.
+    packet.keep = this->_all_ones; // Set TKEEP to all ones.
+    packet.strb = this->_all_ones; // Set TSTRB to all ones.
     this->_port.write(packet);
   }
 
@@ -300,6 +331,7 @@ public:
    */
   template<typename T, int N>
   hls::vector<T, N> PopVector() {
+#pragma HLS INLINE
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamInterface must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
@@ -330,6 +362,7 @@ public:
    */
   template<typename T, int N>
   bool isLastPopVector(hls::vector<T, N>& y) {
+#pragma HLS INLINE
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamInterface must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
@@ -351,6 +384,7 @@ public:
 
 private:
   hls::stream<AxiuPacketType>& _port;
+  SideChannelsType _all_ones;
 #ifndef __SYNTHESIS__
   std::string _name;
 #endif

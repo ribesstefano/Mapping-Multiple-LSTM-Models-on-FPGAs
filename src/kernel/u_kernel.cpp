@@ -341,9 +341,9 @@ void HlsAxisKernelU(const int num_refinements,
   const int R_test = num_refinements;
   const int kNumTilesU = testu::params::I / testu::params::Tu;
   const int kBitwidth = hlsutils::Bitwidth<testu::params::ActivationD>::value;
-  const int kDepth_X = testu::params::N * kNumTilesU;
-  const int kDepth_U = num_refinements * kNumTilesU * testu::params::G;
-  const int kDepth_XU = num_refinements * testu::params::G;
+  const int kStreamDepth_X = 2 + kNumTilesU * testu::params::N;
+  const int kStreamDepth_U = 8 + kNumTilesU * testu::params::N;
+  const int kStreamDepth_XU = 2 + testu::params::G;
 #pragma HLS INTERFACE axis port=x_port
 #pragma HLS INTERFACE axis port=u_port
 #pragma HLS INTERFACE axis port=xu_port
@@ -363,12 +363,13 @@ void HlsAxisKernelU(const int num_refinements,
   hls::stream<VectTuAct_Type> u_streams[testu::params::G];
   hls::stream<VectTuAct_Type> xu_streams[testu::params::N][testu::params::G];
   VectTuAct_Type x_buffer[testu::params::N][kNumTilesU];
-#pragma HLS STREAM variable=x_streams depth=2
-#pragma HLS STREAM variable=u_streams depth=2+testu::params::N*kNumTilesU
-#pragma HLS STREAM variable=xu_streams depth=2
-#pragma HLS ARRAY_PARTITION variable=x_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=u_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=xu_streams complete dim=0
+#pragma HLS STREAM variable=x_streams depth=kStreamDepth_X
+#pragma HLS STREAM variable=u_streams depth=kStreamDepth_U
+#pragma HLS STREAM variable=xu_streams depth=kStreamDepth_XU
+#pragma HLS ARRAY_PARTITION variable=x_streams complete dim=1
+#pragma HLS ARRAY_PARTITION variable=u_streams complete dim=1
+#pragma HLS ARRAY_PARTITION variable=xu_streams complete dim=1
+#pragma HLS ARRAY_PARTITION variable=xu_streams complete dim=2
 #pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=1
   
   Store_X_Buffer:
@@ -389,6 +390,18 @@ void HlsAxisKernelU(const int num_refinements,
       }
     }
   }
+
+//   X_DMA:
+//   for (int i = 0; i < R_test; ++i) {
+// #pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
+//     for (int k = 0; k < testu::params::N; ++k) {
+//       for (int j = 0; j < kNumTilesU; ++j) {
+// #pragma HLS PIPELINE II=1
+//         x_streams[k] << x_axis.PopVector<ActivationType, testu::params::Tu>();
+//       }
+//     }
+//   }
+
   U_DMA:
   for (int i = 0; i < R_test; ++i) {
 #pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
@@ -399,6 +412,7 @@ void HlsAxisKernelU(const int num_refinements,
       }
     }
   }
+
   U_Kernel:
   for (int i = 0; i < R_test; ++i) {
 #pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
@@ -435,7 +449,7 @@ void HlsAxisKernelU(const int num_refinements,
         xu_out[j * testu::params::N + k] = xu_streams[k][j].read().reduce_add();
       }
     }
-    const bool kIsLast = (i == R_test - 1) ? 1 : 0;
+    const bool kIsLast = (i == R_test - 1) ? true : false;
     xu_axis.PushVector<ActivationType, testu::params::G * testu::params::N>(xu_out, kIsLast);
   }
 }
