@@ -25,6 +25,15 @@ target_link_libraries(SVD_KERNEL U_KERNEL)
 target_link_libraries(SVD_KERNEL S_KERNEL)
 target_link_libraries(SVD_KERNEL V_KERNEL)
 
+
+add_library(GEMV_KERNEL STATIC ${CMAKE_SOURCE_DIR}/src/kernel/gemv_kernel.cpp)
+target_include_directories(GEMV_KERNEL PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(GEMV_KERNEL PUBLIC ${CMAKE_SOURCE_DIR}/include/kernel)
+target_compile_options(GEMV_KERNEL PRIVATE -fno-builtin)
+target_link_libraries(GEMV_KERNEL U_KERNEL)
+target_link_libraries(GEMV_KERNEL S_KERNEL)
+target_link_libraries(GEMV_KERNEL V_KERNEL)
+
 # add_library(DQNET STATIC ${CMAKE_SOURCE_DIR}/src/kernel/kernel.cpp)
 # target_include_directories(DQNET PUBLIC ${CMAKE_SOURCE_DIR}/include)
 # target_include_directories(DQNET PUBLIC ${CMAKE_SOURCE_DIR}/include/kernel)

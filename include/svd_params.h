@@ -70,6 +70,7 @@ struct SvdParameters {
   typedef hls::vector<ActivationD, Tu> VectTuType;
   typedef hls::vector<ActivationD, Tv> VectTvType;
   typedef hls::vector<ActivationD, N> VectN_Type;
+  typedef hls::vector<ActivationD, G * N> VectGN_Type;
 #endif
 };
 
