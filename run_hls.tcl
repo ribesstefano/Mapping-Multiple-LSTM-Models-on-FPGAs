@@ -44,7 +44,7 @@ if {${use_zedboard}} {
 # Top function name, testbench file
 # ==============================================================================
 # NOTE: The namespace must also be included.
-set TOP "HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
+set TOP "HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
 set TB "test_u_kernel"
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
@@ -52,7 +52,7 @@ set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
 # Project name
 # ==============================================================================
 set prefix ":"
-set TOP_NO_NAMESPACE "HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
+set TOP_NO_NAMESPACE "HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
 puts ${TOP_NO_NAMESPACE}
 set PROJECT_NAME "vitis_${board_name}_${TOP_NO_NAMESPACE}"
 # ==============================================================================
@@ -123,12 +123,14 @@ if {${reset_project}} {
     add_files ${PRJ_PATH}/src/dma/svd_dma.cpp -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/src/hls_utils/adder_tree.cpp -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/src/hls_utils/hls_metaprogramming.cpp -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/src/kernel/gemv_kernel.cpp -cflags ${CFLAGS}
 
     add_files ${PRJ_PATH}/include/kernel/u_kernel.h -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/include/dma/svd_dma.h -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/include/hls_utils/adder_tree.h -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/include/hls_utils/hls_metaprogramming.h -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/include/dma/svd_parameters.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/kernel/gemv_kernel.h -cflags ${CFLAGS}
 
     # foreach f ${include_files} {
     #     # File svd.h contains main()
