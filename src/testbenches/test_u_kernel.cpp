@@ -18,6 +18,7 @@ int main(int argc, char const *argv[]) {
   return 0;
 #else
   const int num_refinements = testu::params::R;
+  hls::vector<int, testu::params::N> num_refinements_vect = hls::vector<int, testu::params::N>(num_refinements);
   const int kNumTilesU = testu::params::I / testu::params::Tu;
   typedef typename testu::params::ActivationD ActivationType;
   typedef hls::vector<ActivationType, testu::params::N> VectN_Type;
@@ -34,12 +35,14 @@ int main(int argc, char const *argv[]) {
   hls::stream<VectN_Type> xu_port; //[num_refinements * testu::params::G];
   hls::stream<typename testu::VectTuAxiType> x_axis("x_axis");
   hls::stream<typename testu::VectTuAxiType> u_axis("u_axis");
-  hls::stream<typename testu::VectGN_AxiType> xu_axis("xu_axis");
+  hls::stream<typename testu::VectGN_AxiType> xu_gn_axis("xu_gn_axis");
+  hls::stream<typename testu::VectN_AxiType> xu_n_axis("xu_n_axis");
   VectN_Type xu_gold[num_refinements * testu::params::G];
 
   auto x_axis_interface = svd::AxiStreamInterface<testu::VectTuAxiBitwidth>(x_axis);
   auto u_axis_interface = svd::AxiStreamInterface<testu::VectTuAxiBitwidth>(u_axis);
-  auto xu_axis_interface = svd::AxiStreamInterface<testu::VectGN_AxiBitwidth>(xu_axis);
+  auto xu_gn_axis_interface = svd::AxiStreamInterface<testu::VectGN_AxiBitwidth>(xu_gn_axis);
+  auto xu_n_axis_interface = svd::AxiStreamInterface<testu::VectN_AxiBitwidth>(xu_n_axis);
 
   for (int i = 0; i < testu::params::N; ++i) {
     for (int j = 0; j < testu::params::I; ++j) {
@@ -83,14 +86,18 @@ int main(int argc, char const *argv[]) {
   int num_errors = 0;
   
   for (int t = 0; t < num_tests; ++t) {
-    for (int i = 0; i < testu::params::N; ++i) {
-      for (int j = 0; j < kNumTilesU; ++j) {
-        VectTuAct_Type x_val;
-        for (int k = 0; k < testu::params::Tu; ++k) {
-          x_val[k] = x[i][j * testu::params::Tu + k];
+    for (int jj = 0; jj < 2; ++jj) {
+      for (int i = 0; i < testu::params::N; ++i) {
+        for (int j = 0; j < kNumTilesU; ++j) {
+          VectTuAct_Type x_val;
+          for (int k = 0; k < testu::params::Tu; ++k) {
+            x_val[k] = x[i][j * testu::params::Tu + k];
+          }
+          if (jj == 0) {
+            x_port << x_val;
+          }
+          x_axis_interface.PushVector<ActivationType, testu::params::Tu>(x_val);
         }
-        x_port << x_val;
-        x_axis_interface.PushVector<ActivationType, testu::params::Tu>(x_val);
       }
     }
     for (int i = 0; i < num_refinements; ++i) {
@@ -105,19 +112,40 @@ int main(int argc, char const *argv[]) {
         }
       }
     }
+    // NOTE: The streaming order differs from before!
+    for (int i = 0; i < num_refinements; ++i) {
+      for (int k = 0; k < testu::params::G; ++k) {
+        for (int j = 0; j < kNumTilesU; ++j) {
+          VectTuAct_Type u_val;
+          for (int ii = 0; ii < testu::params::Tu; ++ii) {
+            u_val[ii] = u[i][j * testu::params::Tu + ii][k];
+          }
+          u_axis_interface.PushVector<ActivationType, testu::params::Tu>(u_val);
+        }
+      }
+    }
 
     std::cout << "[INFO] Starting HlsVectorKernelU." << std::endl;
     HlsVectorKernelU(num_refinements, x_port, u_port, xu_port);
-    HlsAxisKernelU(num_refinements, x_axis, u_axis, xu_axis);
+    std::cout << "[INFO] Starting HlsAxisKernelU." << std::endl;
+    HlsAxisKernelU(num_refinements, x_axis, u_axis, xu_gn_axis);
+    std::cout << "[INFO] Starting HlsManySamplingsKernelU." << std::endl;
+    HlsManySamplingsKernelU(num_refinements_vect, x_axis, u_axis, xu_n_axis);
 
     for (int i = 0; i < num_refinements; ++i) {
-      auto xu_val = xu_axis_interface.PopVector<ActivationType, testu::params::G * testu::params::N>();
+      auto xu_gn_val = xu_gn_axis_interface.PopVector<ActivationType, testu::params::G * testu::params::N>();
       for (int j = 0; j < testu::params::G; ++j) {
         auto tmp = xu_port.read();
+        auto xu_n_val = xu_n_axis_interface.PopVector<ActivationType, testu::params::N>();
         for (int k = 0; k < testu::params::N; ++k) {
-          std::cout << i << ") test/gold: " << xu_val[j * testu::params::N + k] << " / "
+          // std::cout << i << ") test/gold: " << xu_gn_val[j * testu::params::N + k] << " / "
+          //           << xu_gold[i * testu::params::G + j][k] << std::endl;
+          std::cout << i << ") test/gold: " << xu_n_val[k] << " / "
                     << xu_gold[i * testu::params::G + j][k] << std::endl;
-          if (xu_val[j * testu::params::N + k] != xu_gold[i * testu::params::G + j][k]) {
+          if (xu_gn_val[j * testu::params::N + k] != xu_gold[i * testu::params::G + j][k]) {
+            ++num_errors;
+          }
+          if (xu_n_val[k] != xu_gold[i * testu::params::G + j][k]) {
             ++num_errors;
           }
         }

@@ -376,7 +376,7 @@ public:
     }
     return packet.last == 1 ? true : false;
   }
-#endif
+#endif // __VITIS_HLS__
 
   hls::stream<AxiuPacketType>& get_port() {
     return this->_port;

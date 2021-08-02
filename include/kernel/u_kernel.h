@@ -410,6 +410,7 @@ static const int VectN_AxiBitwidth = hlsutils::Bitwidth<typename params::Activat
 static const int VectGN_AxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::G * params::N;
 typedef hls::vector<typename params::ActivationD, params::Tu> VectTuType;
 typedef hls::vector<typename params::ActivationD, params::N> VectN_Type;
+typedef hls::vector<typename params::ActivationD, params::G * params::N> VectGN_Type;
 typedef svd::AxiStreamInterface<VectTuAxiBitwidth>::AxiuPacketType VectTuAxiType;
 typedef svd::AxiStreamInterface<VectN_AxiBitwidth>::AxiuPacketType VectN_AxiType;
 typedef svd::AxiStreamInterface<VectGN_AxiBitwidth>::AxiuPacketType VectGN_AxiType;
@@ -436,6 +437,11 @@ void HlsAxisKernelU(const int num_refinements,
   hls::stream<typename testu::VectTuAxiType>& x_port,
   hls::stream<typename testu::VectTuAxiType>& u_port,
   hls::stream<typename testu::VectGN_AxiType>& xu_port);
+
+void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refinements,
+  hls::stream<typename testu::VectTuAxiType>& x_port,
+  hls::stream<typename testu::VectTuAxiType>& u_port,
+  hls::stream<typename testu::VectN_AxiType>& xu_port);
 #endif
 
 #endif // end KERNEL_U_KERNEL_H_

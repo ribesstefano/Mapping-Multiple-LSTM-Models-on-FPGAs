@@ -5,6 +5,7 @@
 #include "hls_utils/hls_metaprogramming.h"
 #include "hls_utils/priority_encoder.h"
 #include "dma/width_converter.h"
+#include "dma/axis_lib.h"
 
 #include "hls_stream.h"
 #include "assert.h"
@@ -535,6 +536,40 @@ void PipelinedDispatcher(const int input_size,
     y[j].write(shift_reg[j][NumPE - 1]);
   }
 }
+
+
+#ifdef __VITIS_HLS__
+template <typename params>
+void VectorizedInputDMA(const int R,
+    hls::stream<typename params::VectTuAxiType>& x_port,
+    hls::stream<typename params::VectTuType> x_streams[params::N]) {
+
+  typedef typename params::ActivationD ActivationType;
+  const int kNumTilesU = params::I / params::Tu;
+  svd::AxiStreamInterface<params::VectTuAxiWidth> x_axis = svd::AxiStreamInterface<params::VectTuAxiWidth>(x_port);
+  typename params::VectTuType x_buffer[params::N][kNumTilesU];
+#pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=1
+
+  Store_X_Buffer:
+  for (int i = 0; i < params::N; ++i) {
+    for (int j = 0; j < kNumTilesU; ++j) {
+#pragma HLS LOOP_FLATTEN
+#pragma HLS PIPELINE II=1
+      // x_buffer[i][j] = x_axis.PopVector<ActivationType, params::Tu>();
+    }
+  }
+  Stream_X_Tiles:
+  for (int i = 0; i < R; ++i) {
+#pragma HLS LOOP_TRIPCOUNT min=params::R max=params::R
+    for (int j = 0; j < kNumTilesU; ++j) {
+#pragma HLS PIPELINE II=1
+      for (int k = 0; k < params::N; ++k) {
+        x_streams[k] << x_buffer[k][j];
+      }
+    }
+  }
+}
+#endif
 
 } // end namespace svd
 
