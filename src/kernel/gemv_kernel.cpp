@@ -3,26 +3,26 @@
 #ifdef __VITIS_HLS__
 
 void HlsGemvKernel(const int num_rows, const int num_cols,
-  hls::stream<hls::vector<short, 4> >& x1_port,
-  hls::stream<hls::vector<short, 4> >& x2_port,
-  hls::stream<hls::vector<short, 4> >& w1_port,
-  hls::stream<hls::vector<short, 4> >& w2_port,
-  hls::stream<short>& y1_port,
-  hls::stream<short>& y2_port) {
+  hls::stream<hls::vector<testgemv::DataType, testgemv::T> >& x1_port,
+  hls::stream<hls::vector<testgemv::DataType, testgemv::T> >& x2_port,
+  hls::stream<hls::vector<testgemv::DataType, testgemv::T> >& w1_port,
+  hls::stream<hls::vector<testgemv::DataType, testgemv::T> >& w2_port,
+  hls::stream<testgemv::DataType>& y1_port,
+  hls::stream<testgemv::DataType>& y2_port) {
 #pragma HLS INTERFACE s_axilite port=return bundle=ctrl
 #pragma HLS INTERFACE s_axilite port=num_cols bundle=ctrl
 #pragma HLS INTERFACE s_axilite port=num_rows bundle=ctrl
 #pragma HLS DATAFLOW
 
-  hls::stream<hls::vector<short, 4> > x_streams[2];
-  hls::stream<hls::vector<short, 4> > w_streams[2];
-  hls::stream<short> y_streams[2];
+  hls::stream<hls::vector<testgemv::DataType, testgemv::T> > x_streams[testgemv::N];
+  hls::stream<hls::vector<testgemv::DataType, testgemv::T> > w_streams[testgemv::N];
+  hls::stream<testgemv::DataType> y_streams[testgemv::N];
 #pragma HLS ARRAY_PARTITION variable=x_streams complete
 #pragma HLS ARRAY_PARTITION variable=w_streams complete
 #pragma HLS ARRAY_PARTITION variable=y_streams complete
 
 
-  const int kNumTiles = num_rows / 4;
+  const int kNumTiles = num_rows / testgemv::T;
 
   DMA_in:
   for (int i = 0; i < kNumTiles; ++i) {
@@ -35,7 +35,8 @@ void HlsGemvKernel(const int num_rows, const int num_cols,
     }
   }
 
-  svd::GemvKernel<short, 4, 2>(num_rows, num_cols, x_streams, w_streams, y_streams);
+  svd::GemvKernel<testgemv::DataType, testgemv::T, testgemv::N>(num_rows, num_cols,
+    x_streams, w_streams, y_streams);
 
   DMA_out:
   for (int i = 0; i < num_cols; ++i) {

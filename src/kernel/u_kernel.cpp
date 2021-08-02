@@ -1,4 +1,5 @@
 #include "kernel/u_kernel.h"
+#include "kernel/gemv_kernel.h"
 #include "hls_utils/adder_tree.h"
 #include "dma/svd_dma.h"
 #include "dma/axis_lib.h"
@@ -163,7 +164,6 @@ void HlsAxisKernelU(const int num_refinements,
   hls::stream<typename testu::VectGN_AxiType>& xu_port) {
   const int R_test = num_refinements;
   const int kNumTilesU = testu::params::I / testu::params::Tu;
-  const int kBitwidth = hlsutils::Bitwidth<testu::params::ActivationD>::value;
   const int kStreamDepth_X = 2 + kNumTilesU * testu::params::N;
   const int kStreamDepth_U = 8 + kNumTilesU * testu::params::N;
   const int kStreamDepth_XU = 2 + testu::params::G;
@@ -262,6 +262,91 @@ void HlsAxisKernelU(const int num_refinements,
     xu_axis.PushVector<ActivationType, testu::params::G * testu::params::N>(xu_out, kIsLast);
   }
 }
+
+
+void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refinements,
+  hls::stream<typename testu::VectTuAxiType>& x_port,
+  hls::stream<typename testu::VectTuAxiType>& u_port,
+  hls::stream<typename testu::VectN_AxiType>& xu_port) {
+  const int R_test = num_refinements[0];
+  const int kRmax = num_refinements[0];
+  const int kNumTilesU = testu::params::I / testu::params::Tu;
+  const int kStreamDepth_X = 2 + kNumTilesU * testu::params::N;
+  const int kStreamDepth_U = 8 + kNumTilesU * testu::params::N;
+  const int kStreamDepth_XU = 2 + testu::params::G;
+#pragma HLS INTERFACE axis port=x_port
+#pragma HLS INTERFACE axis port=u_port
+#pragma HLS INTERFACE axis port=xu_port
+#pragma HLS INTERFACE s_axilite port=return
+#pragma HLS INTERFACE s_axilite port=num_refinements
+#pragma HLS DATAFLOW
+  typedef typename testu::params::ActivationD ActivationType;
+
+  auto x_axis = svd::AxiStreamInterface<testu::VectTuAxiBitwidth>(x_port);
+  auto u_axis = svd::AxiStreamInterface<testu::VectTuAxiBitwidth>(u_port);
+  auto xu_axis = svd::AxiStreamInterface<testu::VectN_AxiBitwidth>(xu_port);
+
+  hls::stream<testu::params::VectTuType> x_streams[testu::params::N];
+  hls::stream<testu::params::VectTuType> u_streams[testu::params::N];
+  hls::stream<testu::params::ActivationD> xu_streams[testu::params::N];
+  testu::params::VectTuType x_buffer[testu::params::N][kNumTilesU];
+#pragma HLS STREAM variable=x_streams depth=kStreamDepth_X
+#pragma HLS STREAM variable=u_streams depth=kStreamDepth_U
+#pragma HLS STREAM variable=xu_streams depth=kStreamDepth_XU
+#pragma HLS ARRAY_PARTITION variable=x_streams complete dim=1
+#pragma HLS ARRAY_PARTITION variable=u_streams complete dim=1
+#pragma HLS ARRAY_PARTITION variable=xu_streams complete dim=1
+#pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=1
+  
+  Store_X_Buffer:
+  for (int i = 0; i < testu::params::N; ++i) {
+    for (int j = 0; j < kNumTilesU; ++j) {
+#pragma HLS PIPELINE II=1
+#pragma HLS LOOP_FLATTEN
+      x_buffer[i][j] = x_axis.PopVector<ActivationType, testu::params::Tu>();
+    }
+  }
+  Stream_X_Tiles:
+  for (int i = 0; i < kRmax * testu::params::G; ++i) {
+#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
+    for (int j = 0; j < kNumTilesU; ++j) {
+#pragma HLS PIPELINE II=1
+      for (int k = 0; k < testu::params::N; ++k) {
+        x_streams[k] << x_buffer[k][j];
+      }
+    }
+  }
+
+  U_DMA:
+  for (int i = 0; i < kRmax; ++i) {
+#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
+    for (int j = 0; j < kNumTilesU; ++j) {
+      for (int k = 0; k < testu::params::G; ++k) {
+#pragma HLS PIPELINE II=1
+        auto u_val = u_axis.PopVector<ActivationType, testu::params::Tu>();
+        for (int ii = 0; ii < testu::params::N; ++ii) {
+          u_streams[ii] << u_val;
+        }
+      }
+    }
+  }
+
+  svd::GemvKernel<ActivationType, testu::params::Tu, testu::params::N>(
+    testu::params::I, kRmax * testu::params::G, x_streams, u_streams, xu_streams);
+
+  XU_DMA:
+  for (int i = 0; i < kRmax * testu::params::G; ++i) {
+#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
+#pragma HLS PIPELINE II=1
+    testu::params::VectN_Type xu_out;
+    for (int j = 0; j < testu::params::N; ++j) {
+      xu_out[j] = xu_streams[j].read();
+    }
+    const bool kIsLast = (i == kRmax * testu::params::G - 1) ? true : false;
+    xu_axis.PushVector<ActivationType, testu::params::N>(xu_out, kIsLast);
+  }
+}
+
 #endif
 
 namespace svd {

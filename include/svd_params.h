@@ -2,6 +2,7 @@
 #define SVD_PARAMS_H_
 
 #include "hls_utils/hls_metaprogramming.h"
+#include "dma/axis_lib.h"
 
 #include "ap_int.h"
 #include "ap_axi_sdata.h"
@@ -62,10 +63,10 @@ struct SvdParameters {
   static const int VectTvAxiWidth = ActivationWidth * Tv;
   static const int VectN_AxiWidth = ActivationWidth * N;
   static const int VectGN_AxiWidth = ActivationWidth * G * N;
-  typedef ap_axiu<VectTuAxiWidth, 0, 0, 0> VectTuAxiType;
-  typedef ap_axiu<VectTvAxiWidth, 0, 0, 0> VectTvAxiType;
-  typedef ap_axiu<VectN_AxiWidth, 0, 0, 0> VectN_AxiType;
-  typedef ap_axiu<VectGN_AxiWidth, 0, 0, 0> VectGN_AxiType;
+  typedef typename svd::AxiStreamInterface<VectTuAxiWidth>::AxiuPacketType VectTuAxiType;
+  typedef typename svd::AxiStreamInterface<VectTvAxiWidth>::AxiuPacketType VectTvAxiType;
+  typedef typename svd::AxiStreamInterface<VectN_AxiWidth>::AxiuPacketType VectN_AxiType;
+  typedef typename svd::AxiStreamInterface<VectGN_AxiWidth>::AxiuPacketType VectGN_AxiType;
 #ifdef __VITIS_HLS__
   typedef hls::vector<ActivationD, Tu> VectTuType;
   typedef hls::vector<ActivationD, Tv> VectTvType;
