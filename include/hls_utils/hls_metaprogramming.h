@@ -112,6 +112,11 @@ struct is_pow2 {
   static const bool value = (N & (N - 1)) == 0;
 };
 
+template <unsigned int X, unsigned int Y>
+struct round_up_div {
+  static const unsigned int value = (X + Y - 1) / Y;
+};
+
 } // end namespace hls
 
 #endif // end HLS_UTILS_HLS_METAPROGRAMMING_H_

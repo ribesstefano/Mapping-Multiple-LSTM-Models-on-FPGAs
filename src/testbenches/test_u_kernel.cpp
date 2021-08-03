@@ -19,7 +19,9 @@ int main(int argc, char const *argv[]) {
 #else
   const int num_refinements = testu::params::R;
   hls::vector<int, testu::params::N> num_refinements_vect = hls::vector<int, testu::params::N>(num_refinements);
-  num_refinements_vect[0] = 2;
+  for (int i = 0; i < testu::params::N; ++i) {
+    num_refinements_vect[i] = i + 2;
+  }
   const int kNumTilesU = testu::params::I / testu::params::Tu;
   typedef typename testu::params::ActivationD ActivationType;
   typedef hls::vector<ActivationType, testu::params::N> VectN_Type;
@@ -137,15 +139,23 @@ int main(int argc, char const *argv[]) {
       auto xu_gn_val = xu_gn_axis_interface.PopVector<ActivationType, testu::params::G * testu::params::N>();
       for (int j = 0; j < testu::params::G; ++j) {
         auto tmp = xu_port.read();
-        auto xu_n_val = xu_n_axis_interface.PopVector<ActivationType, testu::params::N>();
         for (int k = 0; k < testu::params::N; ++k) {
-          // std::cout << i << ") test/gold: " << xu_gn_val[j * testu::params::N + k] << " / "
-          //           << xu_gold[i * testu::params::G + j][k] << std::endl;
-          std::cout << i << ") test/gold: " << xu_n_val[k] << " / "
+          std::cout << i << ") test/gold: " << xu_gn_val[j * testu::params::N + k] << " / "
                     << xu_gold[i * testu::params::G + j][k] << std::endl;
           if (xu_gn_val[j * testu::params::N + k] != xu_gold[i * testu::params::G + j][k]) {
             ++num_errors;
           }
+        }
+      }
+    }
+
+
+    for (int i = 0; i < num_refinements; ++i) {
+      for (int j = 0; j < testu::params::G; ++j) {
+        auto xu_n_val = xu_n_axis_interface.PopVector<ActivationType, testu::params::N>();
+        for (int k = 0; k < testu::params::N; ++k) {
+          std::cout << i << ") test/gold: " << xu_n_val[k] << " / "
+                    << xu_gold[i * testu::params::G + j][k] << std::endl;
           if (xu_n_val[k] != xu_gold[i * testu::params::G + j][k]) {
             ++num_errors;
           }
