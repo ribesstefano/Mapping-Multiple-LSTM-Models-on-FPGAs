@@ -268,19 +268,6 @@ void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refine
   hls::stream<typename testu::VectTuAxiType>& x_port,
   hls::stream<typename testu::VectTuAxiType>& u_port,
   hls::stream<typename testu::VectN_AxiType>& xu_port) {
-  // NOTE: The number of refinements and the inputs must be ordered.
-  const int max_R = num_refinements[testu::params::N - 1]; // -1;
-  const int min_R = num_refinements[0]; // 1 << 31;
-//   Get_Max:
-//   for (int i = 0; i < testu::params::N; ++i) {
-// #pragma HLS PIPELINE II=1
-//     if (num_refinements[i] > max_R) {
-//       max_R = num_refinements[i];
-//     }
-//     if (num_refinements[i] < min_R) {
-//       min_R = num_refinements[i];
-//     }
-//   }
   const int kNumTilesU = testu::params::I / testu::params::Tu;
   const int kStreamDepth_X = 2 + kNumTilesU * testu::params::N;
   const int kStreamDepth_U = 8 + kNumTilesU * testu::params::N;
@@ -291,8 +278,26 @@ void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refine
 #pragma HLS INTERFACE s_axilite port=return
 #pragma HLS INTERFACE s_axilite port=num_refinements
 #pragma HLS DATAFLOW
-  typedef typename testu::params::ActivationD ActivationType;
+  // NOTE: The number of refinements and the inputs must be ordered.
+  const int max_R = num_refinements[testu::params::N - 1]; // -1;
+  const int min_R = num_refinements[0]; // 1 << 31;
+  auto get_current_R = [&](const int idx) {
+    int R = 0;
+    for (int i = 0; i < testu::params::N; ++i) {
+      R += (idx < num_refinements[i] ? 1 : 0);
+    }
+    return R;
+  };
+  int total_R = 0;
+  Get_Total_R:
+  for (int i = 0; i < max_R; ++i) {
+#pragma HLS PIPELINE II=1
+    const int R = get_current_R(i);
+    total_R += (kNumTilesU * R + testu::params::N - 1) / testu::params::N; // Ceil 
+  }
+  // std::cout << "total_R: " << total_R << std::endl;
 
+  typedef typename testu::params::ActivationD ActivationType;
   auto x_axis = svd::AxiStreamInterface<testu::VectTuAxiBitwidth>(x_port);
   auto u_axis = svd::AxiStreamInterface<testu::VectTuAxiBitwidth>(u_port);
   auto xu_axis = svd::AxiStreamInterface<testu::VectN_AxiBitwidth>(xu_port);
@@ -318,9 +323,6 @@ void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refine
     }
   }
 
-  hls::vector<int, testu::params::N> R_local = num_refinements;
-  // int max_idx = testu::params::N - 1;
-
   Stream_X_Tiles:
   for (int g = 0; g < testu::params::G; ++g) {
     for (int i = 0; i < max_R; ++i) {
@@ -329,10 +331,11 @@ void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refine
 
       int max_idx = testu::params::N - 1;
       hls::vector<int, testu::params::N> tile_cnt = hls::vector<int, testu::params::N>(0);
+
       while(tile_cnt != hls::vector<int, testu::params::N>(kNumTilesU)) {
-#pragma HLS PIPELINE II=1
         // std::cout << i << ") ";
         for (int j = 0; j < testu::params::N; ++j) {
+#pragma HLS PIPELINE II=1
           int curr_idx = j;
           if (i >= num_refinements[j]) {
             tile_cnt[j] = kNumTilesU;
@@ -352,45 +355,133 @@ void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refine
           }
         }
         // std::cout << "\t\t";
+        // for (int j = 0; j < testu::params::N; ++j) {
+        //   std::cout << tile_cnt[j] << " ";
+        // }
+        // std::cout << std::endl;
+      }
+    }
+  }
+
+
+//   U_DMA:
+//   for (int i = 0; i < max_R; ++i) {
+// #pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
+//     for (int j = 0; j < kNumTilesU; ++j) {
+//       for (int k = 0; k < testu::params::G; ++k) {
+// #pragma HLS PIPELINE II=1
+//         auto u_val = u_axis.PopVector<ActivationType, testu::params::Tu>();
+//         for (int ii = 0; ii < testu::params::N; ++ii) {
+//           u_streams[ii] << u_val;
+//         }
+//       }
+//     }
+//   }
+
+
+  U_DMA:
+  for (int g = 0; g < testu::params::G; ++g) {
+    for (int i = 0; i < max_R; ++i) {
+#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
+      // std::cout << "----------------------------" << std::endl;
+
+      testu::params::VectTuType u_buffer[kNumTilesU];
+#pragma HLS ARRAY_PARTITION variable=u_buffer complete dim=1
+
+      for (int j = 0; j < kNumTilesU; ++j) {
+#pragma HLS PIPELINE II=1
+        u_buffer[j] = u_axis.PopVector<ActivationType, testu::params::Tu>();
+      }
+
+
+      int max_idx = testu::params::N - 1;
+      hls::vector<int, testu::params::N> tile_cnt = hls::vector<int, testu::params::N>(0);
+      while(tile_cnt != hls::vector<int, testu::params::N>(kNumTilesU)) {
+        // std::cout << i << ") ";
+        for (int j = 0; j < testu::params::N; ++j) {
+#pragma HLS PIPELINE II=1
+          int curr_idx = j;
+          if (i >= num_refinements[j]) {
+            tile_cnt[j] = kNumTilesU;
+            curr_idx = max_idx;
+          }
+          if (tile_cnt[curr_idx] < kNumTilesU) {
+            // std::cout << "[" << curr_idx << "]:" << tile_cnt[curr_idx] << " ";
+            u_streams[j] << u_buffer[tile_cnt[curr_idx]];
+            ++tile_cnt[curr_idx];
+          } else {
+            // std::cout << "[" << curr_idx << "]:" << "X ";
+            u_streams[j] << testu::params::VectTuType(0);
+          }
+          if (tile_cnt[max_idx] >= kNumTilesU) {
+            tile_cnt[max_idx] = kNumTilesU;
+            max_idx = (max_idx > 0) ? --max_idx : max_idx;
+          }
+        }
+        // std::cout << "\t\t";
+        // for (int j = 0; j < testu::params::N; ++j) {
+        //   std::cout << tile_cnt[j] << " ";
+        // }
+        // std::cout << std::endl;
+      }
+    }
+  }
+
+  // for (int j = 0; j < testu::params::N; ++j) {
+  //   std::cout << j << ") x_streams.size: " << x_streams[j].size() << std::endl;
+  //   std::cout << j << ") u_streams.size: " << u_streams[j].size() << std::endl;
+  // }
+
+  Kernel:
+  for (int i = 0; i < testu::params::G * total_R; ++i) {
+#pragma HLS PIPELINE II=1    
+    for (int j = 0; j < testu::params::N; ++j) {
+      xu_streams[j] << (x_streams[j].read() * u_streams[j].read()).reduce_add();
+    }
+  }
+
+  // for (int j = 0; j < testu::params::N; ++j) {
+  //   std::cout << j << ") xu_streams.size: " << xu_streams[j].size() << std::endl;
+  // }
+
+  XU_DMA:
+  for (int g = 0; g < testu::params::G; ++g) {
+    for (int i = 0; i < max_R; ++i) {
+#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
+      // std::cout << "----------------------------" << std::endl;
+
+      typename testu::params::VectN_Type xu_out = testu::params::VectN_Type(0);
+
+      int max_idx = testu::params::N - 1;
+      hls::vector<int, testu::params::N> tile_cnt = hls::vector<int, testu::params::N>(0);
+      while(tile_cnt != hls::vector<int, testu::params::N>(kNumTilesU)) {
+#pragma HLS PIPELINE II=1
+        // std::cout << i << ") ";
+        for (int j = 0; j < testu::params::N; ++j) {
+          int curr_idx = j;
+          if (i >= num_refinements[j]) {
+            tile_cnt[j] = kNumTilesU;
+            curr_idx = max_idx;
+          }
+          xu_out[curr_idx] += xu_streams[j].read();
+          if (tile_cnt[curr_idx] < kNumTilesU) {
+            // std::cout << "[" << curr_idx << "]:" << tile_cnt[curr_idx] << " ";
+            ++tile_cnt[curr_idx];
+          }
+          if (tile_cnt[max_idx] >= kNumTilesU) {
+            tile_cnt[max_idx] = kNumTilesU;
+            max_idx = (max_idx > 0) ? --max_idx : max_idx;
+          }
+        }
+        // std::cout << "\t\t";
         for (int j = 0; j < testu::params::N; ++j) {
           // std::cout << tile_cnt[j] << " ";
         }
         // std::cout << std::endl;
       }
-
-
-
+      const bool kIsLast = (i == max_R * testu::params::G - 1) ? true : false;
+      xu_axis.PushVector<ActivationType, testu::params::N>(xu_out, kIsLast);
     }
-  }
-
-
-  U_DMA:
-  for (int i = 0; i < max_R; ++i) {
-#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
-    for (int j = 0; j < kNumTilesU; ++j) {
-      for (int k = 0; k < testu::params::G; ++k) {
-#pragma HLS PIPELINE II=1
-        auto u_val = u_axis.PopVector<ActivationType, testu::params::Tu>();
-        for (int ii = 0; ii < testu::params::N; ++ii) {
-          u_streams[ii] << u_val;
-        }
-      }
-    }
-  }
-
-  svd::GemvKernel<ActivationType, testu::params::Tu, testu::params::N>(
-    testu::params::I, max_R * testu::params::G, x_streams, u_streams, xu_streams);
-
-  XU_DMA:
-  for (int i = 0; i < max_R * testu::params::G; ++i) {
-#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
-#pragma HLS PIPELINE II=1
-    testu::params::VectN_Type xu_out;
-    for (int j = 0; j < testu::params::N; ++j) {
-      xu_out[j] = xu_streams[j].read();
-    }
-    const bool kIsLast = (i == max_R * testu::params::G - 1) ? true : false;
-    xu_axis.PushVector<ActivationType, testu::params::N>(xu_out, kIsLast);
   }
 }
 
