@@ -293,9 +293,14 @@ void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refine
   for (int i = 0; i < max_R; ++i) {
 #pragma HLS PIPELINE II=1
     const int R = get_current_R(i);
-    total_R += (kNumTilesU * R + testu::params::N - 1) / testu::params::N; // Ceil 
+    int tmp = (kNumTilesU * R + testu::params::N - 1) / testu::params::N; // Ceil 
+    std::cout << "(for) cnt: " << tmp << std::endl;
+    total_R += tmp;
   }
-  // std::cout << "total_R: " << total_R << std::endl;
+  std::cout << "total_R: " << total_R << std::endl;
+  for (int j = 0; j < testu::params::N; ++j) {
+    std::cout << j << ") num_refinements: " << num_refinements[j] << std::endl;
+  }
 
   typedef typename testu::params::ActivationD ActivationType;
   auto x_axis = svd::AxiStreamInterface<testu::VectTuAxiBitwidth>(x_port);
@@ -327,39 +332,126 @@ void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refine
   for (int g = 0; g < testu::params::G; ++g) {
     for (int i = 0; i < max_R; ++i) {
 #pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
-      // std::cout << "----------------------------" << std::endl;
+      std::cout << "----------------------------" << std::endl;
 
       int max_idx = testu::params::N - 1;
       hls::vector<int, testu::params::N> tile_cnt = hls::vector<int, testu::params::N>(0);
 
+//       const int R = (kNumTilesU * get_current_R(i) + testu::params::N - 1) / testu::params::N; // Ceil
+
+//       X_Dispatcher:
+//       for (int j = 0; j < R; ++j) {
+//         for (int k = 0; k < testu::params::N; ++k) {
+// #pragma HLS PIPELINE II=1
+//           if (i < num_refinements[k]) { 
+//             x_streams[k] << x_buffer[k][tile_cnt[k]];
+//             ++tile_cnt[k];
+//           } else {
+//             tile_cnt[k] = kNumTilesU;
+//             if (tile_cnt[max_idx] < kNumTilesU) {
+//               x_streams[k] << x_buffer[k][tile_cnt[max_idx]];
+//               tile_cnt[max_idx] = (tile_cnt[max_idx] == kNumTilesU) ? kNumTilesU : ++tile_cnt[max_idx];
+//             } else {
+//               if (max_idx == 0) {
+//                 x_streams[j] << testu::params::VectTuType(0);
+//               } else {
+//                 --max_idx; 
+//                 x_streams[k] << x_buffer[k][tile_cnt[max_idx]];
+//               }
+//             }
+//           }
+//         }
+//       }
+
+/*
+ 
+----------------------------
+0) [0]:0 [1]:0 [2]:0 [3]:0              1 1 1 1
+0) [0]:1 [1]:1 [2]:1 [3]:1              2 2 2 2
+0) [0]:2 [1]:2 [2]:2 [3]:2              3 3 3 3
+0) [0]:3 [1]:3 [2]:3 [3]:3              4 4 4 4
+(while) cnt: 4
+----------------------------
+1) [0]:0 [1]:0 [2]:0 [3]:0              1 1 1 1
+1) [0]:1 [1]:1 [2]:1 [3]:1              2 2 2 2
+1) [0]:2 [1]:2 [2]:2 [3]:2              3 3 3 3
+1) [0]:3 [1]:3 [2]:3 [3]:3              4 4 4 4
+(while) cnt: 4
+----------------------------
+2) [3]:0 [1]:0 [2]:0 [3]:1              4 1 1 2
+2) [3]:2 [1]:1 [2]:1 [3]:3              4 2 2 4
+2) [2]:2 [1]:2 [2]:3 [3]:X <-- ERROR    4 3 4 4
+2) [1]:3 [1]:X [2]:X [3]:X              4 4 4 4
+(while) cnt: 4
+----------------------------
+3) [3]:0 [3]:1 [2]:0 [3]:2              4 4 1 3
+3) [3]:3 [2]:1 [2]:2 [3]:X              4 4 3 4
+3) [2]:3 [1]:X [2]:X [3]:X              4 4 4 4
+(while) cnt: 3
+----------------------------
+4) [3]:0 [3]:1 [3]:2 [3]:3              4 4 4 4
+(while) cnt: 1
+
+ */
+
+
+
+      int cnt = 0;
+      X_Dispatcher:
       while(tile_cnt != hls::vector<int, testu::params::N>(kNumTilesU)) {
-        // std::cout << i << ") ";
+      // for (int ii = 0; ii < R; ++ii) {
+        ++cnt;
+        std::cout << i << ") ";
         for (int j = 0; j < testu::params::N; ++j) {
 #pragma HLS PIPELINE II=1
-          int curr_idx = j;
+
+          int curr_idx;
           if (i >= num_refinements[j]) {
             tile_cnt[j] = kNumTilesU;
+            if (tile_cnt[max_idx] >= kNumTilesU) {
+              --max_idx;
+            }
             curr_idx = max_idx;
-          }
-          if (tile_cnt[curr_idx] < kNumTilesU) {
-            // std::cout << "[" << curr_idx << "]:" << tile_cnt[curr_idx] << " ";
-            x_streams[j] << x_buffer[curr_idx][tile_cnt[curr_idx]];
-            ++tile_cnt[curr_idx];
           } else {
-            // std::cout << "[" << curr_idx << "]:" << "X ";
-            x_streams[j] << testu::params::VectTuType(0);
+            curr_idx = j;
           }
-          if (tile_cnt[max_idx] >= kNumTilesU) {
-            tile_cnt[max_idx] = kNumTilesU;
-            max_idx = (max_idx > 0) ? --max_idx : max_idx;
-          }
+          std::cout << "[" << curr_idx << "]:" << tile_cnt[curr_idx] << " ";
+          auto x_out = (curr_idx >= 0) ? x_buffer[curr_idx][tile_cnt[curr_idx]] : testu::params::VectTuType(0);
+          x_streams[j] << x_out;
+          tile_cnt[curr_idx] = (tile_cnt[curr_idx] == kNumTilesU) ? tile_cnt[curr_idx] : ++tile_cnt[curr_idx];
+
+          // int curr_idx = j;
+          // if (i >= num_refinements[j]) {
+          //   tile_cnt[j] = kNumTilesU;
+          //   curr_idx = max_idx;
+          // }
+          // if (tile_cnt[curr_idx] < kNumTilesU) {
+          //   std::cout << "[" << curr_idx << "]:" << tile_cnt[curr_idx] << " ";
+          //   x_streams[j] << x_buffer[curr_idx][tile_cnt[curr_idx]];
+          //   ++tile_cnt[curr_idx];
+          // } else {
+          //   if (tile_cnt[max_idx] >= kNumTilesU) {
+          //     tile_cnt[max_idx] = kNumTilesU;
+          //     --max_idx;
+          //   }
+          //   if (max_idx != -1) {
+          //     std::cout << "[" << max_idx << "]:" << tile_cnt[max_idx] << " ";
+          //     x_streams[j] << x_buffer[max_idx][tile_cnt[max_idx]];
+          //     ++tile_cnt[max_idx];
+          //   } else {
+          //     std::cout << "[" << max_idx << "]:" << "X ";
+          //     x_streams[j] << testu::params::VectTuType(0);
+          //   }
+          // }
         }
-        // std::cout << "\t\t";
-        // for (int j = 0; j < testu::params::N; ++j) {
-        //   std::cout << tile_cnt[j] << " ";
-        // }
-        // std::cout << std::endl;
+        std::cout << "\t\t";
+        for (int j = 0; j < testu::params::N; ++j) {
+          std::cout << tile_cnt[j] << " ";
+        }
+        std::cout << std::endl;
       }
+      std::cout << "(while) cnt: " << cnt << std::endl;
+
     }
   }
 
@@ -383,11 +475,12 @@ void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refine
   for (int g = 0; g < testu::params::G; ++g) {
     for (int i = 0; i < max_R; ++i) {
 #pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
-      // std::cout << "----------------------------" << std::endl;
+      std::cout << "----------------------------" << std::endl;
 
       testu::params::VectTuType u_buffer[kNumTilesU];
 #pragma HLS ARRAY_PARTITION variable=u_buffer complete dim=1
 
+      Store_U:
       for (int j = 0; j < kNumTilesU; ++j) {
 #pragma HLS PIPELINE II=1
         u_buffer[j] = u_axis.PopVector<ActivationType, testu::params::Tu>();
@@ -396,42 +489,107 @@ void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refine
 
       int max_idx = testu::params::N - 1;
       hls::vector<int, testu::params::N> tile_cnt = hls::vector<int, testu::params::N>(0);
+
+//       U_Dispatcher:
+//       while(tile_cnt != hls::vector<int, testu::params::N>(kNumTilesU)) {
+//         // std::cout << i << ") ";
+//         for (int j = 0; j < testu::params::N; ++j) {
+// #pragma HLS PIPELINE II=1
+//           int curr_idx = j;
+//           if (i >= num_refinements[j]) {
+//             tile_cnt[j] = kNumTilesU;
+//             curr_idx = max_idx;
+//           }
+//           if (tile_cnt[curr_idx] < kNumTilesU) {
+//             // std::cout << "[" << curr_idx << "]:" << tile_cnt[curr_idx] << " ";
+//             u_streams[j] << u_buffer[tile_cnt[curr_idx]];
+//             ++tile_cnt[curr_idx];
+//           } else {
+//             // std::cout << "[" << curr_idx << "]:" << "X ";
+//             u_streams[j] << testu::params::VectTuType(0);
+//           }
+//           // if (tile_cnt[max_idx] >= kNumTilesU) {
+//           //   tile_cnt[max_idx] = kNumTilesU;
+//           //   max_idx = (max_idx > 0) ? --max_idx : max_idx;
+//           // }
+//           while (tile_cnt[max_idx] >= kNumTilesU && max_idx > 0) {
+//             tile_cnt[max_idx] = kNumTilesU;
+//             --max_idx;
+//           }
+//         }
+//         // std::cout << "\t\t";
+//         // for (int j = 0; j < testu::params::N; ++j) {
+//         //   std::cout << tile_cnt[j] << " ";
+//         // }
+//         // std::cout << std::endl;
+//       }
+
+
+      int cnt = 0;
+      U_Dispatcher:
       while(tile_cnt != hls::vector<int, testu::params::N>(kNumTilesU)) {
-        // std::cout << i << ") ";
+      // for (int ii = 0; ii < R; ++ii) {
+        ++cnt;
+        std::cout << i << ") max: " << max_idx << " | ";
         for (int j = 0; j < testu::params::N; ++j) {
 #pragma HLS PIPELINE II=1
+          if (tile_cnt[max_idx] >= kNumTilesU) {
+            --max_idx;
+          }
           int curr_idx = j;
-          if (i >= num_refinements[j]) {
-            tile_cnt[j] = kNumTilesU;
+          if (i >= num_refinements[curr_idx]) {
+            tile_cnt[curr_idx] = kNumTilesU;
             curr_idx = max_idx;
           }
-          if (tile_cnt[curr_idx] < kNumTilesU) {
-            // std::cout << "[" << curr_idx << "]:" << tile_cnt[curr_idx] << " ";
-            u_streams[j] << u_buffer[tile_cnt[curr_idx]];
-            ++tile_cnt[curr_idx];
-          } else {
-            // std::cout << "[" << curr_idx << "]:" << "X ";
-            u_streams[j] << testu::params::VectTuType(0);
-          }
-          if (tile_cnt[max_idx] >= kNumTilesU) {
-            tile_cnt[max_idx] = kNumTilesU;
-            max_idx = (max_idx > 0) ? --max_idx : max_idx;
-          }
+          std::cout << "[" << curr_idx << "]:" << ((curr_idx >= 0) ? tile_cnt[curr_idx] : -1) << " ";
+          auto u_out = (curr_idx >= 0) ? u_buffer[tile_cnt[curr_idx]] : testu::params::VectTuType(0);
+          u_streams[j] << u_out;
+          tile_cnt[curr_idx] = (tile_cnt[curr_idx] == kNumTilesU) ? tile_cnt[curr_idx] : ++tile_cnt[curr_idx];
+
+          // int curr_idx = j;
+          // if (i >= num_refinements[j]) {
+          //   tile_cnt[j] = kNumTilesU;
+          //   curr_idx = max_idx;
+          // }
+          // if (tile_cnt[curr_idx] < kNumTilesU) {
+          //   std::cout << "[" << curr_idx << "]:" << tile_cnt[curr_idx] << " ";
+          //   u_streams[j] << u_buffer[tile_cnt[curr_idx]];
+          //   ++tile_cnt[curr_idx];
+          // } else {
+          //   if (tile_cnt[max_idx] >= kNumTilesU) {
+          //     tile_cnt[max_idx] = kNumTilesU;
+          //     --max_idx;
+          //   }
+          //   if (max_idx != -1) {
+          //     std::cout << "[" << max_idx << "]:" << tile_cnt[max_idx] << " ";
+          //     u_streams[j] << u_buffer[tile_cnt[max_idx]];
+          //     ++tile_cnt[max_idx];
+          //   } else {
+          //     std::cout << "[" << max_idx << "]:" << "X ";
+          //     u_streams[j] << testu::params::VectTuType(0);
+          //   }
+          // }
         }
-        // std::cout << "\t\t";
-        // for (int j = 0; j < testu::params::N; ++j) {
-        //   std::cout << tile_cnt[j] << " ";
-        // }
-        // std::cout << std::endl;
+        std::cout << "\t\t";
+        for (int j = 0; j < testu::params::N; ++j) {
+          std::cout << tile_cnt[j] << " ";
+        }
+        std::cout << std::endl;
       }
+      std::cout << "(while) cnt: " << cnt << std::endl;
+
+
+
     }
   }
 
-  // for (int j = 0; j < testu::params::N; ++j) {
-  //   std::cout << j << ") x_streams.size: " << x_streams[j].size() << std::endl;
-  //   std::cout << j << ") u_streams.size: " << u_streams[j].size() << std::endl;
-  // }
+  for (int j = 0; j < testu::params::N; ++j) {
+    // std::cout << j << ") x_streams.size: " << x_streams[j].size() << std::endl;
+    // std::cout << j << ") u_streams.size: " << u_streams[j].size() << std::endl;
+  }
 
+  // std::cout << "total_R: " << total_R << std::endl;
+  
   Kernel:
   for (int i = 0; i < testu::params::G * total_R; ++i) {
 #pragma HLS PIPELINE II=1    
@@ -440,9 +598,9 @@ void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refine
     }
   }
 
-  // for (int j = 0; j < testu::params::N; ++j) {
-  //   std::cout << j << ") xu_streams.size: " << xu_streams[j].size() << std::endl;
-  // }
+  for (int j = 0; j < testu::params::N; ++j) {
+    // std::cout << j << ") xu_streams.size: " << xu_streams[j].size() << std::endl;
+  }
 
   XU_DMA:
   for (int g = 0; g < testu::params::G; ++g) {
@@ -454,31 +612,80 @@ void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refine
 
       int max_idx = testu::params::N - 1;
       hls::vector<int, testu::params::N> tile_cnt = hls::vector<int, testu::params::N>(0);
+
+//       while(tile_cnt != hls::vector<int, testu::params::N>(kNumTilesU)) {
+// #pragma HLS PIPELINE II=1
+//         // std::cout << i << ") ";
+//         for (int j = 0; j < testu::params::N; ++j) {
+//           int curr_idx = j;
+//           if (i >= num_refinements[j]) {
+//             tile_cnt[j] = kNumTilesU;
+//             curr_idx = max_idx;
+//           }
+//           xu_out[curr_idx] += xu_streams[j].read();
+//           if (tile_cnt[curr_idx] < kNumTilesU) {
+//             // std::cout << "[" << curr_idx << "]:" << tile_cnt[curr_idx] << " ";
+//             ++tile_cnt[curr_idx];
+//           }
+//           // if (tile_cnt[max_idx] >= kNumTilesU) {
+//           //   tile_cnt[max_idx] = kNumTilesU;
+//           //   max_idx = (max_idx > 0) ? --max_idx : max_idx;
+//           // }
+//           while (tile_cnt[max_idx] >= kNumTilesU && max_idx > 0) {
+//             tile_cnt[max_idx] = kNumTilesU;
+//             --max_idx;
+//           }
+//         }
+//       }
+
+
+      int cnt = 0;
+      XU_Fetcher:
       while(tile_cnt != hls::vector<int, testu::params::N>(kNumTilesU)) {
-#pragma HLS PIPELINE II=1
-        // std::cout << i << ") ";
+      // for (int ii = 0; ii < R; ++ii) {
+        ++cnt;
+        std::cout << i << ") ";
         for (int j = 0; j < testu::params::N; ++j) {
+#pragma HLS PIPELINE II=1
+          auto xu_val = xu_streams[j].read();
+
           int curr_idx = j;
           if (i >= num_refinements[j]) {
             tile_cnt[j] = kNumTilesU;
             curr_idx = max_idx;
           }
-          xu_out[curr_idx] += xu_streams[j].read();
           if (tile_cnt[curr_idx] < kNumTilesU) {
-            // std::cout << "[" << curr_idx << "]:" << tile_cnt[curr_idx] << " ";
+            std::cout << "[" << curr_idx << "]:" << tile_cnt[curr_idx] << " ";
+            // u_streams[j] << u_buffer[tile_cnt[curr_idx]];
+            xu_out[tile_cnt[curr_idx]] += xu_val;
             ++tile_cnt[curr_idx];
-          }
-          if (tile_cnt[max_idx] >= kNumTilesU) {
-            tile_cnt[max_idx] = kNumTilesU;
-            max_idx = (max_idx > 0) ? --max_idx : max_idx;
+          } else {
+            if (tile_cnt[max_idx] >= kNumTilesU) {
+              tile_cnt[max_idx] = kNumTilesU;
+              --max_idx;
+            }
+            if (max_idx != -1) {
+              std::cout << "[" << max_idx << "]:" << tile_cnt[max_idx] << " ";
+              xu_out[tile_cnt[max_idx]] += xu_val;
+              // u_streams[j] << u_buffer[tile_cnt[max_idx]];
+              ++tile_cnt[max_idx];
+            } else {
+              xu_out[tile_cnt[max_idx]] += xu_val;
+              std::cout << "[" << max_idx << "]:" << "X ";
+              // u_streams[j] << testu::params::VectTuType(0);
+            }
           }
         }
-        // std::cout << "\t\t";
+        std::cout << "\t\t";
         for (int j = 0; j < testu::params::N; ++j) {
-          // std::cout << tile_cnt[j] << " ";
+          std::cout << tile_cnt[j] << " ";
         }
-        // std::cout << std::endl;
+        std::cout << std::endl;
       }
+      std::cout << "(while) cnt: " << cnt << std::endl;
+
+
+
       const bool kIsLast = (i == max_R * testu::params::G - 1) ? true : false;
       xu_axis.PushVector<ActivationType, testu::params::N>(xu_out, kIsLast);
     }
