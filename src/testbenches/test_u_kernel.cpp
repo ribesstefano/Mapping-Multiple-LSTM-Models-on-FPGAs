@@ -116,7 +116,7 @@ int main(int argc, char const *argv[]) {
       }
     }
     // NOTE: The streaming order differs from before!
-    for (int i = 0; i < num_refinements; ++i) {
+    for (int i = 0; i < num_refinements_vect[testu::params::N]; ++i) {
       for (int k = 0; k < testu::params::G; ++k) {
         for (int j = 0; j < kNumTilesU; ++j) {
           VectTuAct_Type u_val;
@@ -149,19 +149,37 @@ int main(int argc, char const *argv[]) {
       }
     }
 
-
-    for (int i = 0; i < num_refinements; ++i) {
-      for (int j = 0; j < testu::params::G; ++j) {
-        auto xu_n_val = xu_n_axis_interface.PopVector<ActivationType, testu::params::N>();
-        for (int k = 0; k < testu::params::N; ++k) {
-          std::cout << i << ") test/gold: " << xu_n_val[k] << " / "
-                    << xu_gold[i * testu::params::G + j][k] << std::endl;
-          if (xu_n_val[k] != xu_gold[i * testu::params::G + j][k]) {
-            ++num_errors;
-          }
-        }
-      }
+    while(!xu_n_axis.empty()) {
+      auto xu_n_val = xu_n_axis_interface.PopVector<ActivationType, testu::params::N>();
     }
+
+    // auto get_current_R = [&](const int idx) {
+    //   int R = 0;
+    //   for (int i = 0; i < testu::params::N; ++i) {
+    //     R += (idx < num_refinements_vect[i] ? 1 : 0);
+    //   }
+    //   return R;
+    // };
+    // int total_R = 0;
+    // Get_Total_R:
+    // for (int i = 0; i < num_refinements_vect[testu::params::N]; ++i) {
+    //   const int R = get_current_R(i);
+    //   total_R += (kNumTilesU * R + testu::params::N - 1) / testu::params::N; // Ceil 
+    // }
+
+    // for (int i = 0; i < total_R; ++i) {
+    //   for (int j = 0; j < testu::params::G; ++j) {
+    //     auto xu_n_val = xu_n_axis_interface.PopVector<ActivationType, testu::params::N>();
+    //     for (int k = 0; k < testu::params::N; ++k) {
+    //       std::cout << i << ") test/gold: " << xu_n_val[k] << " / "
+    //                 << xu_gold[i * testu::params::G + j][k] << std::endl;
+    //       if (xu_n_val[k] != xu_gold[i * testu::params::G + j][k]) {
+    //         ++num_errors;
+    //       }
+    //     }
+    //   }
+    // }
+
   }
   std::cout << "[INFO] Number of mismatches: " << num_errors << std::endl;
   return 0; // num_errors;

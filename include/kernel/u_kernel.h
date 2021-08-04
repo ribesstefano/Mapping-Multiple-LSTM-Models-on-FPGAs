@@ -388,12 +388,12 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
 
 namespace testu {
 
-static const int kNumInputs = 2;
+static const int kNumInputs = 4;
 static const int kInputSize = 16;
 static const int Tu = 4;
 // NOTE: The rest of the parameters are unused for now.
 static const int kDummySize = 1;
-static const int R = 4;
+static const int R = 32;
 static const int Tv = 1;
 static const int ZTu = 0;
 static const int ZTv = 0;
