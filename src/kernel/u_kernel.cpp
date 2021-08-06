@@ -276,18 +276,20 @@ void HlsKernelU_ManySampling(const hls::vector<int, testu::params::N> num_refine
 #pragma HLS INTERFACE s_axilite port=num_refinements
 #pragma HLS DATAFLOW
   int R_max = num_refinements[0];
-  int R_total = num_refinements[0] * testu::params::N;
+  int R_total = num_refinements[0] * testu::params::N; // Total elements.
   int tmp = num_refinements[0];
+  std::cout << num_refinements[0] << " ";
   Get_Total_R:
   for (int i = 1; i < testu::params::N; ++i) {
 #pragma HLS PIPELINE II=1
+    std::cout << num_refinements[i] << " ";
     if (num_refinements[i] > R_max) {
       R_max = num_refinements[i];
     }
     R_total += (num_refinements[i] - tmp) * (testu::params::N - i);
     tmp += num_refinements[i];
   }
-  std::cout << "R_total: " << R_total << "\n";
+  std::cout << "\tR_total: " << R_total << "\n";
 
   /*
    Ideally, if Rs are ordered, it would be: R0 * N + (R1-R0) * (N-1) + (R2-R1-R0) * (N-2)
@@ -409,9 +411,6 @@ void HlsKernelU_ManySampling(const hls::vector<int, testu::params::N> num_refine
 #pragma HLS PIPELINE II=1
         for (int ii = 0; ii < testu::params::G; ++ii) {
           if (i < num_refinements[k]) {
-            if (ii == 0) {
-              ++iter_cnt;
-            }
             xu_out[k][ii] += xu_streams[ii].read();
 #pragma HLS BIND_OP variable=xu_out[k][ii] op=add impl=dsp
           }
@@ -419,10 +418,12 @@ void HlsKernelU_ManySampling(const hls::vector<int, testu::params::N> num_refine
         if (i < num_refinements[k] && j == kNumTilesU - 1) {
           const bool kIsLast = (iter_cnt == R_total - 1) ? true : false;
           xu_axis.PushVector<ActivationType, testu::params::G>(xu_out[k], kIsLast);
+          ++iter_cnt;
         }
       }
     }
   }
+  std::cout << "[KernelU] iter_cnt: " << iter_cnt << std::endl;
 }
 
 #endif

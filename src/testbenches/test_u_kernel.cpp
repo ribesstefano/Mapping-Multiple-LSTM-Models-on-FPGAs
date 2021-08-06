@@ -20,7 +20,7 @@ int main(int argc, char const *argv[]) {
   const int num_refinements = testu::params::R;
   hls::vector<int, testu::params::N> num_refinements_vect = hls::vector<int, testu::params::N>(num_refinements);
   for (int i = testu::params::N; i >= 0; --i) {
-    int R_tmp = testu::params::R - 2 * i;
+    int R_tmp = testu::params::R - 2 * (testu::params::N - i);
     num_refinements_vect[i] = R_tmp > 0 ? R_tmp : 1;
   }
   const int kNumTilesU = testu::params::I / testu::params::Tu;
@@ -119,7 +119,7 @@ int main(int argc, char const *argv[]) {
       }
     }
     // NOTE: The streaming order differs from before!
-    for (int i = 0; i < num_refinements_vect[testu::params::N]; ++i) {
+    for (int i = 0; i < num_refinements_vect[testu::params::N - 1]; ++i) {
       for (int k = 0; k < testu::params::G; ++k) {
         for (int j = 0; j < kNumTilesU; ++j) {
           VectTuAct_Type u_val;
@@ -135,8 +135,6 @@ int main(int argc, char const *argv[]) {
     HlsVectorKernelU(num_refinements, x_port, u_port, xu_port);
     std::cout << "[INFO] Starting HlsAxisKernelU." << std::endl;
     HlsAxisKernelU(num_refinements, x_axis, u_axis, xu_gn_axis);
-    std::cout << "[INFO] Starting HlsKernelU_ManySampling." << std::endl;
-    HlsKernelU_ManySampling(num_refinements_vect, x_axis, u_axis, xu_g_axis);
 
     for (int i = 0; i < num_refinements; ++i) {
       auto xu_gn_val = xu_gn_axis_interface.PopVector<ActivationType, testu::params::G * testu::params::N>();
@@ -151,10 +149,36 @@ int main(int argc, char const *argv[]) {
         }
       }
     }
+    std::cout << "[INFO] Number of mismatches: " << num_errors << std::endl;
+    std::cout << "[INFO] Starting HlsKernelU_ManySampling." << std::endl;
+    HlsKernelU_ManySampling(num_refinements_vect, x_axis, u_axis, xu_g_axis);
 
-    for (hls::vector<int, testu::params::N>::iterator r = num_refinements_vect.begin(); r != num_refinements_vect.end(); ++r) {
-      std::cout << "r: " << r << std::endl;
+    testu::params::VectG_Type xu_g_val;
+    int total_cnt = 0;
+    int last_at = -1;
+    for (int i = 0; i < num_refinements_vect[testu::params::N - 1]; ++i) { // R_max
+      for (int j = 0; j < testu::params::N; ++j) {
+        if (i < num_refinements_vect[j]) {
+          bool is_last = xu_g_axis_interface.isLastPopVector<ActivationType, testu::params::G>(xu_g_val);
+          if (is_last) {
+            last_at = total_cnt;
+            std::cout << "[INFO] Last index arrived at iteration: " << last_at << std::endl;
+          }
+          ++total_cnt;
+          for (int k = 0; k < testu::params::G; ++k) {
+            std::cout << i << ") test/gold: " << xu_g_val[k] << " / "
+                      << xu_gold[i * testu::params::G + k][j] << std::endl;
+            if (xu_g_val[k] != xu_gold[i * testu::params::G + k][j]) {
+              ++num_errors;
+            }
+          }
+        }
+      }
     }
+    std::cout << "[INFO] Last index arrived at iteration: " << last_at << std::endl;
+    std::cout << "[INFO] Total iterations: " << total_cnt << std::endl;
+    std::cout << "[INFO] Number of mismatches: " << num_errors << std::endl;
+
     while(!xu_n_axis.empty()) {
       auto xu_n_val = xu_n_axis_interface.PopVector<ActivationType, testu::params::N>();
     }
