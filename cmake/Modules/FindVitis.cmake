@@ -1,6 +1,7 @@
 if (WIN32)
 	# set(VITIS_INCLUDE_DIRS D:/Programs/Xilinx/Vitis_HLS/2021.1/include/)
-	set(VITIS_INCLUDE_DIRS C:/Users/ste/phd/hls_projects/hls_svd/vitis_include/include/)
+	set(VITIS_INCLUDE_DIRS C:/Users/ste/phd/hls_projects/hls_svd/vitis_include/2020.2/include/)
+	# set(VITIS_INCLUDE_DIRS C:/Users/ste/phd/hls_projects/hls_svd/vitis_include/2021.1/include/)
 else()
 	set(VITIS_INCLUDE_DIRS /mnt/d/Programs/Xilinx/Vitis_HLS/2021.1/include/)
 endif()
