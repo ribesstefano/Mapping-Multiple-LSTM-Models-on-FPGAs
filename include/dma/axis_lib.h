@@ -51,7 +51,7 @@ public:
 
   ~AxiStreamInterface() {};
 
-  void set_name(const std::string name) {
+  inline void set_name(const std::string name) {
 #ifndef __SYNTHESIS__
     _name = name;
 #endif
@@ -90,7 +90,7 @@ public:
    *                      size of the FIFO.
    */
   template<typename T>
-  void Push(const T &x, bool is_last = false) {
+  inline void Push(const T &x, bool is_last = false) {
 #pragma HLS INLINE
     AxiuPacketType packet;
     packet.data = *((ap_uint<Bitwidth>*)&x);
@@ -109,7 +109,7 @@ public:
    * @tparam     T     The type of the value
    */
   template<typename T>
-  void PushLast(const T &x) {
+  inline void PushLast(const T &x) {
 #pragma HLS INLINE
     AxiuPacketType packet;
     packet.data = *((ap_uint<Bitwidth>*)&x);
@@ -129,7 +129,7 @@ public:
    * @tparam     T     The type of the buffer
    */
   template<typename T>
-  void PushFromBuffer(const int size, const T *x) {
+  inline void PushFromBuffer(const int size, const T *x) {
 #pragma HLS INLINE
     AxiuPacketType packet;
     for (int i = 0; i < size; ++i) {
@@ -154,7 +154,7 @@ public:
    * @tparam     T     The type of the stream
    */
   template<typename T>
-  void PushFromStream(const int size, const hls::stream<T> &x) {
+  inline void PushFromStream(const int size, const hls::stream<T> &x) {
 #pragma HLS INLINE
     AxiuPacketType packet;
     for (int i = 0; i < size; ++i) {
@@ -215,7 +215,7 @@ public:
    * @tparam     T     The type of the output buffer
    */
   template<typename T>
-  void PopToBuffer(const int size, T *y) {
+  inline void PopToBuffer(const int size, T *y) {
 #pragma HLS INLINE
     AxiuPacketType packet;
     for (int i = 0; i < size; ++i) {
@@ -235,7 +235,7 @@ public:
    * @tparam     T     The type of the output stream
    */
   template<typename T>
-  void PopToStream(const int size, hls::stream<T> &y) {
+  inline void PopToStream(const int size, hls::stream<T> &y) {
 #pragma HLS INLINE
     AxiuPacketType packet;
     for (int i = 0; i < size; ++i) {
@@ -274,7 +274,7 @@ public:
      * @tparam     N        Number of elements in the vector
      */
   template<typename T, int N>
-  void PushVector(const hls::vector<T, N>& x, bool is_last = false) {
+  inline void PushVector(const hls::vector<T, N>& x, bool is_last = false) {
 #pragma HLS INLINE
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamInterface must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
@@ -302,7 +302,7 @@ public:
    * @tparam     N     Number of elements in the vector
    */
   template<typename T, int N>
-  void PushLastVector(const hls::vector<T, N>& x) {
+  inline void PushLastVector(const hls::vector<T, N>& x) {
 #pragma HLS INLINE
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamInterface must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);

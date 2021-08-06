@@ -44,7 +44,7 @@ if {${use_zedboard}} {
 # Top function name, testbench file
 # ==============================================================================
 # NOTE: The namespace must also be included.
-set TOP "HlsManySamplingsKernelU" ;#"HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
+set TOP "HlsKernelU_ManySampling" ;#"HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
 set TB "test_u_kernel" ; #"test_gemv_kernel"
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
@@ -52,7 +52,7 @@ set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
 # Project name
 # ==============================================================================
 set prefix ":"
-set TOP_NO_NAMESPACE "HlsManySamplingsKernelU" ;#"HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
+set TOP_NO_NAMESPACE "HlsKernelU_ManySampling" ;#"HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
 puts ${TOP_NO_NAMESPACE}
 set PROJECT_NAME "vitis_${board_name}_${TOP_NO_NAMESPACE}"
 # ==============================================================================
@@ -87,7 +87,7 @@ set ARGV ""
 # NOTE(21/02/2019): the '-fno-builtin' is suggested by Xilinx when using
 # the set_directive_resource option.
 if {${USE_VITIS}} {
-    set CXXSTD "-std=c++1y  -fno-builtin" ; #"-std=c++1y"
+    set CXXSTD "-std=c++14" ;#"-std=c++14 -fno-builtin" ; #"-std=c++1y"
 } else {
     set CXXSTD "-std=c++0x -fno-builtin"
 }

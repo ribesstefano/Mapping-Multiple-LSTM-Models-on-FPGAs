@@ -388,8 +388,8 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
 
 namespace testu {
 
-static const int kNumInputs = 4;
-static const int kInputSize = 16;
+static const int kNumInputs = 1;
+static const int kInputSize = 512;
 static const int Tu = 4;
 // NOTE: The rest of the parameters are unused for now.
 static const int kDummySize = 1;
@@ -397,7 +397,7 @@ static const int R = 32;
 static const int Tv = 1;
 static const int ZTu = 0;
 static const int ZTv = 0;
-static const int G = 1;
+static const int G = 4;
 
 typedef svd::SvdParameters<testu::kNumInputs, testu::kInputSize,
     testu::kDummySize, testu::R, testu::Tu, testu::Tv, testu::ZTu, testu::ZTv,
@@ -438,10 +438,10 @@ void HlsAxisKernelU(const int num_refinements,
   hls::stream<typename testu::VectTuAxiType>& u_port,
   hls::stream<typename testu::VectGN_AxiType>& xu_port);
 
-void HlsManySamplingsKernelU(const hls::vector<int, testu::params::N> num_refinements,
-  hls::stream<typename testu::VectTuAxiType>& x_port,
-  hls::stream<typename testu::VectTuAxiType>& u_port,
-  hls::stream<typename testu::VectN_AxiType>& xu_port);
+void HlsKernelU_ManySampling(const hls::vector<int, testu::params::N> num_refinements,
+  hls::stream<typename testu::params::VectTuAxiType>& x_port,
+  hls::stream<typename testu::params::VectTuAxiType>& u_port,
+  hls::stream<typename testu::params::VectG_AxiType>& xu_port);
 #endif
 
 #endif // end KERNEL_U_KERNEL_H_
