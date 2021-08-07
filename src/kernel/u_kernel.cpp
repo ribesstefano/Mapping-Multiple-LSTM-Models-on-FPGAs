@@ -265,7 +265,8 @@ void HlsAxisKernelU(const int num_refinements,
 }
 
 
-void HlsKernelU_ManySampling(const hls::vector<int, testu::params::N> num_refinements,
+void HlsKernelU_ManySampling(const bool pad_output,
+  const hls::vector<int, testu::params::N> num_refinements,
   hls::stream<typename testu::params::VectTuAxiType>& x_port,
   hls::stream<typename testu::params::VectTuAxiType>& u_port,
   hls::stream<typename testu::params::VectG_AxiType>& xu_port) {
@@ -273,9 +274,10 @@ void HlsKernelU_ManySampling(const hls::vector<int, testu::params::N> num_refine
 #pragma HLS INTERFACE axis port=u_port
 #pragma HLS INTERFACE axis port=xu_port
 #pragma HLS INTERFACE s_axilite port=return
+#pragma HLS INTERFACE s_axilite port=pad_output
 #pragma HLS INTERFACE s_axilite port=num_refinements
 #pragma HLS DATAFLOW
-  int R_max = num_refinements[0];
+  int R_max = num_refinements[testu::params::N - 1];
   int R_total = num_refinements[0] * testu::params::N; // Total elements.
   int tmp = num_refinements[0];
   std::cout << num_refinements[0] << " ";
@@ -289,6 +291,7 @@ void HlsKernelU_ManySampling(const hls::vector<int, testu::params::N> num_refine
     R_total += (num_refinements[i] - tmp) * (testu::params::N - i);
     tmp += num_refinements[i];
   }
+  std::cout << "\tR_max:   " << R_max << "\n";
   std::cout << "\tR_total: " << R_total << "\n";
 
   /*
@@ -369,11 +372,13 @@ void HlsKernelU_ManySampling(const hls::vector<int, testu::params::N> num_refine
             assert(k + ii < testu::params::N);
             x_stream << x_buffer[k + ii][j];
           }
+          // std::cout << "\t[KernelU] Sending x[R." << i+R_prev << "][N." << k+ii << "][T." << j << "]" << std::endl;
         }
       }
     }
     R_prev = num_refinements[ii];
   }
+  // std::cout << std::endl;
 
   U_DMA:
   for (int i = 0; i < R_max; ++i) {
@@ -385,11 +390,13 @@ void HlsKernelU_ManySampling(const hls::vector<int, testu::params::N> num_refine
 #pragma HLS PIPELINE II=1
           if (i < num_refinements[ii]) {
             u_streams[k] << u_val;
+            // std::cout << "\t[KernelU] Sending u[R." << i << "][G." << k << "][N." << ii << "][T." << j << "]" << std::endl;
           }
         }
       }
     }
   }
+  // std::cout << std::endl;
 
   U_Kernel:
   for (int i = 0; i < R_total; ++i) {
@@ -398,6 +405,7 @@ void HlsKernelU_ManySampling(const hls::vector<int, testu::params::N> num_refine
       auto x_val = x_stream.read();
       for (int k = 0; k < testu::params::G; ++k) {
         xu_streams[k] << hlsutils::adder_tree<ActivationType, testu::params::Tu>(x_val * u_streams[k].read());
+        // xu_streams[k] << (x_val * u_streams[k].read()).reduce_add();
       }
     }
   }
@@ -413,17 +421,24 @@ void HlsKernelU_ManySampling(const hls::vector<int, testu::params::N> num_refine
           if (i < num_refinements[k]) {
             xu_out[k][ii] += xu_streams[ii].read();
 #pragma HLS BIND_OP variable=xu_out[k][ii] op=add impl=dsp
+            // std::cout << "\t[KernelU] Reading xu[R." << i << "][G." << ii << "][N." << k << "][T." << j << "]" << std::endl;
           }
         }
         if (i < num_refinements[k] && j == kNumTilesU - 1) {
-          const bool kIsLast = (iter_cnt == R_total - 1) ? true : false;
+          const bool kIsLast = (iter_cnt == R_total - 1 && !pad_output) ? true : false;
+          xu_axis.PushVector<ActivationType, testu::params::G>(xu_out[k], kIsLast);
+          // std::cout << "\t[KernelU] Sending xu[R." << i << "][N." << k << "]" << std::endl;
+          ++iter_cnt;
+        } else if (pad_output) {
+          const bool last_condition = i == R_max - 1 && j == kNumTilesU - 1 && k == testu::params::N - 1; 
+          const bool kIsLast = (last_condition) ? true : false;
           xu_axis.PushVector<ActivationType, testu::params::G>(xu_out[k], kIsLast);
           ++iter_cnt;
         }
       }
     }
   }
-  std::cout << "[KernelU] iter_cnt: " << iter_cnt << std::endl;
+  // std::cout << "[KernelU] iter_cnt: " << iter_cnt << std::endl;
 }
 
 #endif
