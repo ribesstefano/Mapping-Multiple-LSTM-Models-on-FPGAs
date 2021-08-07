@@ -20,7 +20,7 @@ int main(int argc, char const *argv[]) {
   const int num_refinements = testu::params::R;
   hls::vector<int, testu::params::N> num_refinements_vect = hls::vector<int, testu::params::N>(num_refinements);
   for (int i = testu::params::N; i >= 0; --i) {
-    int R_tmp = testu::params::R - 2 * (testu::params::N - i);
+    int R_tmp = testu::params::R - 2 * (testu::params::N - i - 1);
     num_refinements_vect[i] = R_tmp > 0 ? R_tmp : 1;
   }
   const int kNumTilesU = testu::params::I / testu::params::Tu;
@@ -30,7 +30,7 @@ int main(int argc, char const *argv[]) {
   typedef hls::vector<ActivationType, testu::params::Tu> VectTuAct_Type;
   assert(testu::params::I == testu::params::PrunedSizeU);
 
-  ActivationType x[testu::params::N][testu::params::I];
+  ActivationType x[testu::params::N][testu::params::I]; 
   ActivationType u[num_refinements][testu::params::PrunedSizeU][testu::params::G];
   ActivationType xu[num_refinements][testu::params::N][testu::params::G];
 
@@ -92,18 +92,14 @@ int main(int argc, char const *argv[]) {
   int num_errors = 0;
   
   for (int t = 0; t < num_tests; ++t) {
-    for (int jj = 0; jj < 2; ++jj) {
-      for (int i = 0; i < testu::params::N; ++i) {
-        for (int j = 0; j < kNumTilesU; ++j) {
-          VectTuAct_Type x_val;
-          for (int k = 0; k < testu::params::Tu; ++k) {
-            x_val[k] = x[i][j * testu::params::Tu + k];
-          }
-          if (jj == 0) {
-            x_port << x_val;
-          }
-          x_axis_interface.PushVector<ActivationType, testu::params::Tu>(x_val);
+    for (int i = 0; i < testu::params::N; ++i) {
+      for (int j = 0; j < kNumTilesU; ++j) {
+        VectTuAct_Type x_val;
+        for (int k = 0; k < testu::params::Tu; ++k) {
+          x_val[k] = x[i][j * testu::params::Tu + k];
         }
+        x_port << x_val;
+        x_axis_interface.PushVector<ActivationType, testu::params::Tu>(x_val);
       }
     }
     for (int i = 0; i < num_refinements; ++i) {
@@ -118,10 +114,22 @@ int main(int argc, char const *argv[]) {
         }
       }
     }
-    // NOTE: The streaming order differs from before!
+    // NOTE: The streaming order differs from before! kNumTilesU is swapped with
+    // testu::params::N.
+    for (int j = 0; j < kNumTilesU; ++j) {
+      for (int i = 0; i < testu::params::N; ++i) {
+        VectTuAct_Type x_val;
+        for (int k = 0; k < testu::params::Tu; ++k) {
+          x_val[k] = x[i][j * testu::params::Tu + k];
+        }
+        x_axis_interface.PushVector<ActivationType, testu::params::Tu>(x_val);
+      }
+    }
+    // NOTE: The streaming order differs from before! kNumTilesU is swapped with
+    // testu::params::G.
     for (int i = 0; i < num_refinements_vect[testu::params::N - 1]; ++i) {
-      for (int k = 0; k < testu::params::G; ++k) {
-        for (int j = 0; j < kNumTilesU; ++j) {
+      for (int j = 0; j < kNumTilesU; ++j) {
+        for (int k = 0; k < testu::params::G; ++k) {
           VectTuAct_Type u_val;
           for (int ii = 0; ii < testu::params::Tu; ++ii) {
             u_val[ii] = u[i][j * testu::params::Tu + ii][k];
@@ -151,7 +159,7 @@ int main(int argc, char const *argv[]) {
     }
     std::cout << "[INFO] Number of mismatches: " << num_errors << std::endl;
     std::cout << "[INFO] Starting HlsKernelU_ManySampling." << std::endl;
-    HlsKernelU_ManySampling(num_refinements_vect, x_axis, u_axis, xu_g_axis);
+    HlsKernelU_ManySampling(false, num_refinements_vect, x_axis, u_axis, xu_g_axis);
 
     testu::params::VectG_Type xu_g_val;
     int total_cnt = 0;
@@ -165,7 +173,9 @@ int main(int argc, char const *argv[]) {
             std::cout << "[INFO] Last index arrived at iteration: " << last_at << std::endl;
           }
           ++total_cnt;
+          // std::cout << "\t[INFO] Reading xu[R." << i << "][N." << j << "]" << std::endl;
           for (int k = 0; k < testu::params::G; ++k) {
+            // VectN_Type xu_gold[num_refinements * testu::params::G];
             std::cout << i << ") test/gold: " << xu_g_val[k] << " / "
                       << xu_gold[i * testu::params::G + k][j] << std::endl;
             if (xu_g_val[k] != xu_gold[i * testu::params::G + k][j]) {
@@ -182,34 +192,6 @@ int main(int argc, char const *argv[]) {
     while(!xu_n_axis.empty()) {
       auto xu_n_val = xu_n_axis_interface.PopVector<ActivationType, testu::params::N>();
     }
-
-    // auto get_current_R = [&](const int idx) {
-    //   int R = 0;
-    //   for (int i = 0; i < testu::params::N; ++i) {
-    //     R += (idx < num_refinements_vect[i] ? 1 : 0);
-    //   }
-    //   return R;
-    // };
-    // int total_R = 0;
-    // Get_Total_R:
-    // for (int i = 0; i < num_refinements_vect[testu::params::N]; ++i) {
-    //   const int R = get_current_R(i);
-    //   total_R += (kNumTilesU * R + testu::params::N - 1) / testu::params::N; // Ceil 
-    // }
-
-    // for (int i = 0; i < total_R; ++i) {
-    //   for (int j = 0; j < testu::params::G; ++j) {
-    //     auto xu_n_val = xu_n_axis_interface.PopVector<ActivationType, testu::params::N>();
-    //     for (int k = 0; k < testu::params::N; ++k) {
-    //       std::cout << i << ") test/gold: " << xu_n_val[k] << " / "
-    //                 << xu_gold[i * testu::params::G + j][k] << std::endl;
-    //       if (xu_n_val[k] != xu_gold[i * testu::params::G + j][k]) {
-    //         ++num_errors;
-    //       }
-    //     }
-    //   }
-    // }
-
   }
   std::cout << "[INFO] Number of mismatches: " << num_errors << std::endl;
   return 0; // num_errors;
