@@ -64,17 +64,20 @@ struct SvdParameters {
   static const int VectN_AxiWidth = ActivationWidth * N;
   static const int VectG_AxiWidth = ActivationWidth * G;
   static const int VectGN_AxiWidth = ActivationWidth * G * N;
+  static const int VectGTvAxiWidth = ActivationWidth * G * Tv;
   typedef typename svd::AxiStreamInterface<VectTuAxiWidth>::AxiuPacketType VectTuAxiType;
   typedef typename svd::AxiStreamInterface<VectTvAxiWidth>::AxiuPacketType VectTvAxiType;
   typedef typename svd::AxiStreamInterface<VectN_AxiWidth>::AxiuPacketType VectN_AxiType;
   typedef typename svd::AxiStreamInterface<VectG_AxiWidth>::AxiuPacketType VectG_AxiType;
   typedef typename svd::AxiStreamInterface<VectGN_AxiWidth>::AxiuPacketType VectGN_AxiType;
+  typedef typename svd::AxiStreamInterface<VectGTvAxiWidth>::AxiuPacketType VectGTvAxiType;
 #ifdef __VITIS_HLS__
   typedef hls::vector<ActivationD, Tu> VectTuType;
   typedef hls::vector<ActivationD, Tv> VectTvType;
   typedef hls::vector<ActivationD, N> VectN_Type;
   typedef hls::vector<ActivationD, G> VectG_Type;
   typedef hls::vector<ActivationD, G * N> VectGN_Type;
+  typedef hls::vector<ActivationD, G * Tv> VectGTvType;
 #endif
 };
 

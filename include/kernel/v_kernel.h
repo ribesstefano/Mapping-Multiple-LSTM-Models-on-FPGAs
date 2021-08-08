@@ -515,4 +515,28 @@ void VDotUnit2LstmV2(const bool has_bias,
 
 } // svd
 
+namespace testv {
+
+static const int kNumInputs = 2;
+static const int kInputSize = 512;
+static const int Tu = 4;
+// NOTE: The rest of the parameters are unused for now.
+static const int kOutputSize = 512;
+static const int R = 8;
+static const int Tv = 4;
+static const int ZTu = 0;
+static const int ZTv = 0;
+static const int G = 4;
+
+typedef svd::SvdParameters<testv::kNumInputs, testv::kInputSize,
+    testv::kOutputSize, testv::R, testv::Tu, testv::Tv, testv::ZTu, testv::ZTv,
+    testv::G,
+    // svd::ActivationD, svd::WeightD, svd::AccumD> params;
+    short, short, short> params;
+} // testv
+
+#ifndef __VITIS_HLS__
+#else
+#endif
+
 #endif // end KERNEL_V_KERNEL_H_
