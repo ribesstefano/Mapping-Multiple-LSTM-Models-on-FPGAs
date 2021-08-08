@@ -279,23 +279,19 @@ void HlsKernelU_ManySampling(const bool pad_output,
 #pragma HLS DATAFLOW
   int R_max = num_refinements[testu::params::N - 1];
   int R_total = num_refinements[0] * testu::params::N; // Total elements.
-  int tmp = num_refinements[0];
-  std::cout << num_refinements[0] << " ";
   Get_Total_R:
   for (int i = 1; i < testu::params::N; ++i) {
 #pragma HLS PIPELINE II=1
-    std::cout << num_refinements[i] << " ";
     if (num_refinements[i] > R_max) {
       R_max = num_refinements[i];
     }
-    R_total += (num_refinements[i] - tmp) * (testu::params::N - i);
-    tmp += num_refinements[i];
+    R_total += (num_refinements[i] - num_refinements[i - 1]) * (testu::params::N - i);
   }
-  std::cout << "\tR_max:   " << R_max << "\n";
-  std::cout << "\tR_total: " << R_total << "\n";
+  // std::cout << "\tR_max:   " << R_max << std::endl;
+  // std::cout << "\tR_total: " << R_total << std::endl;
 
   /*
-   Ideally, if Rs are ordered, it would be: R0 * N + (R1-R0) * (N-1) + (R2-R1-R0) * (N-2)
+   Ideally, if Rs are ordered, it would be: R0 * N + (R1-R0) * (N-1) + (R2-R1) * (N-2)
 
    Imagine we have: R0 = 2, R1 = 3, R2 = 6
   
@@ -319,7 +315,7 @@ void HlsKernelU_ManySampling(const bool pad_output,
   auto u_axis = svd::AxiStreamInterface<testu::params::VectTuAxiWidth>(u_port);
   auto xu_axis = svd::AxiStreamInterface<testu::params::VectG_AxiWidth>(xu_port);
 
-  hls::stream<testu::params::VectTuType> x_stream;
+  hls::stream<testu::params::VectTuType> x_stream("x_stream");
   hls::stream<testu::params::VectTuType> u_streams[testu::params::G];
   hls::stream<ActivationType> xu_streams[testu::params::G];
   testu::params::VectTuType x_buffer[testu::params::N][kNumTilesU] = {0};
@@ -331,28 +327,6 @@ void HlsKernelU_ManySampling(const bool pad_output,
 #pragma HLS BIND_STORAGE variable=x_buffer type=ram_t2p impl=bram latency=2
   
   assert(num_refinements >= 1);
-//   Store_X_Buffer:
-//   for (int i = 0; i < testu::params::N; ++i) {
-//     for (int j = 0; j < kNumTilesU; ++j) {
-// #pragma HLS PIPELINE II=1
-// #pragma HLS LOOP_FLATTEN
-//       x_buffer[i][j] = x_axis.PopVector<ActivationType, testu::params::Tu>();
-//     }
-//   }
-
-
-//   Stream_X_Tiles:
-//   for (int i = 0; i < R_max; ++i) {
-//     for (int j = 0; j < kNumTilesU; ++j) {
-//       for (int k = 0; k < testu::params::N; ++k) {
-// #pragma HLS PIPELINE II=1
-//         assert(num_refinements[k] >= 1);
-//         if (i < num_refinements[k]) {
-//           x_stream << x_buffer[k][j];
-//         }
-//       }
-//     }
-//   }
 
   int R_prev = 0;
   X_DMA:
