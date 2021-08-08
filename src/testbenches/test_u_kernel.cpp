@@ -159,7 +159,7 @@ int main(int argc, char const *argv[]) {
     }
     std::cout << "[INFO] Number of mismatches: " << num_errors << std::endl;
     std::cout << "[INFO] Starting HlsKernelU_ManySampling." << std::endl;
-    HlsKernelU_ManySampling(false, num_refinements_vect, x_axis, u_axis, xu_g_axis);
+    HlsKernelU_ManySampling(testu::params::I, num_refinements_vect, false, x_axis, u_axis, xu_g_axis);
 
     testu::params::VectG_Type xu_g_val;
     int total_cnt = 0;
