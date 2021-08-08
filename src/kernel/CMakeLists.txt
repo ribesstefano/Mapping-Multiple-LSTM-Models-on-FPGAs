@@ -15,6 +15,7 @@ target_compile_options(S_KERNEL PRIVATE -fno-builtin)
 add_library(V_KERNEL STATIC ${CMAKE_SOURCE_DIR}/src/kernel/v_kernel.cpp)
 target_include_directories(V_KERNEL PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(V_KERNEL PUBLIC ${CMAKE_SOURCE_DIR}/include/kernel)
+target_include_directories(V_KERNEL PUBLIC ${HLS_INCLUDE_DIRS})
 target_compile_options(V_KERNEL PRIVATE -fno-builtin)
 
 add_library(SVD_KERNEL STATIC ${CMAKE_SOURCE_DIR}/src/kernel/svd_kernel.cpp)
