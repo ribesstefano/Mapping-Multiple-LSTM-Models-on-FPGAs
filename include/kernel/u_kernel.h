@@ -438,8 +438,9 @@ void HlsAxisKernelU(const int num_refinements,
   hls::stream<typename testu::VectTuAxiType>& u_port,
   hls::stream<typename testu::VectGN_AxiType>& xu_port);
 
-void HlsKernelU_ManySampling(const bool pad_output,
+void HlsKernelU_ManySampling(const int input_size,
   const hls::vector<int, testu::params::N> num_refinements,
+  const bool pad_output,
   hls::stream<typename testu::params::VectTuAxiType>& x_port,
   hls::stream<typename testu::params::VectTuAxiType>& u_port,
   hls::stream<typename testu::params::VectG_AxiType>& xu_port);

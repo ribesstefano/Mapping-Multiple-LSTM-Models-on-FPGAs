@@ -265,8 +265,9 @@ void HlsAxisKernelU(const int num_refinements,
 }
 
 
-void HlsKernelU_ManySampling(const bool pad_output,
+void HlsKernelU_ManySampling(const int input_size,
   const hls::vector<int, testu::params::N> num_refinements,
+  const bool pad_output,
   hls::stream<typename testu::params::VectTuAxiType>& x_port,
   hls::stream<typename testu::params::VectTuAxiType>& u_port,
   hls::stream<typename testu::params::VectG_AxiType>& xu_port) {
@@ -277,6 +278,47 @@ void HlsKernelU_ManySampling(const bool pad_output,
 #pragma HLS INTERFACE s_axilite port=pad_output
 #pragma HLS INTERFACE s_axilite port=num_refinements
 #pragma HLS DATAFLOW
+  assert(num_refinements >= 1);
+  assert(testu::params::I % testu::params::Tu == 0);
+  assert(input_size % testu::params::Tu == 0);
+  assert(input_size <= testu::params::I);
+  const int kNumTilesU = input_size / testu::params::Tu;
+  const int kMaxNumTilesU = testu::params::I / testu::params::Tu;
+  const int kStreamDepth_X = 2 + kMaxNumTilesU * testu::params::N;
+  const int kStreamDepth_U = 8 + kMaxNumTilesU * testu::params::N;
+  const int kStreamDepth_XU = 2 + testu::params::G;
+  assert(kNumTilesU <= kMaxNumTilesU);
+  typedef typename testu::params::ActivationD ActivationType;
+
+  auto x_axis = svd::AxiStreamInterface<testu::params::VectTuAxiWidth>(x_port);
+  auto u_axis = svd::AxiStreamInterface<testu::params::VectTuAxiWidth>(u_port);
+  auto xu_axis = svd::AxiStreamInterface<testu::params::VectG_AxiWidth>(xu_port);
+
+  hls::stream<testu::params::VectTuType> x_stream("x_stream");
+  hls::stream<testu::params::VectTuType> u_streams[testu::params::G];
+  hls::stream<ActivationType> xu_streams[testu::params::G];
+  testu::params::VectTuType x_buffer[testu::params::N][kMaxNumTilesU] = {0};
+#pragma HLS STREAM variable=x_stream depth=kStreamDepth_X
+#pragma HLS STREAM variable=u_streams depth=kStreamDepth_U
+#pragma HLS STREAM variable=xu_streams depth=kStreamDepth_XU
+#pragma HLS ARRAY_PARTITION variable=u_streams complete dim=1
+#pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=1
+#pragma HLS BIND_STORAGE variable=x_buffer type=ram_t2p impl=bram latency=2
+  /*
+   * Ideally, if Rs are ordered, it would be: R0 * N + (R1-R0) * (N-1) + (R2-R1) *
+   * (N-2)
+   *
+   * Imagine we have: R0 = 2, R1 = 3, R2 = 6
+   *
+   * This means:
+   *  - till refinement 2 we have input 0 to process
+   *  - till refinement 3 we have input 1 to process
+   *  - till refinement 6 we have input 2 to process
+   *
+   * So it would become:
+   *
+   * R_total = 2 * 3 + (3-2) * (3-1) + (6-3) * (3-2)
+   */
   int R_max = num_refinements[testu::params::N - 1];
   int R_total = num_refinements[0] * testu::params::N; // Total elements.
   Get_Total_R:
@@ -287,46 +329,6 @@ void HlsKernelU_ManySampling(const bool pad_output,
     }
     R_total += (num_refinements[i] - num_refinements[i - 1]) * (testu::params::N - i);
   }
-  // std::cout << "\tR_max:   " << R_max << std::endl;
-  // std::cout << "\tR_total: " << R_total << std::endl;
-
-  /*
-   Ideally, if Rs are ordered, it would be: R0 * N + (R1-R0) * (N-1) + (R2-R1) * (N-2)
-
-   Imagine we have: R0 = 2, R1 = 3, R2 = 6
-  
-   This means:
-   - till refinement 2 we have input 0 to process
-   - till refinement 3 we have input 1 to process
-   - till refinement 6 we have input 2 to process
-
-  So it would become:
-
-    R_total = 2 * 3 + (3-2) * (3-1) + (6-3) * (3-2)
-
-  */
-  const int kNumTilesU = testu::params::I / testu::params::Tu;
-  const int kStreamDepth_X = 2 + kNumTilesU * testu::params::N;
-  const int kStreamDepth_U = 8 + kNumTilesU * testu::params::N;
-  const int kStreamDepth_XU = 2 + testu::params::G;
-  typedef typename testu::params::ActivationD ActivationType;
-
-  auto x_axis = svd::AxiStreamInterface<testu::params::VectTuAxiWidth>(x_port);
-  auto u_axis = svd::AxiStreamInterface<testu::params::VectTuAxiWidth>(u_port);
-  auto xu_axis = svd::AxiStreamInterface<testu::params::VectG_AxiWidth>(xu_port);
-
-  hls::stream<testu::params::VectTuType> x_stream("x_stream");
-  hls::stream<testu::params::VectTuType> u_streams[testu::params::G];
-  hls::stream<ActivationType> xu_streams[testu::params::G];
-  testu::params::VectTuType x_buffer[testu::params::N][kNumTilesU] = {0};
-#pragma HLS STREAM variable=x_stream depth=kStreamDepth_X
-#pragma HLS STREAM variable=u_streams depth=kStreamDepth_U
-#pragma HLS STREAM variable=xu_streams depth=kStreamDepth_XU
-#pragma HLS ARRAY_PARTITION variable=u_streams complete dim=1
-#pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=1
-#pragma HLS BIND_STORAGE variable=x_buffer type=ram_t2p impl=bram latency=2
-  
-  assert(num_refinements >= 1);
 
   int R_prev = 0;
   X_DMA:
