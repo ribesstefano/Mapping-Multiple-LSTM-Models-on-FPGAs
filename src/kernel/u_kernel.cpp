@@ -271,6 +271,10 @@ void HlsKernelU_ManySampling(const int input_size,
   hls::stream<typename testu::params::VectTuAxiType>& x_port,
   hls::stream<typename testu::params::VectTuAxiType>& u_port,
   hls::stream<typename testu::params::VectG_AxiType>& xu_port) {
+  /*
+   Notes: Add a parameter for ignoring processing an input, effectively
+   utilizing the full and single pipeline for only a few inputs.
+  */
 #pragma HLS INTERFACE axis port=x_port
 #pragma HLS INTERFACE axis port=u_port
 #pragma HLS INTERFACE axis port=xu_port
