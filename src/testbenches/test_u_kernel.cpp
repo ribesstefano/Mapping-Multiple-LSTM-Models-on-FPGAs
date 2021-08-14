@@ -1,9 +1,11 @@
 #include "testbenches/test_u_kernel.h"
 #include "dma/axis_lib.h"
+
 #ifdef __VITIS_HLS__
 #include "hls_vector.h"
 #endif
-
+#include "ap_int.h"
+#include "hls_stream.h"
 #include <iostream>
 #include <cstdlib>
 
@@ -23,7 +25,8 @@ int main(int argc, char const *argv[]) {
     int R_tmp = testu::params::R - 2 * (testu::params::N - i - 1);
     num_refinements_vect[i] = R_tmp > 0 ? R_tmp : 1;
   }
-  const int kInputSize_tmp = testu::params::I / 4;
+  const int kNumActiveInputs = testu::params::N - 2;
+  const int kInputSize_tmp = testu::params::I / 1;
   const int kInputSize = (kInputSize_tmp > testu::params::I) ? testu::params::I : kInputSize_tmp;
   const int kNumTilesU = kInputSize / testu::params::Tu;
   typedef typename testu::params::ActivationD ActivationType;
@@ -143,7 +146,7 @@ int main(int argc, char const *argv[]) {
     // NOTE: The streaming order differs from before! kNumTilesU is swapped with
     // testu::params::N.
     for (int j = 0; j < kNumTilesU; ++j) {
-      for (int i = 0; i < testu::params::N; ++i) {
+      for (int i = 0; i < kNumActiveInputs; ++i) {
         VectTuAct_Type x_val;
         for (int k = 0; k < testu::params::Tu; ++k) {
           x_val[k] = x[i][j * testu::params::Tu + k];
@@ -153,7 +156,7 @@ int main(int argc, char const *argv[]) {
     }
     // NOTE: The streaming order differs from before! kNumTilesU is swapped with
     // testu::params::G.
-    for (int i = 0; i < num_refinements_vect[testu::params::N - 1]; ++i) {
+    for (int i = 0; i < num_refinements_vect[kNumActiveInputs - 1]; ++i) {
       for (int j = 0; j < kNumTilesU; ++j) {
         for (int k = 0; k < testu::params::G; ++k) {
           VectTuAct_Type u_val;
@@ -165,13 +168,13 @@ int main(int argc, char const *argv[]) {
       }
     }
     std::cout << "[INFO] Starting HlsKernelU_ManySampling." << std::endl;
-    HlsKernelU_ManySampling(kInputSize, num_refinements_vect, false, x_axis, u_axis, xu_g_axis);
+    HlsKernelU_ManySampling(kNumActiveInputs, kInputSize, num_refinements_vect, false, x_axis, u_axis, xu_g_axis);
 
     testu::params::VectG_Type xu_g_val;
     int total_cnt = 0;
     int last_at = -1;
-    for (int i = 0; i < num_refinements_vect[testu::params::N - 1]; ++i) { // R_max
-      for (int j = 0; j < testu::params::N; ++j) {
+    for (int i = 0; i < num_refinements_vect[kNumActiveInputs - 1]; ++i) { // R_max
+      for (int j = 0; j < kNumActiveInputs; ++j) {
         if (i < num_refinements_vect[j]) {
           bool is_last = xu_g_axis_interface.isLastPopVector<ActivationType, testu::params::G>(xu_g_val);
           if (is_last) {
