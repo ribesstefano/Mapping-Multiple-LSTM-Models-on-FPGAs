@@ -388,7 +388,7 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
 
 namespace testu {
 
-static const int kNumInputs = 2;
+static const int kNumInputs = 4;
 static const int kInputSize = 1024;
 static const int Tu = 4;
 // NOTE: The rest of the parameters are unused for now.
@@ -438,7 +438,22 @@ void HlsAxisKernelU(const int num_refinements,
   hls::stream<typename testu::VectTuAxiType>& u_port,
   hls::stream<typename testu::VectGN_AxiType>& xu_port);
 
-void HlsKernelU_ManySampling(const int input_size,
+/**
+ * @brief      Flexible Kernel-U.
+ *
+ * @param[in]  num_active_inputs  The number of active inputs
+ * @param[in]  input_size         The input size
+ * @param[in]  num_refinements    The number of refinements steps (R) per input:
+ *                                the Rs must be positive, greater than zero and
+ *                                in ASCENDING ORDER. Their amount must be less
+ *                                or equal to num_active_inputs.
+ * @param[in]  pad_output         Wether to pad output with zeroes
+ * @param      x_port             The input x port
+ * @param      u_port             The input u port
+ * @param      xu_port            The output xu port
+ */
+void HlsKernelU_ManySampling(const int num_active_inputs,
+  const int input_size,
   const hls::vector<int, testu::params::N> num_refinements,
   const bool pad_output,
   hls::stream<typename testu::params::VectTuAxiType>& x_port,

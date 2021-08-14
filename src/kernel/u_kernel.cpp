@@ -265,7 +265,8 @@ void HlsAxisKernelU(const int num_refinements,
 }
 
 
-void HlsKernelU_ManySampling(const int input_size,
+void HlsKernelU_ManySampling(const int num_active_inputs,
+  const int input_size,
   const hls::vector<int, testu::params::N> num_refinements,
   const bool pad_output,
   hls::stream<typename testu::params::VectTuAxiType>& x_port,
@@ -282,6 +283,7 @@ void HlsKernelU_ManySampling(const int input_size,
 #pragma HLS INTERFACE s_axilite port=pad_output
 #pragma HLS INTERFACE s_axilite port=num_refinements
 #pragma HLS DATAFLOW
+  assert(num_active_inputs <= testu::params::N);
   assert(num_refinements >= 1);
   assert(testu::params::I % testu::params::Tu == 0);
   assert(input_size % testu::params::Tu == 0);
@@ -309,8 +311,8 @@ void HlsKernelU_ManySampling(const int input_size,
 #pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=1
 #pragma HLS BIND_STORAGE variable=x_buffer type=ram_t2p impl=bram latency=2
   /*
-   * Ideally, if Rs are ordered, it would be: R0 * N + (R1-R0) * (N-1) + (R2-R1) *
-   * (N-2)
+   * Ideally, if the Rs are ordered, it would be: R0 * N + (R1-R0) * (N-1) +
+   * (R2-R1) * (N-2)
    *
    * Imagine we have: R0 = 2, R1 = 3, R2 = 6
    *
@@ -323,29 +325,29 @@ void HlsKernelU_ManySampling(const int input_size,
    *
    * R_total = 2 * 3 + (3-2) * (3-1) + (6-3) * (3-2)
    */
-  int R_max = num_refinements[testu::params::N - 1];
-  int R_total = num_refinements[0] * testu::params::N; // Total elements.
+  int R_max = num_refinements[0];
+  int R_total = num_refinements[0] * num_active_inputs; // Total elements.
   Get_Total_R:
-  for (int i = 1; i < testu::params::N; ++i) {
+  for (int i = 1; i < num_active_inputs; ++i) {
 #pragma HLS PIPELINE II=1
     if (num_refinements[i] > R_max) {
       R_max = num_refinements[i];
     }
-    R_total += (num_refinements[i] - num_refinements[i - 1]) * (testu::params::N - i);
+    R_total += (num_refinements[i] - num_refinements[i - 1]) * (num_active_inputs - i);
   }
 
   int R_prev = 0;
   X_DMA:
-  for (int ii = 0; ii < testu::params::N; ++ii) {
+  for (int ii = 0; ii < num_active_inputs; ++ii) {
     Stream_X_Tiles:
     for (int i = 0; i < num_refinements[ii] - R_prev; ++i) {
       assert(num_refinements[ii] - R_prev >= 1);
       for (int j = 0; j < kNumTilesU; ++j) {
-        for (int k = 0; k < testu::params::N - ii; ++k) {
+        for (int k = 0; k < num_active_inputs - ii; ++k) {
 #pragma HLS PIPELINE II=1
           if (ii == 0 && i == 0) {
             auto x_val = x_axis.PopVector<ActivationType, testu::params::Tu>();
-#pragma HLS AGGREGATE variable=x_val
+// #pragma HLS AGGREGATE variable=x_val
             x_buffer[k][j] = x_val;
             x_stream << x_val;
           } else {
@@ -366,7 +368,7 @@ void HlsKernelU_ManySampling(const int input_size,
     for (int j = 0; j < kNumTilesU; ++j) {
       for (int k = 0; k < testu::params::G; ++k) {
         auto u_val = u_axis.PopVector<ActivationType, testu::params::Tu>();
-        for (int ii = 0; ii < testu::params::N; ++ii) {
+        for (int ii = 0; ii < num_active_inputs; ++ii) {
 #pragma HLS PIPELINE II=1
           if (i < num_refinements[ii]) {
             u_streams[k] << u_val;
@@ -395,7 +397,7 @@ void HlsKernelU_ManySampling(const int input_size,
     testu::params::VectG_Type xu_out[testu::params::N] = {testu::params::VectG_Type(0)};
 #pragma HLS ARRAY_PARTITION variable=xu_out complete dim=1
     for (int j = 0; j < kNumTilesU; ++j) {
-      for (int k = 0; k < testu::params::N; ++k) {
+      for (int k = 0; k < num_active_inputs; ++k) {
 #pragma HLS PIPELINE II=1
         for (int ii = 0; ii < testu::params::G; ++ii) {
           if (i < num_refinements[k]) {
@@ -410,7 +412,7 @@ void HlsKernelU_ManySampling(const int input_size,
           // std::cout << "\t[KernelU] Sending xu[R." << i << "][N." << k << "]" << std::endl;
           ++iter_cnt;
         } else if (pad_output) {
-          const bool last_condition = i == R_max - 1 && j == kNumTilesU - 1 && k == testu::params::N - 1; 
+          const bool last_condition = i == R_max - 1 && j == kNumTilesU - 1 && k == num_active_inputs - 1; 
           const bool kIsLast = (last_condition) ? true : false;
           xu_axis.PushVector<ActivationType, testu::params::G>(xu_out[k], kIsLast);
           ++iter_cnt;
