@@ -4,6 +4,7 @@
 #include "svd_params.h"
 #include "hls_utils/hls_metaprogramming.h"
 #include "hls_utils/hls_debugging.h"
+#include "hls_utils/adder_tree.h"
 #include "dma/axis_lib.h"
 
 #include "ap_axi_sdata.h"
@@ -384,6 +385,167 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
 #endif // end REDUCE_PROD_2LSTM_DATAFLOW_DESIGN
 }
 
+#ifdef __VITIS_HLS__
+template <typename params>
+void KernelU(const int num_active_inputs,
+  const int input_size,
+  const hls::vector<int, params::N> num_refinements,
+  const bool pad_output,
+  hls::stream<typename params::VectTuAxiType>& x_port,
+  hls::stream<typename params::VectTuAxiType>& u_port,
+  hls::stream<typename params::VectG_AxiType>& xu_port) {
+  /*
+   Notes: Add a parameter for ignoring processing an input, effectively
+   utilizing the full and single pipeline for only a few inputs.
+  */
+#pragma HLS INTERFACE axis port=x_port
+#pragma HLS INTERFACE axis port=u_port
+#pragma HLS INTERFACE axis port=xu_port
+#pragma HLS INTERFACE s_axilite port=return
+#pragma HLS INTERFACE s_axilite port=pad_output
+#pragma HLS INTERFACE s_axilite port=num_refinements
+#pragma HLS DATAFLOW
+  assert(num_active_inputs <= params::N);
+  assert(num_refinements >= 1);
+  assert(params::I % params::Tu == 0);
+  assert(input_size % params::Tu == 0);
+  assert(input_size <= params::I);
+  const int kNumTilesU = input_size / params::Tu;
+  const int kMaxNumTilesU = params::I / params::Tu;
+  const int kStreamDepth_X = 2 + kMaxNumTilesU * params::N;
+  const int kStreamDepth_U = 8 + kMaxNumTilesU * params::N;
+  const int kStreamDepth_XU = 2 + params::G;
+  assert(kNumTilesU <= kMaxNumTilesU);
+  typedef typename params::ActivationD ActivationType;
+
+  auto x_axis = svd::AxiStreamInterface<params::VectTuAxiWidth>(x_port);
+  auto u_axis = svd::AxiStreamInterface<params::VectTuAxiWidth>(u_port);
+  auto xu_axis = svd::AxiStreamInterface<params::VectG_AxiWidth>(xu_port);
+
+  hls::stream<typename params::VectTuType> x_stream("x_stream");
+  hls::stream<typename params::VectTuType> u_streams[params::G];
+  hls::stream<ActivationType> xu_streams[params::G];
+  typename params::VectTuType x_buffer[params::N][kMaxNumTilesU] = {0};
+#pragma HLS STREAM variable=x_stream depth=kStreamDepth_X
+#pragma HLS STREAM variable=u_streams depth=kStreamDepth_U
+#pragma HLS STREAM variable=xu_streams depth=kStreamDepth_XU
+#pragma HLS ARRAY_PARTITION variable=u_streams complete dim=1
+#pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=1
+#pragma HLS BIND_STORAGE variable=x_buffer type=ram_t2p impl=bram latency=2
+  /*
+   * Ideally, if the Rs are ordered, it would be: R0 * N + (R1-R0) * (N-1) +
+   * (R2-R1) * (N-2)
+   *
+   * Imagine we have: R0 = 2, R1 = 3, R2 = 6
+   *
+   * This means:
+   *  - till refinement 2 we have input 0 to process
+   *  - till refinement 3 we have input 1 to process
+   *  - till refinement 6 we have input 2 to process
+   *
+   * So it would become:
+   *
+   * R_total = 2 * 3 + (3-2) * (3-1) + (6-3) * (3-2)
+   */
+  int R_max = num_refinements[0];
+  int R_total = num_refinements[0] * num_active_inputs; // Total elements.
+  Get_Total_R:
+  for (int i = 1; i < num_active_inputs; ++i) {
+#pragma HLS PIPELINE II=1
+    if (num_refinements[i] > R_max) {
+      R_max = num_refinements[i];
+    }
+    R_total += (num_refinements[i] - num_refinements[i - 1]) * (num_active_inputs - i);
+  }
+
+  int R_prev = 0;
+  X_DMA:
+  for (int ii = 0; ii < num_active_inputs; ++ii) {
+    Stream_X_Tiles:
+    for (int i = 0; i < num_refinements[ii] - R_prev; ++i) {
+      assert(num_refinements[ii] - R_prev >= 1);
+      for (int j = 0; j < kNumTilesU; ++j) {
+        for (int k = 0; k < num_active_inputs - ii; ++k) {
+#pragma HLS PIPELINE II=1
+          if (ii == 0 && i == 0) {
+            auto x_val = x_axis.template PopVector<ActivationType, params::Tu>();
+// #pragma HLS AGGREGATE variable=x_val
+            x_buffer[k][j] = x_val;
+            x_stream << x_val;
+          } else {
+            assert(k + ii < params::N);
+            x_stream << x_buffer[k + ii][j];
+          }
+          // std::cout << "\t[KernelU] Sending x[R." << i+R_prev << "][N." << k+ii << "][T." << j << "]" << std::endl;
+        }
+      }
+    }
+    R_prev = num_refinements[ii];
+  }
+  // std::cout << std::endl;
+
+  U_DMA:
+  for (int i = 0; i < R_max; ++i) {
+#pragma HLS LOOP_TRIPCOUNT min=params::R max=params::R
+    for (int j = 0; j < kNumTilesU; ++j) {
+      for (int k = 0; k < params::G; ++k) {
+        auto u_val = u_axis.template PopVector<ActivationType, params::Tu>();
+        for (int ii = 0; ii < num_active_inputs; ++ii) {
+#pragma HLS PIPELINE II=1
+          if (i < num_refinements[ii]) {
+            u_streams[k] << u_val;
+            // std::cout << "\t[KernelU] Sending u[R." << i << "][G." << k << "][N." << ii << "][T." << j << "]" << std::endl;
+          }
+        }
+      }
+    }
+  }
+  // std::cout << std::endl;
+
+  U_Kernel:
+  for (int i = 0; i < R_total; ++i) {
+    for (int j = 0; j < kNumTilesU; ++j) {
+#pragma HLS PIPELINE II=1
+      auto x_val = x_stream.read();
+      for (int k = 0; k < params::G; ++k) {
+        xu_streams[k] << hlsutils::adder_tree<ActivationType, params::Tu>(x_val * u_streams[k].read());
+        // xu_streams[k] << (x_val * u_streams[k].read()).reduce_add();
+      }
+    }
+  }
+  int iter_cnt = 0;
+  XU_DMA:
+  for (int i = 0; i < R_max; ++i) {
+    typename params::VectG_Type xu_out[params::N] = {typename params::VectG_Type(0)};
+#pragma HLS ARRAY_PARTITION variable=xu_out complete dim=1
+    for (int j = 0; j < kNumTilesU; ++j) {
+      for (int k = 0; k < num_active_inputs; ++k) {
+#pragma HLS PIPELINE II=1
+        for (int ii = 0; ii < params::G; ++ii) {
+          if (i < num_refinements[k]) {
+            xu_out[k][ii] += xu_streams[ii].read();
+#pragma HLS BIND_OP variable=xu_out[k][ii] op=add impl=dsp
+            // std::cout << "\t[KernelU] Reading xu[R." << i << "][G." << ii << "][N." << k << "][T." << j << "]" << std::endl;
+          }
+        }
+        if (i < num_refinements[k] && j == kNumTilesU - 1) {
+          const bool kIsLast = (iter_cnt == R_total - 1 && !pad_output) ? true : false;
+          xu_axis.template PushVector<ActivationType, params::G>(xu_out[k], kIsLast);
+          // std::cout << "\t[KernelU] Sending xu[R." << i << "][N." << k << "]" << std::endl;
+          ++iter_cnt;
+        } else if (pad_output) {
+          const bool last_condition = i == R_max - 1 && j == kNumTilesU - 1 && k == num_active_inputs - 1; 
+          const bool kIsLast = (last_condition) ? true : false;
+          xu_axis.template PushVector<ActivationType, params::G>(xu_out[k], kIsLast);
+          ++iter_cnt;
+        }
+      }
+    }
+  }
+  // std::cout << "[KernelU] iter_cnt: " << iter_cnt << std::endl;
+}
+#endif
+
 } // svd
 
 namespace testu {
@@ -459,6 +621,7 @@ void HlsKernelU_ManySampling(const int num_active_inputs,
   hls::stream<typename testu::params::VectTuAxiType>& x_port,
   hls::stream<typename testu::params::VectTuAxiType>& u_port,
   hls::stream<typename testu::params::VectG_AxiType>& xu_port);
-#endif
+
+#endif // end __VITIS_HLS__
 
 #endif // end KERNEL_U_KERNEL_H_
