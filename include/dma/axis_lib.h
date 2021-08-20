@@ -390,6 +390,22 @@ private:
 #endif
 };
 
+#ifdef __VITIS_HLS__
+template<typename T, int N, int Bitwidth>
+class AxiVectStreamInterface : AxiStreamInterface<Bitwidth> {
+private:
+  /* data */
+public:
+  AxiVectStreamInterface() {};
+  ~AxiVectStreamInterface() {};
+
+  // hls::vector<T, N> PopVector() {
+  //   return this->PopVector<T, N>();
+  // }
+};
+#endif // __VITIS_HLS__
+
+
 } // svd
 
 #endif // end DMA_AXIS_LIB_H_
