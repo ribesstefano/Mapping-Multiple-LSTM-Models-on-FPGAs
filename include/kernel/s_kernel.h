@@ -41,27 +41,28 @@ struct KernelS_Params {
 };
 
 template <typename params>
-void GenericKernelS(const hls::vector<int, params::N> num_refinements,
-  hls::stream<typename params::VectG_AxiType>& xu_port,
-  hls::stream<typename params::VectG_AxiType>& s_port,
-  hls::stream<typename params::VectG_AxiType>& xus_port) {
-#if 0
-#pragma HLS INLINE
-#pragma HLS INTERFACE axis port=xu_port
-#pragma HLS INTERFACE axis port=s_port
-#pragma HLS INTERFACE axis port=xus_port
-#pragma HLS INTERFACE s_axilite port=return
-#pragma HLS INTERFACE s_axilite port=num_refinements
+void KernelS(const int num_active_inputs,
+    const hls::vector<int, params::N> num_refinements,
+    hls::stream<typename params::VectG_AxiType>& xu_port,
+    hls::stream<typename params::VectG_AxiType>& s_port,
+    hls::stream<typename params::VectG_AxiType>& xus_port) {
+// #pragma HLS INTERFACE axis port=xu_port
+// #pragma HLS INTERFACE axis port=s_port
+// #pragma HLS INTERFACE axis port=xus_port
+// #pragma HLS INTERFACE s_axilite port=return
+// #pragma HLS INTERFACE s_axilite port=num_active_inputs
+// #pragma HLS INTERFACE s_axilite port=num_refinements
 #pragma HLS DATAFLOW
-  int R_max = num_refinements[params::N - 1];
-  int R_total = num_refinements[0] * params::N; // Total elements.
+#pragma HLS INLINE
+  int R_max = num_refinements[0];
+  int R_total = num_refinements[0] * num_active_inputs; // Total elements.
   Get_Total_R:
-  for (int i = 1; i < params::N; ++i) {
+  for (int i = 1; i < num_active_inputs; ++i) {
 #pragma HLS PIPELINE II=1
     if (num_refinements[i] > R_max) {
       R_max = num_refinements[i];
     }
-    R_total += (num_refinements[i] - num_refinements[i - 1]) * (params::N - i);
+    R_total += (num_refinements[i] - num_refinements[i - 1]) * (num_active_inputs - i);
   }
   auto xu_axis = svd::AxiStreamInterface<params::VectG_AxiWidth>(xu_port);
   auto s_axis = svd::AxiStreamInterface<params::VectG_AxiWidth>(s_port);
@@ -70,13 +71,12 @@ void GenericKernelS(const hls::vector<int, params::N> num_refinements,
   for (int i = 0; i < R_total; ++i) {
 #pragma HLS PIPELINE II=1
     typedef typename params::ActivationD ActivationType;
-    auto xu_val = xu_axis.PopVector<ActivationType, params::G>();
-    auto s_val = s_axis.PopVector<ActivationType, params::G>();
+    auto xu_val = xu_axis.template PopVector<ActivationType, params::G>();
+    auto s_val = s_axis.template PopVector<ActivationType, params::G>();
     auto xus_val = xu_val * s_val;
     const bool kIsLast = (i == R_total - 1) ? true : false;
-    xus_axis.PushVector<ActivationType, params::G>(xus_val, kIsLast);
+    xus_axis.template PushVector<ActivationType, params::G>(xus_val, kIsLast);
   }
-#endif
 }
 
 } // svd

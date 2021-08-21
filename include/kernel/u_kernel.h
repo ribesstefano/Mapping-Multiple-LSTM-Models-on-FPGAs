@@ -386,27 +386,46 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
 }
 
 #ifdef __VITIS_HLS__
+/**
+ * @brief      Flexible Kernel-U.
+ *
+ * @param[in]  num_active_inputs  The number of active inputs
+ * @param[in]  input_size         The input size
+ * @param[in]  num_refinements    The number of refinements steps (R) per input:
+ *                                the Rs must be positive, greater than zero and
+ *                                in ASCENDING ORDER. Their amount must be less
+ *                                or equal to num_active_inputs. There should be
+ *                                #num_active_inputs defined Rs (with no gaps),
+ *                                as only the first #num_active_inputs Rs will
+ *                                be considered.
+ * @param[in]  pad_output         Wether to pad output with zeroes
+ * @param      x_port             The input x port
+ * @param      u_port             The input u port
+ * @param      xu_port            The output xu port
+ *
+ * @tparam     params             The collection of fixed parameters and
+ *                                configurations.
+ */
 template <typename params>
 void KernelU(const int num_active_inputs,
-  const int input_size,
-  const hls::vector<int, params::N> num_refinements,
-  const bool pad_output,
-  hls::stream<typename params::VectTuAxiType>& x_port,
-  hls::stream<typename params::VectTuAxiType>& u_port,
-  hls::stream<typename params::VectG_AxiType>& xu_port) {
-  /*
-   Notes: Add a parameter for ignoring processing an input, effectively
-   utilizing the full and single pipeline for only a few inputs.
-  */
-#pragma HLS INTERFACE axis port=x_port
-#pragma HLS INTERFACE axis port=u_port
-#pragma HLS INTERFACE axis port=xu_port
-#pragma HLS INTERFACE s_axilite port=return
-#pragma HLS INTERFACE s_axilite port=pad_output
-#pragma HLS INTERFACE s_axilite port=num_refinements
+    const int input_size,
+    const hls::vector<int, params::N> num_refinements,
+    const bool pad_output,
+    hls::stream<typename params::VectTuAxiType>& x_port,
+    hls::stream<typename params::VectTuAxiType>& u_port,
+    hls::stream<typename params::VectG_AxiType>& xu_port) {
+// #pragma HLS INTERFACE axis port=x_port
+// #pragma HLS INTERFACE axis port=u_port
+// #pragma HLS INTERFACE axis port=xu_port
+// #pragma HLS INTERFACE s_axilite port=return
+// #pragma HLS INTERFACE s_axilite port=num_active_inputs
+// #pragma HLS INTERFACE s_axilite port=input_size
+// #pragma HLS INTERFACE s_axilite port=num_refinements
+// #pragma HLS INTERFACE s_axilite port=pad_output
 #pragma HLS DATAFLOW
+#pragma HLS INLINE
   assert(num_active_inputs <= params::N);
-  assert(num_refinements >= 1);
+  assert(num_refinements >= 0);
   assert(params::I % params::Tu == 0);
   assert(input_size % params::Tu == 0);
   assert(input_size <= params::I);
@@ -425,7 +444,7 @@ void KernelU(const int num_active_inputs,
   hls::stream<typename params::VectTuType> x_stream("x_stream");
   hls::stream<typename params::VectTuType> u_streams[params::G];
   hls::stream<ActivationType> xu_streams[params::G];
-  typename params::VectTuType x_buffer[params::N][kMaxNumTilesU] = {0};
+  typename params::VectTuType x_buffer[params::N][kMaxNumTilesU];
 #pragma HLS STREAM variable=x_stream depth=kStreamDepth_X
 #pragma HLS STREAM variable=u_streams depth=kStreamDepth_U
 #pragma HLS STREAM variable=xu_streams depth=kStreamDepth_XU
@@ -601,7 +620,7 @@ void HlsAxisKernelU(const int num_refinements,
   hls::stream<typename testu::VectGN_AxiType>& xu_port);
 
 /**
- * @brief      Flexible Kernel-U.
+ * @brief      Synthesizeable flexible Kernel-U.
  *
  * @param[in]  num_active_inputs  The number of active inputs
  * @param[in]  input_size         The input size

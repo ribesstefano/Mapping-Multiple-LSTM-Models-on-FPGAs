@@ -15,6 +15,46 @@
 
 namespace svd {
 
+template<typename Type, int Ni, int Ii, int Tui, int ZTui = 0, int Gi = 1>
+struct ParamsU {
+  static const int N = Ni;
+  static const int I = Ii;
+  static const int Tu = Tui;
+  static const int ZTu = ZTui;
+  static const int G = Gi;
+  static const int TuElems = I / Tu;
+  static const int TuBits = hlsutils::log2<Tu>::value > 0 ? hlsutils::log2<Tu>::value : 1;
+  typedef ap_uint<Tu> UnzD;
+  typedef ap_uint<TuBits> UnzIdxD;
+  typedef Type ActivationD;
+  typedef Type WeightD;
+  typedef Type AccumulationD;
+  typedef hls::stream<UnzD> UnzS;
+  typedef hls::stream<ap_uint<TuBits> > UnzIdxS;
+  typedef hls::stream<ActivationD> ActivationS;
+  typedef hls::stream<WeightD> WeightS;
+  typedef hls::stream<AccumulationD> AccumulationS;
+  typedef ap_uint<hlsutils::Bitwidth<WeightD>::value * G> UPortD;
+  static const int PrunedSizeU = I / Tu * (Tu - ZTu);
+  static const int ActivationWidth = hlsutils::Bitwidth<ActivationD>::value;
+  static const int WeightWidth = hlsutils::Bitwidth<WeightD>::value;
+  static const int AccumulationWidth = hlsutils::Bitwidth<AccumulationD>::value;
+  static const int VectTuAxiWidth = ActivationWidth * Tu;
+  static const int VectN_AxiWidth = ActivationWidth * N;
+  static const int VectG_AxiWidth = ActivationWidth * G;
+  static const int VectGN_AxiWidth = ActivationWidth * G * N;
+  typedef typename svd::AxiStreamInterface<VectTuAxiWidth>::AxiuPacketType VectTuAxiType;
+  typedef typename svd::AxiStreamInterface<VectN_AxiWidth>::AxiuPacketType VectN_AxiType;
+  typedef typename svd::AxiStreamInterface<VectG_AxiWidth>::AxiuPacketType VectG_AxiType;
+  typedef typename svd::AxiStreamInterface<VectGN_AxiWidth>::AxiuPacketType VectGN_AxiType;
+#ifdef __VITIS_HLS__
+  typedef hls::vector<ActivationD, Tu> VectTuType;
+  typedef hls::vector<ActivationD, N> VectN_Type;
+  typedef hls::vector<ActivationD, G> VectG_Type;
+  typedef hls::vector<ActivationD, G * N> VectGN_Type;
+#endif
+};
+
 template <int Ni, int Ii, int Hi, int Ri, int Tui, int Tvi, int ZTui = 0,
   int ZTvi = 0, int Gi = 1,
   typename ActivationD_tp = ap_fixed<16, 3>,
@@ -290,5 +330,10 @@ typedef svd::SvdParameters<NUM_INPUTS, INPUT_SIZE, HIDDEN_SIZE, NUM_ITERATIONS,
     ActivationD, WeightD, AccumD> svd_params;
 
 } // namespace svd
+
+
+namespace testsvd {
+
+} // end testsvd
 
 #endif // end SVD_PARAMS_H_
