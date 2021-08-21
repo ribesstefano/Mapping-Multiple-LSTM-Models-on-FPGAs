@@ -391,19 +391,29 @@ private:
 };
 
 #ifdef __VITIS_HLS__
+/**
+ * @brief      This class describes an AXI stream interface wrapper for
+ *             hls::vector type.
+ *
+ * @todo       Implement proprer constructor
+ *
+ * @tparam     T         { description }
+ * @tparam     N         { description }
+ * @tparam     Bitwidth  { description }
+ */
 template<typename T, int N, int Bitwidth>
 class AxiVectStreamInterface : AxiStreamInterface<Bitwidth> {
 private:
-  /* data */
+
 public:
   AxiVectStreamInterface() {};
   ~AxiVectStreamInterface() {};
 
-  // hls::vector<T, N> PopVector() {
-  //   return this->PopVector<T, N>();
-  // }
+  hls::vector<T, N> Pop() {
+    return this->template PopVector<T, N>();
+  }
 };
-#endif // __VITIS_HLS__
+#endif // end __VITIS_HLS__
 
 
 } // svd

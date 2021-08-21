@@ -513,6 +513,99 @@ void VDotUnit2LstmV2(const bool has_bias,
   } // end V_Function
 }
 
+
+#ifdef __VITIS_HLS__
+template <typename params>
+void KernelV(const int num_active_inputs,
+    const int output_size,
+    const hls::vector<int, params::N> num_refinements,
+    hls::stream<typename params::VectG_AxiType>& xus_port,
+    hls::stream<typename params::VectTvAxiType>& v_port,
+    hls::stream<typename params::VectGTvAxiType>& y_port) {
+// #pragma HLS INTERFACE axis port=xus_port
+// #pragma HLS INTERFACE axis port=v_port
+// #pragma HLS INTERFACE axis port=y_port
+// #pragma HLS INTERFACE s_axilite port=return
+// #pragma HLS INTERFACE s_axilite port=num_active_inputs
+// #pragma HLS INTERFACE s_axilite port=output_size
+// #pragma HLS INTERFACE s_axilite port=num_refinements
+#pragma HLS DATAFLOW
+#pragma HLS INLINE
+  assert(num_refinements >= 1);
+  assert(params::H % params::Tv == 0);
+  assert(output_size % params::Tv == 0);
+  assert(output_size <= params::H);
+  typedef typename params::ActivationD ActivationType;
+  const int kNumTilesV = output_size / params::Tv;
+  const int kMaxNumTilesV = params::H / params::Tv;
+  const int kStreamDepth_V = 8 + kMaxNumTilesV * params::N;
+  assert(kNumTilesV <= kMaxNumTilesV);
+  auto xus_axis = svd::AxiStreamInterface<params::VectG_AxiWidth>(xus_port);
+  auto v_axis = svd::AxiStreamInterface<params::VectTvAxiWidth>(v_port);
+  auto y_axis = svd::AxiStreamInterface<params::VectGTvAxiWidth>(y_port);
+  hls::stream<typename params::VectTvType> v_streams[params::G];
+  typename params::VectTvType y_buffer[params::G][params::N][kMaxNumTilesV];
+#pragma HLS STREAM variable=v_streams depth=kStreamDepth_V
+#pragma HLS ARRAY_PARTITION variable=v_streams complete dim=1
+#pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=1
+#pragma HLS BIND_STORAGE variable=y_buffer type=ram_t2p impl=bram latency=2
+
+  int R_max = num_refinements[0];
+  int R_total = num_refinements[0] * num_active_inputs; // Total elements.
+  Get_Total_R:
+  for (int i = 1; i < num_active_inputs; ++i) {
+#pragma HLS PIPELINE II=1
+    if (num_refinements[i] > R_max) {
+      R_max = num_refinements[i];
+    }
+    R_total += (num_refinements[i] - num_refinements[i - 1]) * (num_active_inputs - i);
+  }
+
+  V_DMA:
+  for (int i = 0; i < params::R; ++i) {
+    for (int j = 0; j < kNumTilesV; ++j) {
+      for (int k = 0; k < params::G; ++k) {
+        for (int ii = 0; ii < num_active_inputs; ++ii) {
+#pragma HLS PIPELINE II=1
+          auto v_val = v_axis.template PopVector<ActivationType, params::Tv>();
+          v_streams[k].write(v_val);
+        }
+      }
+    }
+  }
+
+  V_Kernel:
+  for (int i = 0; i < params::R; ++i) {
+    for (int j = 0; j < kNumTilesV; ++j) {
+      for (int k = 0; k < num_active_inputs; ++k) {
+#pragma HLS PIPELINE II=1
+        auto xus_val = xus_axis.template PopVector<ActivationType, params::G>();
+        for (int ii = 0; ii < params::G; ++ii) {
+          auto v_val = v_streams[ii].read();
+          y_buffer[ii][k][j] += v_val * xus_val[ii];
+        }
+      }
+    }
+    if (i == params::R - 1) {
+      typename params::VectGTvType y_out = typename params::VectGTvType(0);
+#pragma HLS LOOP_MERGE
+      for (int j = 0; j < kNumTilesV; ++j) {
+        for (int k = 0; k < num_active_inputs; ++k) {
+          for (int ii = 0; ii < params::Tv; ++ii) {
+            for (int jj = 0; jj < params::G; ++jj) {
+#pragma HLS PIPELINE II=1
+              y_out[ii * params::G + jj] = y_buffer[jj][k][j][ii];
+            }
+          }
+          const bool kIsLast = (j == kNumTilesV - 1 && k == params::N - 1) ? true : false;
+          y_axis.template PushVector<ActivationType, params::G * params::Tv>(y_out);
+        }
+      }
+    }
+  }
+}
+#endif // end __VITIS_HLS__
+
 } // svd
 
 namespace testv {
@@ -534,9 +627,5 @@ typedef svd::SvdParameters<testv::kNumInputs, testv::kInputSize,
     // svd::ActivationD, svd::WeightD, svd::AccumD> params;
     short, short, short> params;
 } // testv
-
-#ifndef __VITIS_HLS__
-#else
-#endif
 
 #endif // end KERNEL_V_KERNEL_H_
