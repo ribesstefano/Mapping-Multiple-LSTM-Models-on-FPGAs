@@ -541,12 +541,12 @@ void PipelinedDispatcher(const int input_size,
 #ifdef __VITIS_HLS__
 template <typename params>
 void VectorizedInputDMA(const int R,
-    hls::stream<typename params::VectTuAxiType>& x_port,
+    hls::stream<typename params::VectTuAxiPacketType>& x_port,
     hls::stream<typename params::VectTuType> x_streams[params::N]) {
 
   typedef typename params::ActivationD ActivationType;
   const int kNumTilesU = params::I / params::Tu;
-  svd::AxiStreamInterface<params::VectTuAxiWidth> x_axis = svd::AxiStreamInterface<params::VectTuAxiWidth>(x_port);
+  svd::AxiStreamPort<params::VectTuAxiWidth> x_axis = svd::AxiStreamPort<params::VectTuAxiWidth>(x_port);
   typename params::VectTuType x_buffer[params::N][kNumTilesU];
 #pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=1
 

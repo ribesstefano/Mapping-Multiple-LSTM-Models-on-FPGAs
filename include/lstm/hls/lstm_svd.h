@@ -2,6 +2,8 @@
 #define LSTM_HLS_LSTM_SVD_H_
 
 #include "svd_params.h"
+#include "kernel/svd_kernel.h"
+#include "math_utils/activation_functions.h"
 
 #include "ap_int.h"
 
@@ -144,6 +146,96 @@ void SvdModel2LstmSDSoCV2(
     svd::ActivationD c_t1_curr_port[HIDDEN_SIZE],
     svd::ActivationD c_t2_curr_port[HIDDEN_SIZE]);
 
+
+#ifndef __VITIS_HLS__
+#else
+template <typename params>
+void LstmSvdKernel(const int num_active_inputs,
+    const int input_size,
+    const int output_size,
+    const hls::vector<int, params::N> num_refinements,
+    // Current Gates
+    hls::stream<typename params::VectTuAxiPacketType>& x_port,
+    hls::stream<typename params::VectTuAxiPacketType>& u_cur_port,
+    hls::stream<typename params::VectG_AxiPacketType>& s_cur_port,
+    hls::stream<typename params::VectTvAxiPacketType>& v_cur_port,
+    // Recurrent Gates
+    hls::stream<typename params::VectTuAxiPacketType>& h_prev_port,
+    hls::stream<typename params::VectTuAxiPacketType>& u_rec_port,
+    hls::stream<typename params::VectG_AxiPacketType>& s_rec_port,
+    hls::stream<typename params::VectTvAxiPacketType>& v_rec_port,
+    // Non-Linearities
+    hls::stream<typename params::VectGTvAxiPacketType>& bias_port,
+    hls::stream<typename params::VectTvAxiPacketType>& c_prev_port,
+    hls::stream<typename params::VectTvAxiPacketType>& h_curr_port,
+    hls::stream<typename params::VectTvAxiPacketType>& c_curr_port) {
+#pragma HLS DATAFLOW
+#pragma HLS INLINE
+  typedef typename params::ActivationD ActivationType;
+  hls::stream<typename params::VectGTvAxiPacketType> y_cur_port;
+  hls::stream<typename params::VectGTvAxiPacketType> y_rec_port;
+  auto y_cur_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(y_cur_port);
+  auto y_rec_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(y_rec_port);
+  auto bias_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(bias_port);
+  auto c_prev_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(c_prev_port);
+  auto c_curr_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(c_curr_port);
+  auto h_curr_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(h_curr_port);
+  // Current Gates
+  svd::SvdKernel<params>(num_active_inputs, input_size, output_size,
+    num_refinements, x_port, u_cur_port, s_cur_port, v_cur_port, y_cur_port);
+  // Recurrent Gates
+  svd::SvdKernel<params>(num_active_inputs, output_size, output_size,
+    num_refinements, h_prev_port, u_rec_port, s_rec_port, v_rec_port, y_rec_port);
+  // Non-Linearities
+  const int kTypeBitwidth = hlsutils::Bitwidth<ActivationType>::value;
+  const int kLutSize = (kTypeBitwidth > 16) ? 256 : 512;
+  const bool kHasBias = true;
+  for (int i = 0; i < params::H; ++i) {
+#pragma HLS PIPELINE II=1
+    const int kGTv = params::G * params::Tv;
+    auto y_cur = y_cur_axis.template PopVector<ActivationType, kGTv>();
+    auto y_rec = y_rec_axis.template PopVector<ActivationType, kGTv>();
+    auto bias = bias_axis.template PopVector<ActivationType, kGTv>();
+    auto c_prev = c_prev_axis.template PopVector<ActivationType, params::Tv>();
+    typename params::VectTvType c_curr;
+    typename params::VectTvType h_curr;
+    for (int j = 0; j < params::Tv; ++j) {
+      svd::LstmNonLinearFunctions<ActivationType, ActivationType, kLutSize>(
+        kHasBias,
+        y_cur[j * params::G + 0], y_cur[j * params::G + 1],
+        y_cur[j * params::G + 2], y_cur[j * params::G + 3],
+        y_rec[j * params::G + 0], y_rec[j * params::G + 1],
+        y_rec[j * params::G + 2], y_rec[j * params::G + 3],
+        bias[j * params::G + 0], bias[j * params::G + 1],
+        bias[j * params::G + 2], bias[j * params::G + 3],
+        c_prev[j], c_curr[j], h_curr[j]);
+    }
+    c_curr_axis.template PushVector<ActivationType, params::Tv>(c_curr);
+    h_curr_axis.template PushVector<ActivationType, params::Tv>(h_curr);
+  }
+}
+#endif // end __VITIS_HLS__
+
 } // svd
+
+void HlsLstmSvd(const int num_active_inputs,
+    const int input_size,
+    const int output_size,
+    const hls::vector<int, svd::svd_params::N> num_refinements,
+    // Current Gates
+    hls::stream<typename svd::svd_params::VectTuAxiPacketType>& x_port,
+    hls::stream<typename svd::svd_params::VectTuAxiPacketType>& u_cur_port,
+    hls::stream<typename svd::svd_params::VectG_AxiPacketType>& s_cur_port,
+    hls::stream<typename svd::svd_params::VectTvAxiPacketType>& v_cur_port,
+    // Recurrent Gates
+    hls::stream<typename svd::svd_params::VectTuAxiPacketType>& h_prev_port,
+    hls::stream<typename svd::svd_params::VectTuAxiPacketType>& u_rec_port,
+    hls::stream<typename svd::svd_params::VectG_AxiPacketType>& s_rec_port,
+    hls::stream<typename svd::svd_params::VectTvAxiPacketType>& v_rec_port,
+    // Non-Linearities
+    hls::stream<typename svd::svd_params::VectGTvAxiPacketType>& bias_port,
+    hls::stream<typename svd::svd_params::VectTvAxiPacketType>& c_prev_port,
+    hls::stream<typename svd::svd_params::VectTvAxiPacketType>& h_curr_port,
+    hls::stream<typename svd::svd_params::VectTvAxiPacketType>& c_curr_port);
 
 #endif // end LSTM_HLS_LSTM_SVD_H_

@@ -373,3 +373,46 @@ void SvdModel2LstmSDSoCV2(
 }
 
 } // svd
+
+
+void HlsLstmSvd(const int num_active_inputs,
+    const int input_size,
+    const int output_size,
+    const hls::vector<int, svd::svd_params::N> num_refinements,
+    // Current Gates
+    hls::stream<typename svd::svd_params::VectTuAxiPacketType>& x_port,
+    hls::stream<typename svd::svd_params::VectTuAxiPacketType>& u_cur_port,
+    hls::stream<typename svd::svd_params::VectG_AxiPacketType>& s_cur_port,
+    hls::stream<typename svd::svd_params::VectTvAxiPacketType>& v_cur_port,
+    // Recurrent Gates
+    hls::stream<typename svd::svd_params::VectTuAxiPacketType>& h_prev_port,
+    hls::stream<typename svd::svd_params::VectTuAxiPacketType>& u_rec_port,
+    hls::stream<typename svd::svd_params::VectG_AxiPacketType>& s_rec_port,
+    hls::stream<typename svd::svd_params::VectTvAxiPacketType>& v_rec_port,
+    // Non-Linearities
+    hls::stream<typename svd::svd_params::VectGTvAxiPacketType>& bias_port,
+    hls::stream<typename svd::svd_params::VectTvAxiPacketType>& c_prev_port,
+    hls::stream<typename svd::svd_params::VectTvAxiPacketType>& h_curr_port,
+    hls::stream<typename svd::svd_params::VectTvAxiPacketType>& c_curr_port) {
+#pragma HLS INTERFACE s_axilite port=return bundle=ctrl
+#pragma HLS INTERFACE s_axilite port=num_active_inputs bundle=ctrl
+#pragma HLS INTERFACE s_axilite port=input_size bundle=ctrl
+#pragma HLS INTERFACE s_axilite port=output_size bundle=ctrl
+#pragma HLS INTERFACE s_axilite port=num_refinements bundle=ctrl
+#pragma HLS INTERFACE axis port=x_port
+#pragma HLS INTERFACE axis port=u_cur_port
+#pragma HLS INTERFACE axis port=s_cur_port
+#pragma HLS INTERFACE axis port=v_cur_port
+#pragma HLS INTERFACE axis port=h_prev_port
+#pragma HLS INTERFACE axis port=u_rec_port
+#pragma HLS INTERFACE axis port=s_rec_port
+#pragma HLS INTERFACE axis port=v_rec_port
+#pragma HLS INTERFACE axis port=bias_port
+#pragma HLS INTERFACE axis port=c_prev_port
+#pragma HLS INTERFACE axis port=h_curr_port
+#pragma HLS INTERFACE axis port=c_curr_port
+  svd::LstmSvdKernel<svd::svd_params>(num_active_inputs, input_size,
+    output_size, num_refinements, x_port, u_cur_port, s_cur_port, v_cur_port,
+    h_prev_port, u_rec_port, s_rec_port, v_rec_port, bias_port, c_prev_port,
+    h_curr_port, c_curr_port);
+}

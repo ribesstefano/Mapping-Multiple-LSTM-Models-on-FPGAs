@@ -519,9 +519,9 @@ template <typename params>
 void KernelV(const int num_active_inputs,
     const int output_size,
     const hls::vector<int, params::N> num_refinements,
-    hls::stream<typename params::VectG_AxiType>& xus_port,
-    hls::stream<typename params::VectTvAxiType>& v_port,
-    hls::stream<typename params::VectGTvAxiType>& y_port) {
+    hls::stream<typename params::VectG_AxiPacketType>& xus_port,
+    hls::stream<typename params::VectTvAxiPacketType>& v_port,
+    hls::stream<typename params::VectGTvAxiPacketType>& y_port) {
 // #pragma HLS INTERFACE axis port=xus_port
 // #pragma HLS INTERFACE axis port=v_port
 // #pragma HLS INTERFACE axis port=y_port
@@ -531,7 +531,9 @@ void KernelV(const int num_active_inputs,
 // #pragma HLS INTERFACE s_axilite port=num_refinements
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
-  assert(num_refinements >= 1);
+  assert(num_active_inputs <= params::N);
+  assert(num_active_inputs > 0);
+  assert(num_refinements >= 0);
   assert(params::H % params::Tv == 0);
   assert(output_size % params::Tv == 0);
   assert(output_size <= params::H);
@@ -540,9 +542,9 @@ void KernelV(const int num_active_inputs,
   const int kMaxNumTilesV = params::H / params::Tv;
   const int kStreamDepth_V = 8 + kMaxNumTilesV * params::N;
   assert(kNumTilesV <= kMaxNumTilesV);
-  auto xus_axis = svd::AxiStreamInterface<params::VectG_AxiWidth>(xus_port);
-  auto v_axis = svd::AxiStreamInterface<params::VectTvAxiWidth>(v_port);
-  auto y_axis = svd::AxiStreamInterface<params::VectGTvAxiWidth>(y_port);
+  auto xus_axis = svd::AxiStreamPort<params::VectG_AxiWidth>(xus_port);
+  auto v_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(v_port);
+  auto y_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(y_port);
   hls::stream<typename params::VectTvType> v_streams[params::G];
   typename params::VectTvType y_buffer[params::G][params::N][kMaxNumTilesV];
 #pragma HLS STREAM variable=v_streams depth=kStreamDepth_V
@@ -558,6 +560,7 @@ void KernelV(const int num_active_inputs,
     if (num_refinements[i] > R_max) {
       R_max = num_refinements[i];
     }
+    assert(num_refinements[i] > num_refinements[i - 1]);
     R_total += (num_refinements[i] - num_refinements[i - 1]) * (num_active_inputs - i);
   }
 
@@ -587,7 +590,7 @@ void KernelV(const int num_active_inputs,
       }
     }
     if (i == params::R - 1) {
-      typename params::VectGTvType y_out = typename params::VectGTvType(0);
+      auto y_out = typename params::VectGTvType(0);
 #pragma HLS LOOP_MERGE
       for (int j = 0; j < kNumTilesV; ++j) {
         for (int k = 0; k < num_active_inputs; ++k) {

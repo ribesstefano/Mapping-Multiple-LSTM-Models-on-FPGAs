@@ -42,18 +42,18 @@ int main(int argc, char const *argv[]) {
   hls::stream<VectTuAct_Type> x_port; //[testu::params::N * kNumTilesU];
   hls::stream<VectTuAct_Type> u_port; //[num_refinements * kNumTilesU * testu::params::G];
   hls::stream<VectN_Type> xu_port; //[num_refinements * testu::params::G];
-  hls::stream<typename testu::params::VectTuAxiType> x_axis("x_axis");
-  hls::stream<typename testu::params::VectTuAxiType> u_axis("u_axis");
-  hls::stream<typename testu::params::VectGN_AxiType> xu_gn_axis("xu_gn_axis");
-  hls::stream<typename testu::params::VectN_AxiType> xu_n_axis("xu_n_axis");
-  hls::stream<typename testu::params::VectG_AxiType> xu_g_axis("xu_g_axis");
+  hls::stream<typename testu::params::VectTuAxiPacketType> x_axis("x_axis");
+  hls::stream<typename testu::params::VectTuAxiPacketType> u_axis("u_axis");
+  hls::stream<typename testu::params::VectGN_AxiPacketType> xu_gn_axis("xu_gn_axis");
+  hls::stream<typename testu::params::VectN_AxiPacketType> xu_n_axis("xu_n_axis");
+  hls::stream<typename testu::params::VectG_AxiPacketType> xu_g_axis("xu_g_axis");
   VectN_Type xu_gold[num_refinements * testu::params::G];
 
-  auto x_axis_interface = svd::AxiStreamInterface<testu::params::VectTuAxiWidth>(x_axis);
-  auto u_axis_interface = svd::AxiStreamInterface<testu::params::VectTuAxiWidth>(u_axis);
-  auto xu_gn_axis_interface = svd::AxiStreamInterface<testu::params::VectGN_AxiWidth>(xu_gn_axis);
-  auto xu_n_axis_interface = svd::AxiStreamInterface<testu::params::VectN_AxiWidth>(xu_n_axis);
-  auto xu_g_axis_interface = svd::AxiStreamInterface<testu::params::VectG_AxiWidth>(xu_g_axis);
+  auto x_axis_interface = svd::AxiStreamPort<testu::params::VectTuAxiWidth>(x_axis);
+  auto u_axis_interface = svd::AxiStreamPort<testu::params::VectTuAxiWidth>(u_axis);
+  auto xu_gn_axis_interface = svd::AxiStreamPort<testu::params::VectGN_AxiWidth>(xu_gn_axis);
+  auto xu_n_axis_interface = svd::AxiStreamPort<testu::params::VectN_AxiWidth>(xu_n_axis);
+  auto xu_g_axis_interface = svd::AxiStreamPort<testu::params::VectG_AxiWidth>(xu_g_axis);
 
   for (int i = 0; i < testu::params::N; ++i) {
     for (int j = 0; j < testu::params::I; ++j) {

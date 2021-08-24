@@ -43,10 +43,14 @@ struct ParamsU {
   static const int VectN_AxiWidth = ActivationWidth * N;
   static const int VectG_AxiWidth = ActivationWidth * G;
   static const int VectGN_AxiWidth = ActivationWidth * G * N;
-  typedef typename svd::AxiStreamInterface<VectTuAxiWidth>::AxiuPacketType VectTuAxiType;
-  typedef typename svd::AxiStreamInterface<VectN_AxiWidth>::AxiuPacketType VectN_AxiType;
-  typedef typename svd::AxiStreamInterface<VectG_AxiWidth>::AxiuPacketType VectG_AxiType;
-  typedef typename svd::AxiStreamInterface<VectGN_AxiWidth>::AxiuPacketType VectGN_AxiType;
+  typedef typename svd::AxiStreamPort<VectTuAxiWidth>::AxiuPacketType VectTuAxiPacketType;
+  typedef typename svd::AxiStreamPort<VectN_AxiWidth>::AxiuPacketType VectN_AxiPacketType;
+  typedef typename svd::AxiStreamPort<VectG_AxiWidth>::AxiuPacketType VectG_AxiPacketType;
+  typedef typename svd::AxiStreamPort<VectGN_AxiWidth>::AxiuPacketType VectGN_AxiPacketType;
+  typedef typename svd::AxiStreamWrapper<VectTuAxiWidth>::AxiuType VectTuAxiuType;
+  typedef typename svd::AxiStreamWrapper<VectN_AxiWidth>::AxiuType VectN_AxiuType;
+  typedef typename svd::AxiStreamWrapper<VectG_AxiWidth>::AxiuType VectG_AxiuType;
+  typedef typename svd::AxiStreamWrapper<VectGN_AxiWidth>::AxiuType VectGN_AxiuType;
 #ifdef __VITIS_HLS__
   typedef hls::vector<ActivationD, Tu> VectTuType;
   typedef hls::vector<ActivationD, N> VectN_Type;
@@ -105,12 +109,12 @@ struct SvdParameters {
   static const int VectG_AxiWidth = ActivationWidth * G;
   static const int VectGN_AxiWidth = ActivationWidth * G * N;
   static const int VectGTvAxiWidth = ActivationWidth * G * Tv;
-  typedef typename svd::AxiStreamInterface<VectTuAxiWidth>::AxiuPacketType VectTuAxiType;
-  typedef typename svd::AxiStreamInterface<VectTvAxiWidth>::AxiuPacketType VectTvAxiType;
-  typedef typename svd::AxiStreamInterface<VectN_AxiWidth>::AxiuPacketType VectN_AxiType;
-  typedef typename svd::AxiStreamInterface<VectG_AxiWidth>::AxiuPacketType VectG_AxiType;
-  typedef typename svd::AxiStreamInterface<VectGN_AxiWidth>::AxiuPacketType VectGN_AxiType;
-  typedef typename svd::AxiStreamInterface<VectGTvAxiWidth>::AxiuPacketType VectGTvAxiType;
+  typedef typename svd::AxiStreamPort<VectTuAxiWidth>::AxiuPacketType VectTuAxiPacketType;
+  typedef typename svd::AxiStreamPort<VectTvAxiWidth>::AxiuPacketType VectTvAxiPacketType;
+  typedef typename svd::AxiStreamPort<VectN_AxiWidth>::AxiuPacketType VectN_AxiPacketType;
+  typedef typename svd::AxiStreamPort<VectG_AxiWidth>::AxiuPacketType VectG_AxiPacketType;
+  typedef typename svd::AxiStreamPort<VectGN_AxiWidth>::AxiuPacketType VectGN_AxiPacketType;
+  typedef typename svd::AxiStreamPort<VectGTvAxiWidth>::AxiuPacketType VectGTvAxiPacketType;
 #ifdef __VITIS_HLS__
   typedef hls::vector<ActivationD, Tu> VectTuType;
   typedef hls::vector<ActivationD, Tv> VectTvType;

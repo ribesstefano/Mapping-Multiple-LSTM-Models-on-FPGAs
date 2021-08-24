@@ -5,6 +5,9 @@
 
 #include "hls_stream.h"
 #include "assert.h"
+#ifdef __VITIS_HLS__
+#include "hls_vector.h"
+#endif
 
 #include <cmath>
 
@@ -239,6 +242,7 @@ void LstmNonLinearFunctions(const bool has_bias,
                             const ActivationType c_prev,
                             ActivationType &c_curr,
                             ActivationType &h_curr) {
+#pragma HLS FUNCTION_INSTANTIATE variable=has_bias
 #pragma HLS PIPELINE II=1
   ActivationType i_gate = 0;
   ActivationType f_gate = 0;
@@ -281,6 +285,129 @@ void LstmNonLinearFunctions(const bool has_bias,
   h_curr = h_reg;
 }
 
+
+#ifdef __VITIS_HLS__
+/**
+ * @brief      LSTM non-linearity function to be applied to each output element.
+ *             It implements the following Python (Keras) implementation:
+ *
+ *                i = self.recurrent_activation(x_i + K.dot(h_tm1_i,
+ *                                                self.recurrent_kernel_i))
+ *                f = self.recurrent_activation(x_f + K.dot(h_tm1_f,
+ *                                                self.recurrent_kernel_f))
+ *                c = f * c_tm1 + i * self.activation(x_c + K.dot(h_tm1_c,
+ *                                                self.recurrent_kernel_c))
+ *                o = self.recurrent_activation(x_o + K.dot(h_tm1_o,
+ *                                                self.recurrent_kernel_o))
+ *                h = o * self.activation(c)
+ *
+ * @param[in]  has_bias        Indicates if bias is present.
+ * @param[in]  cur_gate_i      The current gate i element
+ * @param[in]  cur_gate_f      The current gate f element
+ * @param[in]  cur_gate_c      The current gate c element
+ * @param[in]  cur_gate_o      The current gate o element
+ * @param[in]  rec_gate_i      The recurrent gate i element
+ * @param[in]  rec_gate_f      The recurrent gate f element
+ * @param[in]  rec_gate_c      The recurrent gate c element
+ * @param[in]  rec_gate_o      The recurrent gate o element
+ * @param[in]  bias_i          The bias i element
+ * @param[in]  bias_f          The bias f element
+ * @param[in]  bias_c          The bias c element
+ * @param[in]  bias_o          The bias o element
+ * @param[in]  c_prev          The previous c (cell) state
+ * @param      c_curr          The current c (cell) state
+ * @param      h_curr          The h current
+ *
+ * @tparam     ActivationType  The activation type
+ * @tparam     WeightType      The weight type
+ * @tparam     LutSize         The tanh LUT size: having it templated helps
+ *                             inferring a ROM
+ */
+template <typename T, int N, int LutSize>
+void LstmVectNonLinearFunctions(const bool has_bias,
+    const hls::vector<T, N> cur_gate_i,
+    const hls::vector<T, N> cur_gate_f,
+    const hls::vector<T, N> cur_gate_c,
+    const hls::vector<T, N> cur_gate_o,
+    const hls::vector<T, N> rec_gate_i,
+    const hls::vector<T, N> rec_gate_f,
+    const hls::vector<T, N> rec_gate_c,
+    const hls::vector<T, N> rec_gate_o,
+    const hls::vector<T, N> bias_i,
+    const hls::vector<T, N> bias_f,
+    const hls::vector<T, N> bias_c,
+    const hls::vector<T, N> bias_o,
+    const hls::vector<T, N> c_prev,
+    const hls::vector<T, N> &c_curr,
+    const hls::vector<T, N> &h_curr) {
+#pragma HLS FUNCTION_INSTANTIATE variable=has_bias
+#pragma HLS PIPELINE II=1
+  const hls::vector<T, N> i_gate = 0;
+  const hls::vector<T, N> f_gate = 0;
+  const hls::vector<T, N> c_gate = 0;
+  const hls::vector<T, N> o_gate = 0;
+  if (has_bias) {
+    i_gate = cur_gate_i + rec_gate_i + bias_i;
+    f_gate = cur_gate_f + rec_gate_f + bias_f;
+    c_gate = cur_gate_c + rec_gate_c + bias_c;
+    o_gate = cur_gate_o + rec_gate_o + bias_o;
+  } else {
+    i_gate = cur_gate_i + rec_gate_i;
+    f_gate = cur_gate_f + rec_gate_f;
+    o_gate = cur_gate_c + rec_gate_c;
+    c_gate = cur_gate_o + rec_gate_o;
+  }
+#pragma HLS BIND_OP variable=i_gate op=add impl=dsp
+#pragma HLS BIND_OP variable=f_gate op=add impl=dsp
+#pragma HLS BIND_OP variable=c_gate op=add impl=dsp
+#pragma HLS BIND_OP variable=o_gate op=add impl=dsp
+
+//   const auto sigma_i = HardSigmoid<ActivationType>(i_gate);
+//   const auto sigma_f = HardSigmoid<ActivationType>(f_gate);
+//   const auto sigma_o = HardSigmoid<ActivationType>(o_gate);
+//   const auto tanh_cell = TanH<ActivationType, LutSize>(c_gate);
+
+//   const auto c_lhs = sigma_f * c_prev;
+//   const auto c_reg = c_lhs + sigma_i * tanh_cell;
+// #pragma HLS RESOURCE variable=c_lhs core=DSP48 latency=3
+// #pragma HLS RESOURCE variable=c_reg core=DSP48 latency=3
+//   c_curr = c_reg;
+
+//   const auto c_tanh = TanH<ActivationType, LutSize>(c_reg);
+//   const auto h_reg = sigma_o * c_tanh;
+// #pragma HLS RESOURCE variable=h_reg core=DSP48 latency=3
+//   h_curr = h_reg;
+}
+#endif // end __VITIS_HLS__
+
+
+
+/**
+ * @brief      Processing element used in SvdLstm. Deprecated.
+ *
+ * @deprecated Old inplementation, not flexible enough.
+ *
+ * @param[in]  size        The size
+ * @param[in]  c_t_prev    The c t previous
+ * @param[in]  cur_gate_i  The current gate i
+ * @param[in]  cur_gate_f  The current gate f
+ * @param[in]  cur_gate_c  The current gate c
+ * @param[in]  cur_gate_o  The current gate o
+ * @param[in]  rec_gate_i  The record gate i
+ * @param[in]  rec_gate_f  The record gate f
+ * @param[in]  rec_gate_c  The record gate c
+ * @param[in]  rec_gate_o  The record gate o
+ * @param      h           { parameter_description }
+ * @param      c_t         { parameter_description }
+ * @param[in]  has_bias    Indicates if bias
+ * @param[in]  i_bias      I bias
+ * @param[in]  f_bias      The f bias
+ * @param[in]  c_bias      The c bias
+ * @param[in]  o_bias      The o bias
+ *
+ * @tparam     A           { description }
+ * @tparam     W           { description }
+ */
 template <typename A, typename W>
 void NonLinearityUnitPE(const int size,
                         const A *c_t_prev,
