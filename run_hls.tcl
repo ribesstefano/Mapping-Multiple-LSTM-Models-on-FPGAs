@@ -199,6 +199,8 @@ if {${reset_project}} {
 # ==============================================================================
 # Configure HLS
 # ==============================================================================
+config_compile -name_max_length=12
+
 if {${relax_ii}} {
     config_schedule -effort ${scheduler_effort} -relax_ii_for_timing=1
 } else {
