@@ -96,6 +96,12 @@ struct Bitwidth<double> {
   static const int value = 64;
 };
 
+#ifdef __VITIS_HLS__
+template<typename T, int N>
+struct VectBitwidth {
+  static const int value = N * Bitwidth<T>::value;
+};
+#endif
 
 template<int X, int R, int T, int ZT>
 struct PrunedSize {

@@ -406,25 +406,18 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
  * @tparam     params             The collection of fixed parameters and
  *                                configurations.
  */
-template <typename params>
+template <typename params, typename OutInterface = svd::AxiStreamPort<params::VectG_AxiWidth> >
 void KernelU(const int num_active_inputs,
     const int input_size,
     const hls::vector<int, params::N> num_refinements,
     const bool pad_output,
-    hls::stream<typename params::VectTuAxiType>& x_port,
-    hls::stream<typename params::VectTuAxiType>& u_port,
-    hls::stream<typename params::VectG_AxiType>& xu_port) {
-// #pragma HLS INTERFACE axis port=x_port
-// #pragma HLS INTERFACE axis port=u_port
-// #pragma HLS INTERFACE axis port=xu_port
-// #pragma HLS INTERFACE s_axilite port=return
-// #pragma HLS INTERFACE s_axilite port=num_active_inputs
-// #pragma HLS INTERFACE s_axilite port=input_size
-// #pragma HLS INTERFACE s_axilite port=num_refinements
-// #pragma HLS INTERFACE s_axilite port=pad_output
+    hls::stream<typename params::VectTuAxiPacketType>& x_port,
+    hls::stream<typename params::VectTuAxiPacketType>& u_port,
+    hls::stream<typename OutInterface::PacketType>& xu_port) {
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
   assert(num_active_inputs <= params::N);
+  assert(num_active_inputs > 0);
   assert(num_refinements >= 0);
   assert(params::I % params::Tu == 0);
   assert(input_size % params::Tu == 0);
@@ -437,9 +430,9 @@ void KernelU(const int num_active_inputs,
   assert(kNumTilesU <= kMaxNumTilesU);
   typedef typename params::ActivationD ActivationType;
 
-  auto x_axis = svd::AxiStreamInterface<params::VectTuAxiWidth>(x_port);
-  auto u_axis = svd::AxiStreamInterface<params::VectTuAxiWidth>(u_port);
-  auto xu_axis = svd::AxiStreamInterface<params::VectG_AxiWidth>(xu_port);
+  auto x_axis = svd::AxiStreamPort<params::VectTuAxiWidth>(x_port);
+  auto u_axis = svd::AxiStreamPort<params::VectTuAxiWidth>(u_port);
+  auto xu_axis = svd::AxiStreamInterface<OutInterface>(xu_port);
 
   hls::stream<typename params::VectTuType> x_stream("x_stream");
   hls::stream<typename params::VectTuType> u_streams[params::G];
@@ -474,6 +467,7 @@ void KernelU(const int num_active_inputs,
     if (num_refinements[i] > R_max) {
       R_max = num_refinements[i];
     }
+    assert(num_refinements[i] > num_refinements[i - 1]);
     R_total += (num_refinements[i] - num_refinements[i - 1]) * (num_active_inputs - i);
   }
 
@@ -488,20 +482,17 @@ void KernelU(const int num_active_inputs,
 #pragma HLS PIPELINE II=1
           if (ii == 0 && i == 0) {
             auto x_val = x_axis.template PopVector<ActivationType, params::Tu>();
-// #pragma HLS AGGREGATE variable=x_val
             x_buffer[k][j] = x_val;
             x_stream << x_val;
           } else {
             assert(k + ii < params::N);
             x_stream << x_buffer[k + ii][j];
           }
-          // std::cout << "\t[KernelU] Sending x[R." << i+R_prev << "][N." << k+ii << "][T." << j << "]" << std::endl;
         }
       }
     }
     R_prev = num_refinements[ii];
   }
-  // std::cout << std::endl;
 
   U_DMA:
   for (int i = 0; i < R_max; ++i) {
@@ -513,13 +504,11 @@ void KernelU(const int num_active_inputs,
 #pragma HLS PIPELINE II=1
           if (i < num_refinements[ii]) {
             u_streams[k] << u_val;
-            // std::cout << "\t[KernelU] Sending u[R." << i << "][G." << k << "][N." << ii << "][T." << j << "]" << std::endl;
           }
         }
       }
     }
   }
-  // std::cout << std::endl;
 
   U_Kernel:
   for (int i = 0; i < R_total; ++i) {
@@ -544,13 +533,11 @@ void KernelU(const int num_active_inputs,
           if (i < num_refinements[k]) {
             xu_out[k][ii] += xu_streams[ii].read();
 #pragma HLS BIND_OP variable=xu_out[k][ii] op=add impl=dsp
-            // std::cout << "\t[KernelU] Reading xu[R." << i << "][G." << ii << "][N." << k << "][T." << j << "]" << std::endl;
           }
         }
         if (i < num_refinements[k] && j == kNumTilesU - 1) {
           const bool kIsLast = (iter_cnt == R_total - 1 && !pad_output) ? true : false;
           xu_axis.template PushVector<ActivationType, params::G>(xu_out[k], kIsLast);
-          // std::cout << "\t[KernelU] Sending xu[R." << i << "][N." << k << "]" << std::endl;
           ++iter_cnt;
         } else if (pad_output) {
           const bool last_condition = i == R_max - 1 && j == kNumTilesU - 1 && k == num_active_inputs - 1; 
@@ -561,7 +548,6 @@ void KernelU(const int num_active_inputs,
       }
     }
   }
-  // std::cout << "[KernelU] iter_cnt: " << iter_cnt << std::endl;
 }
 #endif
 
@@ -592,9 +578,9 @@ static const int VectGN_AxiBitwidth = hlsutils::Bitwidth<typename params::Activa
 typedef hls::vector<typename params::ActivationD, params::Tu> VectTuType;
 typedef hls::vector<typename params::ActivationD, params::N> VectN_Type;
 typedef hls::vector<typename params::ActivationD, params::G * params::N> VectGN_Type;
-typedef svd::AxiStreamInterface<VectTuAxiBitwidth>::AxiuPacketType VectTuAxiType;
-typedef svd::AxiStreamInterface<VectN_AxiBitwidth>::AxiuPacketType VectN_AxiType;
-typedef svd::AxiStreamInterface<VectGN_AxiBitwidth>::AxiuPacketType VectGN_AxiType;
+typedef svd::AxiStreamPort<VectTuAxiBitwidth>::AxiuPacketType VectTuAxiPacketType;
+typedef svd::AxiStreamPort<VectN_AxiBitwidth>::AxiuPacketType VectN_AxiPacketType;
+typedef svd::AxiStreamPort<VectGN_AxiBitwidth>::AxiuPacketType VectGN_AxiPacketType;
 
 } // testu
 
@@ -615,9 +601,9 @@ void HlsVectorKernelU(const int num_refinements,
   hls::stream<hls::vector<typename testu::params::ActivationD, testu::params::N> >& xu_port);
 
 void HlsAxisKernelU(const int num_refinements,
-  hls::stream<typename testu::VectTuAxiType>& x_port,
-  hls::stream<typename testu::VectTuAxiType>& u_port,
-  hls::stream<typename testu::VectGN_AxiType>& xu_port);
+  hls::stream<typename testu::VectTuAxiPacketType>& x_port,
+  hls::stream<typename testu::VectTuAxiPacketType>& u_port,
+  hls::stream<typename testu::VectGN_AxiPacketType>& xu_port);
 
 /**
  * @brief      Synthesizeable flexible Kernel-U.
@@ -637,9 +623,9 @@ void HlsKernelU_ManySampling(const int num_active_inputs,
   const int input_size,
   const hls::vector<int, testu::params::N> num_refinements,
   const bool pad_output,
-  hls::stream<typename testu::params::VectTuAxiType>& x_port,
-  hls::stream<typename testu::params::VectTuAxiType>& u_port,
-  hls::stream<typename testu::params::VectG_AxiType>& xu_port);
+  hls::stream<typename testu::params::VectTuAxiPacketType>& x_port,
+  hls::stream<typename testu::params::VectTuAxiPacketType>& u_port,
+  hls::stream<typename testu::params::VectG_AxiPacketType>& xu_port);
 
 #endif // end __VITIS_HLS__
 

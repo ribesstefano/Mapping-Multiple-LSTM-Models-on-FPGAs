@@ -160,9 +160,9 @@ void HlsVectorKernelU(const int num_refinements,
 }
 
 void HlsAxisKernelU(const int num_refinements,
-  hls::stream<typename testu::VectTuAxiType>& x_port,
-  hls::stream<typename testu::VectTuAxiType>& u_port,
-  hls::stream<typename testu::VectGN_AxiType>& xu_port) {
+  hls::stream<typename testu::VectTuAxiPacketType>& x_port,
+  hls::stream<typename testu::VectTuAxiPacketType>& u_port,
+  hls::stream<typename testu::VectGN_AxiPacketType>& xu_port) {
   const int R_test = num_refinements;
   const int kNumTilesU = testu::params::I / testu::params::Tu;
   const int kStreamDepth_X = 2 + kNumTilesU * testu::params::N;
@@ -176,9 +176,9 @@ void HlsAxisKernelU(const int num_refinements,
 #pragma HLS DATAFLOW
   typedef typename testu::params::ActivationD ActivationType;
 
-  auto x_axis = svd::AxiStreamInterface<testu::VectTuAxiBitwidth>(x_port);
-  auto u_axis = svd::AxiStreamInterface<testu::VectTuAxiBitwidth>(u_port);
-  auto xu_axis = svd::AxiStreamInterface<testu::VectGN_AxiBitwidth>(xu_port);
+  auto x_axis = svd::AxiStreamPort<testu::VectTuAxiBitwidth>(x_port);
+  auto u_axis = svd::AxiStreamPort<testu::VectTuAxiBitwidth>(u_port);
+  auto xu_axis = svd::AxiStreamPort<testu::VectGN_AxiBitwidth>(xu_port);
 
   hls::stream<testu::params::VectTuType> x_streams[testu::params::N];
   hls::stream<testu::params::VectTuType> u_streams[testu::params::G];
@@ -269,9 +269,9 @@ void HlsKernelU_ManySampling(const int num_active_inputs,
     const int input_size,
     const hls::vector<int, testu::params::N> num_refinements,
     const bool pad_output,
-    hls::stream<typename testu::params::VectTuAxiType>& x_port,
-    hls::stream<typename testu::params::VectTuAxiType>& u_port,
-    hls::stream<typename testu::params::VectG_AxiType>& xu_port) {
+    hls::stream<typename testu::params::VectTuAxiPacketType>& x_port,
+    hls::stream<typename testu::params::VectTuAxiPacketType>& u_port,
+    hls::stream<typename testu::params::VectG_AxiPacketType>& xu_port) {
 #pragma HLS INTERFACE axis port=x_port
 #pragma HLS INTERFACE axis port=u_port
 #pragma HLS INTERFACE axis port=xu_port

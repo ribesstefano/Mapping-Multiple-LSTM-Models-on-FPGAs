@@ -34,7 +34,7 @@ struct KernelS_Params {
   static const int ActivationWidth = hlsutils::Bitwidth<ActivationD>::value;
   static const int VectG_AxiWidth = ActivationWidth * G;
   typedef ActivationD_tp ActivationD;
-  typedef typename svd::AxiStreamInterface<VectG_AxiWidth>::AxiuPacketType VectG_AxiType;
+  typedef typename svd::AxiStreamPort<VectG_AxiWidth>::AxiuPacketType VectG_AxiPacketType;
 #ifdef __VITIS_HLS__
   typedef hls::vector<ActivationD, G> VectG_Type;
 #endif
@@ -43,9 +43,9 @@ struct KernelS_Params {
 template <typename params>
 void KernelS(const int num_active_inputs,
     const hls::vector<int, params::N> num_refinements,
-    hls::stream<typename params::VectG_AxiType>& xu_port,
-    hls::stream<typename params::VectG_AxiType>& s_port,
-    hls::stream<typename params::VectG_AxiType>& xus_port) {
+    hls::stream<typename params::VectG_AxiPacketType>& xu_port,
+    hls::stream<typename params::VectG_AxiPacketType>& s_port,
+    hls::stream<typename params::VectG_AxiPacketType>& xus_port) {
 // #pragma HLS INTERFACE axis port=xu_port
 // #pragma HLS INTERFACE axis port=s_port
 // #pragma HLS INTERFACE axis port=xus_port
@@ -54,6 +54,9 @@ void KernelS(const int num_active_inputs,
 // #pragma HLS INTERFACE s_axilite port=num_refinements
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
+  assert(num_active_inputs <= params::N);
+  assert(num_active_inputs > 0);
+  assert(num_refinements >= 0);
   int R_max = num_refinements[0];
   int R_total = num_refinements[0] * num_active_inputs; // Total elements.
   Get_Total_R:
@@ -62,11 +65,12 @@ void KernelS(const int num_active_inputs,
     if (num_refinements[i] > R_max) {
       R_max = num_refinements[i];
     }
+    assert(num_refinements[i] > num_refinements[i - 1]);
     R_total += (num_refinements[i] - num_refinements[i - 1]) * (num_active_inputs - i);
   }
-  auto xu_axis = svd::AxiStreamInterface<params::VectG_AxiWidth>(xu_port);
-  auto s_axis = svd::AxiStreamInterface<params::VectG_AxiWidth>(s_port);
-  auto xus_axis = svd::AxiStreamInterface<params::VectG_AxiWidth>(xus_port);
+  auto xu_axis = svd::AxiStreamPort<params::VectG_AxiWidth>(xu_port);
+  auto s_axis = svd::AxiStreamPort<params::VectG_AxiWidth>(s_port);
+  auto xus_axis = svd::AxiStreamPort<params::VectG_AxiWidth>(xus_port);
   S_Kernel:
   for (int i = 0; i < R_total; ++i) {
 #pragma HLS PIPELINE II=1
@@ -105,9 +109,9 @@ typedef svd::SvdParameters<tests::kNumInputs, tests::kInputSize,
 #ifndef __VITIS_HLS__
 #else
 void HlsKernelS(const hls::vector<int, tests::params::N> num_refinements,
-  hls::stream<typename tests::params::VectG_AxiType>& xu_port,
-  hls::stream<typename tests::params::VectG_AxiType>& s_port,
-  hls::stream<typename tests::params::VectG_AxiType>& xus_port);
+  hls::stream<typename tests::params::VectG_AxiPacketType>& xu_port,
+  hls::stream<typename tests::params::VectG_AxiPacketType>& s_port,
+  hls::stream<typename tests::params::VectG_AxiPacketType>& xus_port);
 #endif
 
 #endif // end KERNEL_S_KERNEL_H_
