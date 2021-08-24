@@ -3,11 +3,11 @@ proc append_lstm_params {&defines} {
     dict set params NUM_SAMPLES 2
     dict set params INPUT_SIZE 1024
     dict set params HIDDEN_SIZE 512
-    dict set params NUM_ITERATIONS 16
-    dict set params NUM_TILES_U 32
-    dict set params NUM_ZERO_TILES_U 16
-    dict set params NUM_TILES_V 64
-    dict set params NUM_ZERO_TILES_V 8
+    dict set params NUM_ITERATIONS 32
+    dict set params NUM_TILES_U 4
+    dict set params NUM_ZERO_TILES_U 1
+    dict set params NUM_TILES_V 4
+    dict set params NUM_ZERO_TILES_V 1
     dict set params NUM_TIMESTEPS 28
 
 	set tmp {}
