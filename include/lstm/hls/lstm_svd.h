@@ -169,8 +169,15 @@ void LstmSvdKernel(const int num_active_inputs,
     hls::stream<typename params::VectTvAxiPacketType>& c_prev_port,
     hls::stream<typename params::VectTvAxiPacketType>& h_curr_port,
     hls::stream<typename params::VectTvAxiPacketType>& c_curr_port) {
-#pragma HLS DATAFLOW
+#pragma HLS TOP name=LstmSvdKernel
 #pragma HLS INLINE
+#pragma HLS DATAFLOW
+#pragma HLS STABLE variable=s_cur_port
+#pragma HLS STABLE variable=s_rec_port
+#pragma HLS STABLE variable=v_cur_port
+#pragma HLS STABLE variable=v_rec_port
+#pragma HLS STABLE variable=bias_port
+#pragma HLS STABLE variable=c_prev_port
   typedef typename params::ActivationD ActivationType;
   hls::stream<typename params::VectGTvAxiPacketType> y_cur_port;
   hls::stream<typename params::VectGTvAxiPacketType> y_rec_port;

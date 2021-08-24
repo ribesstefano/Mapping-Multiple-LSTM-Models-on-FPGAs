@@ -26,16 +26,16 @@ struct AxiuPacketTlastOnlyType {
 };
 
 template<int Bitwidth>
-class AxiStreamWrapper {
+class AxiStreamFifo {
 public:
   typedef ap_int<Bitwidth> PacketType;
   typedef ap_int<Bitwidth> AxiuType;
 
-  AxiStreamWrapper(hls::stream<AxiuType>& port) : _port(port) {
+  AxiStreamFifo(hls::stream<AxiuType>& port) : _port(port) {
 #pragma HLS INLINE
   }
 
-  ~AxiStreamWrapper() {};
+  ~AxiStreamFifo() {};
 
   template<typename T>
   inline void Push(const T &x, bool is_last = false) {

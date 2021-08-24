@@ -30,18 +30,21 @@ void SvdKernel(const int num_active_inputs,
     hls::stream<typename params::VectG_AxiPacketType>& s_port,
     hls::stream<typename params::VectTvAxiPacketType>& v_port,
     hls::stream<typename params::VectGTvAxiPacketType>& y_port) {
-#pragma HLS DATAFLOW
+#pragma TOP name=SvdKernel
 #pragma HLS INLINE
+#pragma HLS DATAFLOW
+#pragma HLS STABLE variable=s_port
   const bool pad_output = false;
-  hls::stream<typename params::VectG_AxiPacketType> xu_port("xu_port");
-  hls::stream<typename params::VectG_AxiPacketType> xus_port("xus_port");
+  typedef svd::AxiStreamFifo<params::VectG_AxiWidth> FifoWrapper;
+  hls::stream<typename FifoWrapper::PacketType> xu_port("xu_port");
+  hls::stream<typename FifoWrapper::PacketType> xus_port("xus_port");
 #pragma HLS STREAM variable=xu_port depth=2
 #pragma HLS STREAM variable=xus_port depth=2
-  svd::KernelU<params>(num_active_inputs, input_size, num_refinements,
-    pad_output, x_port, u_port, xu_port);
-  svd::KernelS<params>(num_active_inputs, num_refinements, xu_port,
+  svd::KernelU<params, FifoWrapper>(num_active_inputs, input_size,
+    num_refinements, pad_output, x_port, u_port, xu_port);
+  svd::KernelS<params, FifoWrapper>(num_active_inputs, num_refinements, xu_port,
     s_port, xus_port);
-  svd::KernelV<params>(num_active_inputs, output_size,
+  svd::KernelV<params, FifoWrapper>(num_active_inputs, output_size,
     num_refinements, xus_port, v_port, y_port);
 }
 

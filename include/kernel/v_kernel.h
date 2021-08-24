@@ -515,20 +515,17 @@ void VDotUnit2LstmV2(const bool has_bias,
 
 
 #ifdef __VITIS_HLS__
-template <typename params>
+template <
+  typename params,
+  typename XusWrapper = svd::AxiStreamPort<params::VectG_AxiWidth>
+>
 void KernelV(const int num_active_inputs,
     const int output_size,
     const hls::vector<int, params::N> num_refinements,
-    hls::stream<typename params::VectG_AxiPacketType>& xus_port,
+    hls::stream<typename XusWrapper::PacketType>& xus_port,
     hls::stream<typename params::VectTvAxiPacketType>& v_port,
     hls::stream<typename params::VectGTvAxiPacketType>& y_port) {
-// #pragma HLS INTERFACE axis port=xus_port
-// #pragma HLS INTERFACE axis port=v_port
-// #pragma HLS INTERFACE axis port=y_port
-// #pragma HLS INTERFACE s_axilite port=return
-// #pragma HLS INTERFACE s_axilite port=num_active_inputs
-// #pragma HLS INTERFACE s_axilite port=output_size
-// #pragma HLS INTERFACE s_axilite port=num_refinements
+#pragma TOP name=KernelV
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
   assert(num_active_inputs <= params::N);
@@ -542,7 +539,7 @@ void KernelV(const int num_active_inputs,
   const int kMaxNumTilesV = params::H / params::Tv;
   const int kStreamDepth_V = 8 + kMaxNumTilesV * params::N;
   assert(kNumTilesV <= kMaxNumTilesV);
-  auto xus_axis = svd::AxiStreamPort<params::VectG_AxiWidth>(xus_port);
+  auto xus_axis = svd::AxiStreamInterface<XusWrapper>(xus_port);
   auto v_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(v_port);
   auto y_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(y_port);
   hls::stream<typename params::VectTvType> v_streams[params::G];

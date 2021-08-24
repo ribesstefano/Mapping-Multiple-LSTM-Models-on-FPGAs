@@ -47,10 +47,10 @@ struct ParamsU {
   typedef typename svd::AxiStreamPort<VectN_AxiWidth>::AxiuPacketType VectN_AxiPacketType;
   typedef typename svd::AxiStreamPort<VectG_AxiWidth>::AxiuPacketType VectG_AxiPacketType;
   typedef typename svd::AxiStreamPort<VectGN_AxiWidth>::AxiuPacketType VectGN_AxiPacketType;
-  typedef typename svd::AxiStreamWrapper<VectTuAxiWidth>::AxiuType VectTuAxiuType;
-  typedef typename svd::AxiStreamWrapper<VectN_AxiWidth>::AxiuType VectN_AxiuType;
-  typedef typename svd::AxiStreamWrapper<VectG_AxiWidth>::AxiuType VectG_AxiuType;
-  typedef typename svd::AxiStreamWrapper<VectGN_AxiWidth>::AxiuType VectGN_AxiuType;
+  typedef typename svd::AxiStreamFifo<VectTuAxiWidth>::AxiuType VectTuAxiuType;
+  typedef typename svd::AxiStreamFifo<VectN_AxiWidth>::AxiuType VectN_AxiuType;
+  typedef typename svd::AxiStreamFifo<VectG_AxiWidth>::AxiuType VectG_AxiuType;
+  typedef typename svd::AxiStreamFifo<VectGN_AxiWidth>::AxiuType VectGN_AxiuType;
 #ifdef __VITIS_HLS__
   typedef hls::vector<ActivationD, Tu> VectTuType;
   typedef hls::vector<ActivationD, N> VectN_Type;

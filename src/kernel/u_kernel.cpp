@@ -265,7 +265,7 @@ void HlsAxisKernelU(const int num_refinements,
 }
 
 
-void HlsKernelU_ManySampling(const int num_active_inputs,
+void HlsKernelU(const int num_active_inputs,
     const int input_size,
     const hls::vector<int, testu::params::N> num_refinements,
     const bool pad_output,
