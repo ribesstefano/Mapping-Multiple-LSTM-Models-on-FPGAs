@@ -167,8 +167,8 @@ int main(int argc, char const *argv[]) {
         }
       }
     }
-    std::cout << "[INFO] Starting HlsKernelU_ManySampling." << std::endl;
-    HlsKernelU_ManySampling(kNumActiveInputs, kInputSize, num_refinements_vect, false, x_axis, u_axis, xu_g_axis);
+    std::cout << "[INFO] Starting HlsKernelU." << std::endl;
+    HlsKernelU(kNumActiveInputs, kInputSize, num_refinements_vect, false, x_axis, u_axis, xu_g_axis);
 
     testu::params::VectG_Type xu_g_val;
     int total_cnt = 0;

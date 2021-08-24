@@ -406,14 +406,15 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
  * @tparam     params             The collection of fixed parameters and
  *                                configurations.
  */
-template <typename params, typename OutInterface = svd::AxiStreamPort<params::VectG_AxiWidth> >
+template <typename params, typename OutPortWrapper = svd::AxiStreamPort<params::VectG_AxiWidth> >
 void KernelU(const int num_active_inputs,
     const int input_size,
     const hls::vector<int, params::N> num_refinements,
     const bool pad_output,
     hls::stream<typename params::VectTuAxiPacketType>& x_port,
     hls::stream<typename params::VectTuAxiPacketType>& u_port,
-    hls::stream<typename OutInterface::PacketType>& xu_port) {
+    hls::stream<typename OutPortWrapper::PacketType>& xu_port) {
+#pragma TOP name=KernelU
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
   assert(num_active_inputs <= params::N);
@@ -432,7 +433,7 @@ void KernelU(const int num_active_inputs,
 
   auto x_axis = svd::AxiStreamPort<params::VectTuAxiWidth>(x_port);
   auto u_axis = svd::AxiStreamPort<params::VectTuAxiWidth>(u_port);
-  auto xu_axis = svd::AxiStreamInterface<OutInterface>(xu_port);
+  auto xu_axis = svd::AxiStreamInterface<OutPortWrapper>(xu_port);
 
   hls::stream<typename params::VectTuType> x_stream("x_stream");
   hls::stream<typename params::VectTuType> u_streams[params::G];
@@ -590,11 +591,6 @@ void HlsKernelU(const int num_refinements,
   const typename testu::params::UPortD u_port[testu::params::R * testu::params::PrunedSizeU],
   typename testu::params::ActivationD xu_port[testu::params::N][testu::params::G * testu::params::R]);
 #else
-void HlsKernelU(const int num_refinements,
-  hls::vector<typename testu::params::ActivationD, testu::params::N>* x_port,
-  hls::vector<typename testu::params::ActivationD, testu::params::G>* u_port,
-  hls::vector<typename testu::params::ActivationD, testu::params::N>* xu_port);
-
 void HlsVectorKernelU(const int num_refinements,
   hls::stream<hls::vector<typename testu::params::ActivationD, testu::params::Tu> >& x_port,
   hls::stream<hls::vector<typename testu::params::ActivationD, testu::params::Tu> >& u_port,
@@ -619,7 +615,7 @@ void HlsAxisKernelU(const int num_refinements,
  * @param      u_port             The input u port
  * @param      xu_port            The output xu port
  */
-void HlsKernelU_ManySampling(const int num_active_inputs,
+void HlsKernelU(const int num_active_inputs,
   const int input_size,
   const hls::vector<int, testu::params::N> num_refinements,
   const bool pad_output,

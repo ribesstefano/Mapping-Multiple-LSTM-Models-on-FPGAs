@@ -80,34 +80,24 @@ In order to implement AXIS interfaces, avoid using `depth` in the pragma, as fol
 ```c++
 const int kAxiBitwidth = 128;
 
-void HlsVectorKernelU_V2(hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& x_port,
-                         hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& y_port) {
-#pragma HLS INTERFACE axis port=x_port // depth=... <- NO DEPTH!
-#pragma HLS INTERFACE axis port=y_port // depth=... <- NO DEPTH!
+void HlsVectorKernelU(hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& x_port,
+                      hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& y_port) {
+#pragma HLS INTERFACE axis port=x_port // depth=... <- DON'T SPECIFY THE DEPTH!
+#pragma HLS INTERFACE axis port=y_port // depth=... <- DON'T SPECIFY THE DEPTH!
 	// ...
 }
 ```
-The type `ap_axiu` must now be used to generate AXIS with side channels. Note: for using external DMAs, we just need the TLAST signal.
+The type `ap_axiu` must now be used to generate AXIS with side channels. Note: for using external DMAs, we need the TLAST, TKEEP and TSTRB signals. In particular, TKEEP and TSTRB must be all set (i.e. all ones) in order to signal data packets.
 
-The `AxiStreamInterface` class in `axis_lib.h` can also be used with `hls::vector` types, like:
+#### AxiStreamInterface Class
 
-```c++
-const int kAxiBitwidth = 128;
+This repository contains a wrapper class for kernel arguments of type `hls::stream` named `AxiStreamInterface`. The class is implemented following a _Policy-based_ C++ paradigm, meaning that it accepts either a `AxiStreamPort` or `AxiStreamFifo` as possible policies (in practice, a template argument).
 
-void HlsVectorKernelU_V2(hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& x_port,
-                         hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& y_port) {
-#pragma HLS INTERFACE axis port=x_port // depth=... <- NO DEPTH!
-#pragma HLS INTERFACE axis port=y_port // depth=... <- NO DEPTH!
-  auto x_axis = svd::AxiStreamInterface<kAxiBitwidth>(x_port);
-  auto y_axis = svd::AxiStreamInterface<kAxiBitwidth>(y_port);
-  // ...
-  auto x_vec = x_axis.PopVector<float, 4>(); // This will pop a float vector of 4 elements.
-  // ...
-  hls::vector<float, 4> y_vec(3.14);
-  y_axis.PushVector<float, 4>(y_vec); // This will push a float vector of 4 elements.
-	// ...
-}
-```
+The idea is to have a kernel argument, i.e. an HLS port, which can be either an AXIS interface with side-channels, or a bare FIFO interface connected to another kernel. In fact, Vitis HLS doesn't allow stream interfaces with side-channels within an IP. To overcome the issue, the `AxiStreamInterface` can be customized to be an IP port or a FIFO port, depending on the use of the kernel.
+
+An example of this can be seen in `HlsKernelU` and in `svd::SvdKernel`, which specialize the `svd::KernelU` function template. In the first case, the `svd::KernelU` has its output stream port `xu_port` connected to one of the IP's ports (with side-channels). In the latter case instead, `svd::KernelU` is connected to `svd::KernelS`, and so its `xu_port` argument is an internal FIFO (without side-channels).
+
+The `AxiStreamInterface` class in `axis_lib.h` can also be used with `hls::vector` types.
 
 ### HLS Vector Patch
 
