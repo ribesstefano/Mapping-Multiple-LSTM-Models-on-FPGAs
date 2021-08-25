@@ -29,9 +29,8 @@ template<int Bitwidth>
 class AxiStreamFifo {
 public:
   typedef ap_int<Bitwidth> PacketType;
-  typedef ap_int<Bitwidth> AxiuType;
 
-  AxiStreamFifo(hls::stream<AxiuType>& port) : _port(port) {
+  AxiStreamFifo(hls::stream<PacketType>& port) : _port(port) {
 #pragma HLS INLINE
   }
 
@@ -40,7 +39,7 @@ public:
   template<typename T>
   inline void Push(const T &x, bool is_last = false) {
 #pragma HLS INLINE
-    AxiuType packet = *((AxiuType*)&x);
+    PacketType packet = *((PacketType*)&x);
     this->_port.write(packet);
   }
 
@@ -54,7 +53,7 @@ public:
   template<typename T>
   inline void PushLast(const T &x) {
 #pragma HLS INLINE
-    AxiuType packet = *((AxiuType*)&x);
+    PacketType packet = *((PacketType*)&x);
     this->_port.write(packet);
   }
 
@@ -69,10 +68,10 @@ public:
   template<typename T>
   inline void PushFromBuffer(const int size, const T *x) {
 #pragma HLS INLINE
-    AxiuType packet;
+    PacketType packet;
     for (int i = 0; i < size; ++i) {
 #pragma HLS PIPELINE II=1
-      packet = *((AxiuType*)&x[i]);
+      packet = *((PacketType*)&x[i]);
       this->_port.write(packet);
     }
   }
@@ -88,11 +87,11 @@ public:
   template<typename T>
   inline void PushFromStream(const int size, const hls::stream<T> &x) {
 #pragma HLS INLINE
-    AxiuType packet;
+    PacketType packet;
     for (int i = 0; i < size; ++i) {
 #pragma HLS PIPELINE II=1
       T x_val = x.read();
-      packet = *((AxiuType*)&x_val);
+      packet = *((PacketType*)&x_val);
       this->_port.write(packet);
     }
   }
@@ -106,7 +105,7 @@ public:
    */
   template<typename T>
   T Pop() {
-    AxiuType packet = this->_port.read();
+    PacketType packet = this->_port.read();
     return *((T*)&packet);
   }
 
@@ -122,7 +121,7 @@ public:
    */
   template<typename T>
   bool isLastPop(T &y) {
-    AxiuType packet = this->_port.read();
+    PacketType packet = this->_port.read();
     y = *((T*)&packet);
     return false;
   }
@@ -139,7 +138,7 @@ public:
   template<typename T>
   inline void PopToBuffer(const int size, T *y) {
 #pragma HLS INLINE
-    AxiuType packet;
+    PacketType packet;
     for (int i = 0; i < size; ++i) {
 #pragma HLS PIPELINE II=1
       packet = this->_port.read();
@@ -159,7 +158,7 @@ public:
   template<typename T>
   inline void PopToStream(const int size, hls::stream<T> &y) {
 #pragma HLS INLINE
-    AxiuType packet;
+    PacketType packet;
     for (int i = 0; i < size; ++i) {
 #pragma HLS PIPELINE II=1
       packet = this->_port.read();
@@ -201,7 +200,7 @@ public:
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamPort must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
-    AxiuType packet;
+    PacketType packet;
     for (int i = 0; i < N; ++i) {
       const int kHi = (i + 1) * kElemBitwidth - 1;
       const int kLo = i * kElemBitwidth;
@@ -225,7 +224,7 @@ public:
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamPort must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
-    AxiuType packet;
+    PacketType packet;
     for (int i = 0; i < N; ++i) {
       const int kHi = (i + 1) * kElemBitwidth - 1;
       const int kLo = i * kElemBitwidth;
@@ -249,7 +248,7 @@ public:
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamPort must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
-    AxiuType packet = this->_port.read();
+    PacketType packet = this->_port.read();
     hls::vector<T, N> y;
     for (int i = 0; i < N; ++i) {
       const int kHi = (i + 1) * kElemBitwidth - 1;
@@ -276,7 +275,7 @@ public:
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamPort must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
-    AxiuType packet = this->_port.read();
+    PacketType packet = this->_port.read();
     for (int i = 0; i < N; ++i) {
       const int kHi = (i + 1) * kElemBitwidth - 1;
       const int kLo = i * kElemBitwidth;
@@ -287,12 +286,12 @@ public:
   }
 #endif // __VITIS_HLS__
 
-  hls::stream<AxiuType>& get_port() {
+  hls::stream<PacketType>& get_port() {
     return this->_port;
   }
 
 private:
-  hls::stream<AxiuType>& _port;
+  hls::stream<PacketType>& _port;
 };
 
 /**
@@ -310,12 +309,11 @@ private:
 template <int Bitwidth>
 class AxiStreamPort {
 public:
-  // typedef AxiuPacketTlastOnlyType<Bitwidth> AxiuPacketType;
+  // typedef AxiuPacketTlastOnlyType<Bitwidth> PacketType;
   typedef ap_axiu<Bitwidth, 0, 0, 0> PacketType;
-  typedef ap_axiu<Bitwidth, 0, 0, 0> AxiuPacketType;
   typedef ap_uint<hls::bytewidth<ap_uint<Bitwidth> > > SideChannelsType;
 
-  AxiStreamPort(hls::stream<AxiuPacketType>& port) : _port(port),
+  AxiStreamPort(hls::stream<PacketType>& port) : _port(port),
     _all_ones(~(SideChannelsType(0))), _has_side_channels(true) {
 #pragma HLS INLINE
   };
@@ -363,7 +361,7 @@ public:
   template<typename T>
   inline void Push(const T &x, bool is_last = false) {
 #pragma HLS INLINE
-    AxiuPacketType packet;
+    PacketType packet;
     packet.data = *((ap_uint<Bitwidth>*)&x);
     packet.last = is_last? 1 : 0;
     // NOTE: If TKEEP and TSTRB both high, the packet is a data type.
@@ -382,7 +380,7 @@ public:
   template<typename T>
   inline void PushLast(const T &x) {
 #pragma HLS INLINE
-    AxiuPacketType packet;
+    PacketType packet;
     packet.data = *((ap_uint<Bitwidth>*)&x);
     packet.last = 1;
     // NOTE: If TKEEP and TSTRB both high, the packet is a data type.
@@ -402,7 +400,7 @@ public:
   template<typename T>
   inline void PushFromBuffer(const int size, const T *x) {
 #pragma HLS INLINE
-    AxiuPacketType packet;
+    PacketType packet;
     for (int i = 0; i < size; ++i) {
 #pragma HLS PIPELINE II=1
       packet.data = *((ap_uint<Bitwidth>*)&x[i]);
@@ -427,7 +425,7 @@ public:
   template<typename T>
   inline void PushFromStream(const int size, const hls::stream<T> &x) {
 #pragma HLS INLINE
-    AxiuPacketType packet;
+    PacketType packet;
     for (int i = 0; i < size; ++i) {
 #pragma HLS PIPELINE II=1
       T x_val = x.read();
@@ -451,7 +449,7 @@ public:
    */
   template<typename T>
   T Pop() {
-    AxiuPacketType packet;
+    PacketType packet;
     packet = this->_port.read();
     return *((T*)&packet.data);
   }
@@ -470,7 +468,7 @@ public:
    */
   template<typename T>
   bool isLastPop(T &y) {
-    AxiuPacketType packet;
+    PacketType packet;
     packet = this->_port.read();
     y = *((T*)&packet.data);
     return packet.last == 1 ? true : false;
@@ -488,7 +486,7 @@ public:
   template<typename T>
   inline void PopToBuffer(const int size, T *y) {
 #pragma HLS INLINE
-    AxiuPacketType packet;
+    PacketType packet;
     for (int i = 0; i < size; ++i) {
 #pragma HLS PIPELINE II=1
       packet = this->_port.read();
@@ -508,7 +506,7 @@ public:
   template<typename T>
   inline void PopToStream(const int size, hls::stream<T> &y) {
 #pragma HLS INLINE
-    AxiuPacketType packet;
+    PacketType packet;
     for (int i = 0; i < size; ++i) {
 #pragma HLS PIPELINE II=1
       packet = this->_port.read();
@@ -550,7 +548,7 @@ public:
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamPort must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
-    AxiuPacketType packet;
+    PacketType packet;
     for (int i = 0; i < N; ++i) {
       const int kHi = (i + 1) * kElemBitwidth - 1;
       const int kLo = i * kElemBitwidth;
@@ -578,7 +576,7 @@ public:
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamPort must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
-    AxiuPacketType packet;
+    PacketType packet;
     for (int i = 0; i < N; ++i) {
       const int kHi = (i + 1) * kElemBitwidth - 1;
       const int kLo = i * kElemBitwidth;
@@ -606,7 +604,7 @@ public:
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamPort must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
-    AxiuPacketType packet;
+    PacketType packet;
     packet = this->_port.read();
     hls::vector<T, N> y;
     for (int i = 0; i < N; ++i) {
@@ -637,7 +635,7 @@ public:
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamPort must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
-    AxiuPacketType packet;
+    PacketType packet;
     packet = this->_port.read();
     for (int i = 0; i < N; ++i) {
       const int kHi = (i + 1) * kElemBitwidth - 1;
@@ -649,12 +647,12 @@ public:
   }
 #endif // __VITIS_HLS__
 
-  hls::stream<AxiuPacketType>& get_port() {
+  hls::stream<PacketType>& get_port() {
     return this->_port;
   }
 
 private:
-  hls::stream<AxiuPacketType>& _port;
+  hls::stream<PacketType>& _port;
   SideChannelsType _all_ones;
   bool _has_side_channels;
 #ifndef __SYNTHESIS__
