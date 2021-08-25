@@ -664,6 +664,10 @@ private:
  * @brief      This class describes an AXI stream interface (Policy-based
  *             design).
  *
+ *             It has to be used as a "generic" interface whithin a kernel. The
+ *             port of the kernel attached to this class can then be either a
+ *             FIFO or a AXIS port.
+ *
  * @tparam     AxiClass  The policy class.
  */
 template <typename AxiClass>

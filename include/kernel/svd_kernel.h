@@ -20,7 +20,10 @@ inline void SvdKernel(svd::SvdStreams<params> &streams) {
   svd::KernelV<params>(params::R, streams);
 }
 
-template <typename params>
+template <
+  typename params,
+  typename WrapperAxisGTv = svd::AxiStreamPort<params::VectGTvAxiWidth>
+>
 void SvdKernel(const int num_active_inputs,
     const int input_size,
     const int output_size,
@@ -29,7 +32,7 @@ void SvdKernel(const int num_active_inputs,
     hls::stream<typename params::VectTuAxiPacketType>& u_port,
     hls::stream<typename params::VectG_AxiPacketType>& s_port,
     hls::stream<typename params::VectTvAxiPacketType>& v_port,
-    hls::stream<typename params::VectGTvAxiPacketType>& y_port) {
+    hls::stream<typename WrapperAxisGTv::PacketType>& y_port) {
 #pragma TOP name=SvdKernel
 #pragma HLS INLINE
 #pragma HLS DATAFLOW
@@ -44,8 +47,8 @@ void SvdKernel(const int num_active_inputs,
     num_refinements, pad_output, x_port, u_port, xu_port);
   svd::KernelS<params, FifoWrapper>(num_active_inputs, num_refinements, xu_port,
     s_port, xus_port);
-  svd::KernelV<params, FifoWrapper>(num_active_inputs, output_size,
-    num_refinements, xus_port, v_port, y_port);
+  svd::KernelV<params, FifoWrapper, WrapperAxisGTv>(num_active_inputs,
+    output_size, num_refinements, xus_port, v_port, y_port);
 }
 
 } // svd

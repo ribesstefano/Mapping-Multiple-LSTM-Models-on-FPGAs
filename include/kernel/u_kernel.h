@@ -406,14 +406,17 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
  * @tparam     params             The collection of fixed parameters and
  *                                configurations.
  */
-template <typename params, typename OutPortWrapper = svd::AxiStreamPort<params::VectG_AxiWidth> >
+template <
+  typename params,
+  typename WrapperAxisG = svd::AxiStreamPort<params::VectG_AxiWidth>
+>
 void KernelU(const int num_active_inputs,
     const int input_size,
     const hls::vector<int, params::N> num_refinements,
     const bool pad_output,
     hls::stream<typename params::VectTuAxiPacketType>& x_port,
     hls::stream<typename params::VectTuAxiPacketType>& u_port,
-    hls::stream<typename OutPortWrapper::PacketType>& xu_port) {
+    hls::stream<typename WrapperAxisG::PacketType>& xu_port) {
 #pragma TOP name=KernelU
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
@@ -433,7 +436,7 @@ void KernelU(const int num_active_inputs,
 
   auto x_axis = svd::AxiStreamPort<params::VectTuAxiWidth>(x_port);
   auto u_axis = svd::AxiStreamPort<params::VectTuAxiWidth>(u_port);
-  auto xu_axis = svd::AxiStreamInterface<OutPortWrapper>(xu_port);
+  auto xu_axis = svd::AxiStreamInterface<WrapperAxisG>(xu_port);
 
   hls::stream<typename params::VectTuType> x_stream("x_stream");
   hls::stream<typename params::VectTuType> u_streams[params::G];
@@ -545,12 +548,11 @@ void KernelU(const int num_active_inputs,
           }
         }
         if (i < num_refinements[k] && j == kNumTilesU - 1) {
-          const bool kIsLast = (iter_cnt == R_total - 1 && !pad_output) ? true : false;
+          const bool kIsLast = (iter_cnt == R_total - 1 && !pad_output);
           xu_axis.template PushVector<ActivationType, params::G>(xu_out[k], kIsLast);
           ++iter_cnt;
         } else if (pad_output) {
-          const bool last_condition = i == R_max - 1 && j == kNumTilesU - 1 && k == num_active_inputs - 1; 
-          const bool kIsLast = (last_condition) ? true : false;
+          const bool kIsLast = i == R_max - 1 && j == kNumTilesU - 1 && k == num_active_inputs - 1; 
           xu_axis.template PushVector<ActivationType, params::G>(xu_out[k], kIsLast);
           ++iter_cnt;
         }
