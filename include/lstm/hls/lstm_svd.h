@@ -179,25 +179,30 @@ void LstmSvdKernel(const int num_active_inputs,
 #pragma HLS STABLE variable=bias_port
 #pragma HLS STABLE variable=c_prev_port
   typedef typename params::ActivationD ActivationType;
-  hls::stream<typename params::VectGTvAxiPacketType> y_cur_port;
-  hls::stream<typename params::VectGTvAxiPacketType> y_rec_port;
-  auto y_cur_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(y_cur_port);
-  auto y_rec_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(y_rec_port);
+  typedef svd::AxiStreamFifo<params::VectGTvAxiWidth> FifoWrapper;
+  hls::stream<typename FifoWrapper::PacketType> y_cur_port;
+  hls::stream<typename FifoWrapper::PacketType> y_rec_port;
+#pragma HLS STREAM variable=y_cur_port depth=2
+#pragma HLS STREAM variable=y_rec_port depth=2
+  auto y_cur_axis = svd::AxiStreamFifo<params::VectGTvAxiWidth>(y_cur_port);
+  auto y_rec_axis = svd::AxiStreamFifo<params::VectGTvAxiWidth>(y_rec_port);
   auto bias_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(bias_port);
   auto c_prev_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(c_prev_port);
   auto c_curr_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(c_curr_port);
   auto h_curr_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(h_curr_port);
   // Current Gates
-  svd::SvdKernel<params>(num_active_inputs, input_size, output_size,
-    num_refinements, x_port, u_cur_port, s_cur_port, v_cur_port, y_cur_port);
+  svd::SvdKernel<params, FifoWrapper>(num_active_inputs, input_size,
+    output_size, num_refinements, x_port, u_cur_port, s_cur_port,
+    v_cur_port, y_cur_port);
   // Recurrent Gates
-  svd::SvdKernel<params>(num_active_inputs, output_size, output_size,
-    num_refinements, h_prev_port, u_rec_port, s_rec_port, v_rec_port, y_rec_port);
+  svd::SvdKernel<params, FifoWrapper>(num_active_inputs, output_size,
+    output_size, num_refinements, h_prev_port, u_rec_port, s_rec_port,
+    v_rec_port, y_rec_port);
   // Non-Linearities
   const int kTypeBitwidth = hlsutils::Bitwidth<ActivationType>::value;
   const int kLutSize = (kTypeBitwidth > 16) ? 256 : 512;
   const bool kHasBias = true;
-  for (int i = 0; i < params::H; ++i) {
+  for (int i = 0; i < output_size; ++i) {
 #pragma HLS PIPELINE II=1
     const int kGTv = params::G * params::Tv;
     auto y_cur = y_cur_axis.template PopVector<ActivationType, kGTv>();

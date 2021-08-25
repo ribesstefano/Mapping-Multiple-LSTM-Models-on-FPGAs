@@ -517,14 +517,15 @@ void VDotUnit2LstmV2(const bool has_bias,
 #ifdef __VITIS_HLS__
 template <
   typename params,
-  typename XusWrapper = svd::AxiStreamPort<params::VectG_AxiWidth>
+  typename WrapperAxisG = svd::AxiStreamPort<params::VectG_AxiWidth>,
+  typename WrapperAxisGTv = svd::AxiStreamPort<params::VectGTvAxiWidth>
 >
 void KernelV(const int num_active_inputs,
     const int output_size,
     const hls::vector<int, params::N> num_refinements,
-    hls::stream<typename XusWrapper::PacketType>& xus_port,
+    hls::stream<typename WrapperAxisG::PacketType>& xus_port,
     hls::stream<typename params::VectTvAxiPacketType>& v_port,
-    hls::stream<typename params::VectGTvAxiPacketType>& y_port) {
+    hls::stream<typename WrapperAxisGTv::PacketType>& y_port) {
 #pragma TOP name=KernelV
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
@@ -539,54 +540,72 @@ void KernelV(const int num_active_inputs,
   const int kMaxNumTilesV = params::H / params::Tv;
   const int kStreamDepth_V = 8 + kMaxNumTilesV * params::N;
   assert(kNumTilesV <= kMaxNumTilesV);
-  auto xus_axis = svd::AxiStreamInterface<XusWrapper>(xus_port);
+  auto xus_axis = svd::AxiStreamInterface<WrapperAxisG>(xus_port);
   auto v_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(v_port);
-  auto y_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(y_port);
+  auto y_axis = svd::AxiStreamInterface<WrapperAxisGTv>(y_port);
   hls::stream<typename params::VectTvType> v_streams[params::G];
-  typename params::VectTvType y_buffer[params::G][params::N][kMaxNumTilesV];
+  ActivationType y_buffer_tmp[params::G][params::N][params::Tv][kMaxNumTilesV] = {0};
 #pragma HLS STREAM variable=v_streams depth=kStreamDepth_V
 #pragma HLS ARRAY_PARTITION variable=v_streams complete dim=1
-#pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=1
-#pragma HLS BIND_STORAGE variable=y_buffer type=ram_t2p impl=bram latency=2
+#pragma HLS ARRAY_PARTITION variable=y_buffer_tmp complete dim=1
+// #pragma HLS ARRAY_PARTITION variable=y_buffer_tmp complete dim=2 // I'm not accessing N dimension in parallel
+#pragma HLS ARRAY_PARTITION variable=y_buffer_tmp complete dim=3
+#pragma HLS BIND_STORAGE variable=y_buffer_tmp type=ram_t2p impl=bram latency=1
+
+  // typename params::VectTvType y_buffer[params::G][params::N][kMaxNumTilesV];
+// #pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=1
+// #pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=2
+// #pragma HLS BIND_STORAGE variable=y_buffer type=ram_t2p impl=bram latency=1
 
   int R_max = num_refinements[0];
-  int R_total = num_refinements[0] * num_active_inputs; // Total elements.
-  Get_Total_R:
+  // int R_total = num_refinements[0] * num_active_inputs; // Total elements.
+  Get_Max_R:
   for (int i = 1; i < num_active_inputs; ++i) {
 #pragma HLS PIPELINE II=1
     if (num_refinements[i] > R_max) {
       R_max = num_refinements[i];
     }
     assert(num_refinements[i] > num_refinements[i - 1]);
-    R_total += (num_refinements[i] - num_refinements[i - 1]) * (num_active_inputs - i);
+    // R_total += (num_refinements[i] - num_refinements[i - 1]) * (num_active_inputs - i);
   }
 
   V_DMA:
-  for (int i = 0; i < params::R; ++i) {
+  for (int i = 0; i < R_max; ++i) {
     for (int j = 0; j < kNumTilesV; ++j) {
       for (int k = 0; k < params::G; ++k) {
+        auto v_val = v_axis.template PopVector<ActivationType, params::Tv>();
         for (int ii = 0; ii < num_active_inputs; ++ii) {
 #pragma HLS PIPELINE II=1
-          auto v_val = v_axis.template PopVector<ActivationType, params::Tv>();
-          v_streams[k].write(v_val);
+          if (i < num_refinements[ii]) {
+            v_streams[k] << v_val;
+          }
         }
       }
     }
   }
 
   V_Kernel:
-  for (int i = 0; i < params::R; ++i) {
+  for (int i = 0; i < R_max; ++i) {
     for (int j = 0; j < kNumTilesV; ++j) {
+      V_num_active_inputs:
       for (int k = 0; k < num_active_inputs; ++k) {
 #pragma HLS PIPELINE II=1
-        auto xus_val = xus_axis.template PopVector<ActivationType, params::G>();
-        for (int ii = 0; ii < params::G; ++ii) {
-          auto v_val = v_streams[ii].read();
-          y_buffer[ii][k][j] += v_val * xus_val[ii];
+        assert(k < params::N);
+        if (i < num_refinements[k]) {
+          auto xus_val = xus_axis.template PopVector<ActivationType, params::G>();
+          V_G:
+          for (int ii = 0; ii < params::G; ++ii) {
+            auto v_val = v_streams[ii].read();
+            V_Tv:
+            for (int jj = 0; jj < params::Tv; ++jj) {
+              y_buffer_tmp[ii][k][jj][j] += v_val[jj] * xus_val[ii];
+            }
+            // y_buffer[ii][k][j] += v_val * xus_val[ii];
+          }
         }
       }
     }
-    if (i == params::R - 1) {
+    if (i == R_max - 1) {
       auto y_out = typename params::VectGTvType(0);
 #pragma HLS LOOP_MERGE
       for (int j = 0; j < kNumTilesV; ++j) {
@@ -594,11 +613,13 @@ void KernelV(const int num_active_inputs,
           for (int ii = 0; ii < params::Tv; ++ii) {
             for (int jj = 0; jj < params::G; ++jj) {
 #pragma HLS PIPELINE II=1
-              y_out[ii * params::G + jj] = y_buffer[jj][k][j][ii];
+              y_out[ii * params::G + jj] = y_buffer_tmp[jj][k][ii][j];
+              // y_out[ii * params::G + jj] = y_buffer[jj][k][j][ii];
             }
           }
-          const bool kIsLast = (j == kNumTilesV - 1 && k == params::N - 1) ? true : false;
-          y_axis.template PushVector<ActivationType, params::G * params::Tv>(y_out);
+          const bool kIsLast = j == kNumTilesV - 1 && k == num_active_inputs - 1;
+          const int kGTv = params::G * params::Tv;
+          y_axis.template PushVector<ActivationType, kGTv>(y_out);
         }
       }
     }
@@ -625,7 +646,8 @@ typedef svd::SvdParameters<testv::kNumInputs, testv::kInputSize,
     testv::kOutputSize, testv::R, testv::Tu, testv::Tv, testv::ZTu, testv::ZTv,
     testv::G,
     // svd::ActivationD, svd::WeightD, svd::AccumD> params;
-    short, short, short> params;
+    // short, short, short> params;
+    ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH> > params;
 } // testv
 
 #endif // end KERNEL_V_KERNEL_H_
