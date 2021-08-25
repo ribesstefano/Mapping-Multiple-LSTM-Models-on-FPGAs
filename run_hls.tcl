@@ -44,7 +44,7 @@ if {${use_zedboard}} {
 # Top function name, testbench file
 # ==============================================================================
 # NOTE: The namespace must also be included.
-set TOP "HlsSvdKernel" ;# "HlsKernelV" ; #"HlsKernelS" ;# "HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
+set TOP "HlsKernelU" ;# "HlsKernelV" ; #"HlsKernelS" ;# "HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
 set TB "test_u_kernel" ; #"test_gemv_kernel"
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
@@ -52,7 +52,7 @@ set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
 # Project name
 # ==============================================================================
 set prefix ":"
-set TOP_NO_NAMESPACE "HlsSvdKernel" ;# "HlsKernelV" ; #"HlsKernelS" ;# "HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
+set TOP_NO_NAMESPACE "HlsKernelU" ;# "HlsKernelV" ; #"HlsKernelS" ;# "HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
 puts ${TOP_NO_NAMESPACE}
 set PROJECT_NAME "vitis_${board_name}_${TOP_NO_NAMESPACE}"
 # ==============================================================================
@@ -119,37 +119,37 @@ set src_files [findFiles "${PRJ_PATH}/src/${SRC_DIR}/" "*.cpp" "${PRJ_PATH}/src/
 set include_files [findFiles "${PRJ_PATH}/include/${SRC_DIR}/" "*.h" "${PRJ_PATH}/include/testbenches"]
 
 if {${reset_project}} {
-    # add_files ${PRJ_PATH}/src/kernel/u_kernel.cpp -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/src/kernel/s_kernel.cpp -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/src/kernel/v_kernel.cpp -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/src/dma/svd_dma.cpp -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/src/hls_utils/adder_tree.cpp -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/src/hls_utils/hls_metaprogramming.cpp -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/src/kernel/gemv_kernel.cpp -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/src/kernel/u_kernel.cpp -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/src/kernel/s_kernel.cpp -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/src/kernel/v_kernel.cpp -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/src/dma/svd_dma.cpp -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/src/hls_utils/adder_tree.cpp -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/src/hls_utils/hls_metaprogramming.cpp -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/src/kernel/gemv_kernel.cpp -cflags ${CFLAGS}
 
-    # add_files ${PRJ_PATH}/include/kernel/u_kernel.h -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/include/kernel/s_kernel.h -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/include/kernel/v_kernel.h -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/include/dma/svd_dma.h -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/include/hls_utils/adder_tree.h -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/include/hls_utils/hls_metaprogramming.h -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/include/dma/svd_parameters.h -cflags ${CFLAGS}
-    # add_files ${PRJ_PATH}/include/kernel/gemv_kernel.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/kernel/u_kernel.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/kernel/s_kernel.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/kernel/v_kernel.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/dma/svd_dma.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/hls_utils/adder_tree.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/hls_utils/hls_metaprogramming.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/dma/svd_parameters.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/kernel/gemv_kernel.h -cflags ${CFLAGS}
 
-    foreach f ${include_files} {
-        # File svd.h contains main()
-        if {${f} eq "${PRJ_PATH}/include/svd.h"} {
-        } else {
-            add_files ${f} -cflags ${CFLAGS}
-        }
-    }
-    foreach f ${src_files} {
-        # File svd.cpp contains main()
-        if {${f} eq "${PRJ_PATH}/src/svd.cpp"} {
-        } else {
-            add_files ${f} -cflags ${CFLAGS}
-        }
-    }
+    # foreach f ${include_files} {
+    #     # File svd.h contains main()
+    #     if {${f} eq "${PRJ_PATH}/include/svd.h"} {
+    #     } else {
+    #         add_files ${f} -cflags ${CFLAGS}
+    #     }
+    # }
+    # foreach f ${src_files} {
+    #     # File svd.cpp contains main()
+    #     if {${f} eq "${PRJ_PATH}/src/svd.cpp"} {
+    #     } else {
+    #         add_files ${f} -cflags ${CFLAGS}
+    #     }
+    # }
 
     # Add Testbench Files
     if {${csim} || ${cosim}} {

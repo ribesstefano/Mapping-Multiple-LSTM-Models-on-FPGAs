@@ -438,13 +438,14 @@ void KernelU(const int num_active_inputs,
   hls::stream<typename params::VectTuType> x_stream("x_stream");
   hls::stream<typename params::VectTuType> u_streams[params::G];
   hls::stream<ActivationType> xu_streams[params::G];
-  typename params::VectTuType x_buffer[params::N][kMaxNumTilesU];
+  ActivationType x_buffer[params::N][params::Tu][kMaxNumTilesU];
 #pragma HLS STREAM variable=x_stream depth=kStreamDepth_X
 #pragma HLS STREAM variable=u_streams depth=kStreamDepth_U
 #pragma HLS STREAM variable=xu_streams depth=kStreamDepth_XU
 #pragma HLS ARRAY_PARTITION variable=u_streams complete dim=1
 #pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=1
-#pragma HLS BIND_STORAGE variable=x_buffer type=ram_t2p impl=bram latency=2
+#pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=2
+#pragma HLS BIND_STORAGE variable=x_buffer type=ram_t2p impl=bram latency=1
   /*
    * Ideally, if the Rs are ordered, it would be: R0 * N + (R1-R0) * (N-1) +
    * (R2-R1) * (N-2)
@@ -481,13 +482,20 @@ void KernelU(const int num_active_inputs,
       for (int j = 0; j < kNumTilesU; ++j) {
         for (int k = 0; k < num_active_inputs - ii; ++k) {
 #pragma HLS PIPELINE II=1
+          assert(num_active_inputs - ii >= 1);
           if (ii == 0 && i == 0) {
             auto x_val = x_axis.template PopVector<ActivationType, params::Tu>();
-            x_buffer[k][j] = x_val;
             x_stream << x_val;
+            for (int jj = 0; jj < params::Tu; ++jj) {
+              x_buffer[k][jj][j] = x_val[jj];
+            }
           } else {
             assert(k + ii < params::N);
-            x_stream << x_buffer[k + ii][j];
+            typename params::VectTuType x_val;
+            for (int jj = 0; jj < params::Tu; ++jj) {
+              x_val[jj] = x_buffer[k + ii][jj][j];
+            }
+            x_stream << x_val;
           }
         }
       }
@@ -579,9 +587,9 @@ static const int VectGN_AxiBitwidth = hlsutils::Bitwidth<typename params::Activa
 typedef hls::vector<typename params::ActivationD, params::Tu> VectTuType;
 typedef hls::vector<typename params::ActivationD, params::N> VectN_Type;
 typedef hls::vector<typename params::ActivationD, params::G * params::N> VectGN_Type;
-typedef svd::AxiStreamPort<VectTuAxiBitwidth>::AxiuPacketType VectTuAxiPacketType;
-typedef svd::AxiStreamPort<VectN_AxiBitwidth>::AxiuPacketType VectN_AxiPacketType;
-typedef svd::AxiStreamPort<VectGN_AxiBitwidth>::AxiuPacketType VectGN_AxiPacketType;
+typedef svd::AxiStreamPort<VectTuAxiBitwidth>::PacketType VectTuAxiPacketType;
+typedef svd::AxiStreamPort<VectN_AxiBitwidth>::PacketType VectN_AxiPacketType;
+typedef svd::AxiStreamPort<VectGN_AxiBitwidth>::PacketType VectGN_AxiPacketType;
 
 } // testu
 
