@@ -560,7 +560,7 @@ void KernelV(const int num_active_inputs,
     if (num_refinements[i] > R_max) {
       R_max = num_refinements[i];
     }
-    assert(num_refinements[i] > num_refinements[i - 1]);
+    // assert(num_refinements[i] >= num_refinements[i - 1]);
     // R_total += (num_refinements[i] - num_refinements[i - 1]) * (num_active_inputs - i);
   }
 
@@ -579,28 +579,57 @@ void KernelV(const int num_active_inputs,
     }
   }
 
+  typename params::VectG_Type xus_val;
   V_Kernel:
   for (int i = 0; i < R_max; ++i) {
     for (int j = 0; j < kNumTilesV; ++j) {
-      for (int k = 0; k < num_active_inputs; ++k) {
-#pragma HLS PIPELINE II=1
-        assert(k < params::N);
-        if (i < num_refinements[k]) {
-          auto xus_val = xus_axis.template PopVector<ActivationType, params::G>();
-          for (int ii = 0; ii < params::G; ++ii) {
+      for (int ii = 0; ii < params::G; ++ii) {
+        for (int k = 0; k < num_active_inputs; ++k) {
+  #pragma HLS PIPELINE II=1
+          assert(k < params::N);
+          if (i < num_refinements[k] && j == 0 && ii == 0) {
+            xus_val = xus_axis.template PopVector<ActivationType, params::G>();
+          }
+          if (i < num_refinements[k]) {
             auto v_val = v_streams[ii].read();
             for (int jj = 0; jj < params::Tv; ++jj) {
               y_buffer[ii][k][jj][j] += v_val[jj] * xus_val[ii];
+              // std::cout << v_val[jj] << "\t" << xus_val[ii] << std::endl;
+              // std::cout << y_buffer[ii][k][jj][j] << std::endl;
             }
           }
+
         }
       }
+
+
+//       for (int k = 0; k < num_active_inputs; ++k) {
+// #pragma HLS PIPELINE II=1
+//         assert(k < params::N);
+//         typename params::VectG_Type xus_val;
+//         if (i < num_refinements[k]) {
+//           if (j == 0) {
+//             xus_val = xus_axis.template PopVector<ActivationType, params::G>();
+//           }
+//           for (int ii = 0; ii < params::G; ++ii) {
+//             auto v_val = v_streams[ii].read();
+//             for (int jj = 0; jj < params::Tv; ++jj) {
+// // ActivationType y_buffer[params::G][params::N][params::Tv][kMaxNumTilesV] = {0};
+//               y_buffer[ii][k][jj][j] += v_val[jj] * xus_val[ii];
+//               // std::cout << v_val[jj] << "\t" << xus_val[ii] << std::endl;
+//               // std::cout << y_buffer[ii][k][jj][j] << std::endl;
+//             }
+//           }
+//         }
+//       }
+
     }
     if (i == R_max - 1) {
-      auto y_out = typename params::VectGTvType(0);
+      // auto y_out = typename params::VectGTvType(0);
 #pragma HLS LOOP_MERGE
       for (int j = 0; j < kNumTilesV; ++j) {
         for (int k = 0; k < num_active_inputs; ++k) {
+          typename params::VectGTvType y_out;
           for (int ii = 0; ii < params::Tv; ++ii) {
             for (int jj = 0; jj < params::G; ++jj) {
 #pragma HLS PIPELINE II=1
@@ -621,12 +650,12 @@ void KernelV(const int num_active_inputs,
 
 namespace testv {
 
-static const int kNumInputs = 2;
+static const int kNumInputs = 4;
 static const int kInputSize = 512;
 static const int Tu = 4;
 // NOTE: The rest of the parameters are unused for now.
-static const int kOutputSize = 512;
-static const int R = 8;
+static const int kOutputSize = 128;
+static const int R = 64;
 static const int Tv = 4;
 static const int ZTu = 0;
 static const int ZTv = 0;
@@ -638,6 +667,17 @@ typedef svd::SvdParameters<testv::kNumInputs, testv::kInputSize,
     // svd::ActivationD, svd::WeightD, svd::AccumD> params;
     // short, short, short> params;
     ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH> > params;
+
 } // testv
+
+#ifndef __VITIS_HLS__
+#else
+void HlsKernelV(const int num_active_inputs,
+    const int output_size,
+    const hls::vector<int, testv::params::N> num_refinements,
+    hls::stream<typename testv::params::VectG_AxiPacketType>& xus_port,
+    hls::stream<typename testv::params::VectTvAxiPacketType>& v_port,
+    hls::stream<typename testv::params::VectGTvAxiPacketType>& y_port);
+#endif // end __VITIS_HLS__
 
 #endif // end KERNEL_V_KERNEL_H_

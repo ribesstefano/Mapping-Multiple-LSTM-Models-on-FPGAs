@@ -472,7 +472,7 @@ void KernelU(const int num_active_inputs,
     if (num_refinements[i] > R_max) {
       R_max = num_refinements[i];
     }
-    assert(num_refinements[i] > num_refinements[i - 1]);
+    assert(num_refinements[i] >= num_refinements[i - 1]);
     R_total += (num_refinements[i] - num_refinements[i - 1]) * (num_active_inputs - i);
   }
 

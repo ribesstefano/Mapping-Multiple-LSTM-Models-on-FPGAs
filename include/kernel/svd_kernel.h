@@ -34,7 +34,7 @@ void SvdKernel(const int num_active_inputs,
     hls::stream<typename params::VectTvAxiPacketType>& v_port,
     hls::stream<typename WrapperAxisGTv::PacketType>& y_port) {
 #pragma HLS TOP name=SvdKernel
-// #pragma HLS INLINE
+#pragma HLS INLINE
 #pragma HLS DATAFLOW
 #pragma HLS STABLE variable=s_port
   const bool pad_output = false;
