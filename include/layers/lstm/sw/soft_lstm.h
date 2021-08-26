@@ -36,8 +36,8 @@
  * streams 
  *
  *****************************************************************************/
-#ifndef LSTM_SW_LSTM_SOFTWARE_H_
-#define LSTM_SW_LSTM_SOFTWARE_H_
+#ifndef LAYERS_LSTM_SW_LSTM_SOFTWARE_H_
+#define LAYERS_LSTM_SW_LSTM_SOFTWARE_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -85,4 +85,4 @@ void LstmUnbatched(const bool use_blas,
                    const float *bias_o,
                    float *out);
 
-#endif // end LSTM_SW_LSTM_SOFTWARE_H_
+#endif // end LAYERS_LSTM_SW_LSTM_SOFTWARE_H_

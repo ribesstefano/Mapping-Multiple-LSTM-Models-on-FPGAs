@@ -272,14 +272,14 @@ void HlsKernelU(const int num_active_inputs,
     hls::stream<typename testu::params::VectTuAxiPacketType>& x_port,
     hls::stream<typename testu::params::VectTuAxiPacketType>& u_port,
     hls::stream<typename testu::params::VectG_AxiPacketType>& xu_port) {
-#pragma HLS INTERFACE axis port=x_port
-#pragma HLS INTERFACE axis port=u_port
-#pragma HLS INTERFACE axis port=xu_port
 #pragma HLS INTERFACE s_axilite port=return
 #pragma HLS INTERFACE s_axilite port=num_active_inputs
 #pragma HLS INTERFACE s_axilite port=input_size
 #pragma HLS INTERFACE s_axilite port=num_refinements
 #pragma HLS INTERFACE s_axilite port=pad_output
+#pragma HLS INTERFACE axis port=x_port
+#pragma HLS INTERFACE axis port=u_port
+#pragma HLS INTERFACE axis port=xu_port
   svd::KernelU<testu::params>(num_active_inputs, input_size, num_refinements,
     pad_output, x_port, u_port, xu_port);
 }

@@ -1,4 +1,4 @@
-#include "lstm/sw/soft_lstm_svd.h"
+#include "layers/lstm/sw/soft_lstm_svd.h"
 
 namespace svd {
 
