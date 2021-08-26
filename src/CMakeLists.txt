@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 add_subdirectory(dma)
 add_subdirectory(kernel)
-add_subdirectory(lstm)
 add_subdirectory(math_utils)
 add_subdirectory(hls_utils)
 add_subdirectory(testbenches)
+# add_subdirectory(lstm)
+# add_subdirectory(dense)
+add_subdirectory(layers)
 
 # NOTE: Each library/object will have an identifier and that identifier will then
 # be used to link the final executable, i.e. target_link_libraries(ProjectName LibraryName)

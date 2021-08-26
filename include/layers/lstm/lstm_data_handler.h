@@ -1,5 +1,5 @@
-#ifndef LSTM_DATA_HANDLER_H_
-#define LSTM_DATA_HANDLER_H_
+#ifndef LAYERS_LSTM_DATA_HANDLER_H_
+#define LAYERS_LSTM_DATA_HANDLER_H_
 
 #include "math_utils/data_handler.h"
 #include "hls_utils/hls_metaprogramming.h"
@@ -676,4 +676,4 @@ public:
 
 } // svd
 
-#endif // end LSTM_DATA_HANDLER_H_
+#endif // end LAYERS_LSTM_DATA_HANDLER_H_

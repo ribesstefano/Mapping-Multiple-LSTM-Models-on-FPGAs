@@ -36,7 +36,7 @@
  * streams 
  *
  *****************************************************************************/
-#include "lstm/sw/soft_lstm.h"
+#include "layers/lstm/sw/soft_lstm.h"
 #include "math_utils/blas_utils.h"
 #include "math_utils/activation_functions.h"
 

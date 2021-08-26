@@ -1,9 +1,9 @@
 #include "svd_params.h"
 #include "svd_ip.h"
-#include "lstm/lstm_data_handler.h"
-#include "lstm/sw/soft_lstm_svd.h"
-#include "lstm/hls/lstm_svd.h"
-#include "lstm/hls/lstm_svd_emulator.h"
+#include "layers/lstm/lstm_data_handler.h"
+#include "layers/lstm/sw/soft_lstm_svd.h"
+#include "layers/lstm/hls/lstm_svd.h"
+#include "layers/lstm/hls/lstm_svd_emulator.h"
 
 #include "ap_fixed.h"
 

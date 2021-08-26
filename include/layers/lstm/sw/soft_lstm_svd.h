@@ -1,5 +1,5 @@
-#ifndef LSTM_SW_SOFT_LSTM_SVD_H_
-#define LSTM_SW_SOFT_LSTM_SVD_H_
+#ifndef LAYERS_LSTM_SW_SOFT_LSTM_SVD_H_
+#define LAYERS_LSTM_SW_SOFT_LSTM_SVD_H_
 
 #include "math_utils/blas_utils.h"
 #include "math_utils/activation_functions.h"
@@ -1019,4 +1019,4 @@ void SvdModelLstmSoftwareBatched(const int verbose,
 
 } // svd
 
-#endif // end LSTM_SW_SOFT_LSTM_SVD_H_
+#endif // end LAYERS_LSTM_SW_SOFT_LSTM_SVD_H_
