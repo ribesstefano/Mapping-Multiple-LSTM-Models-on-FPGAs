@@ -417,7 +417,7 @@ void KernelU(const int num_active_inputs,
     hls::stream<typename params::VectTuAxiPacketType>& x_port,
     hls::stream<typename params::VectTuAxiPacketType>& u_port,
     hls::stream<typename WrapperAxisG::PacketType>& xu_port) {
-#pragma TOP name=KernelU
+#pragma HLS TOP name=KernelU
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
   assert(num_active_inputs <= params::N);

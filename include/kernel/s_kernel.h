@@ -40,6 +40,8 @@ struct KernelS_Params {
 #endif
 };
 
+#ifndef __VITIS_HLS__
+#else
 template <
   typename params,
   typename PortWrapper = svd::AxiStreamPort<params::VectG_AxiWidth>
@@ -49,7 +51,7 @@ void KernelS(const int num_active_inputs,
     hls::stream<typename PortWrapper::PacketType>& xu_port,
     hls::stream<typename params::VectG_AxiPacketType>& s_port,
     hls::stream<typename PortWrapper::PacketType>& xus_port) {
-#pragma TOP name=KernelS
+#pragma HLS TOP name=KernelS
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
   assert(num_active_inputs <= params::N);
@@ -80,6 +82,7 @@ void KernelS(const int num_active_inputs,
     xus_axis.template PushVector<ActivationType, params::G>(xus_val, kIsLast);
   }
 }
+#endif // __VITIS_HLS__
 
 } // svd
 

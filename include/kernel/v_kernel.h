@@ -514,7 +514,8 @@ void VDotUnit2LstmV2(const bool has_bias,
 }
 
 
-#ifdef __VITIS_HLS__
+#ifndef __VITIS_HLS__
+#else
 template <
   typename params,
   typename WrapperAxisG = svd::AxiStreamPort<params::VectG_AxiWidth>,
@@ -526,7 +527,7 @@ void KernelV(const int num_active_inputs,
     hls::stream<typename WrapperAxisG::PacketType>& xus_port,
     hls::stream<typename params::VectTvAxiPacketType>& v_port,
     hls::stream<typename WrapperAxisGTv::PacketType>& y_port) {
-#pragma TOP name=KernelV
+#pragma HLS TOP name=KernelV
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
   assert(num_active_inputs <= params::N);
@@ -544,19 +545,13 @@ void KernelV(const int num_active_inputs,
   auto v_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(v_port);
   auto y_axis = svd::AxiStreamInterface<WrapperAxisGTv>(y_port);
   hls::stream<typename params::VectTvType> v_streams[params::G];
-  ActivationType y_buffer_tmp[params::G][params::N][params::Tv][kMaxNumTilesV] = {0};
+  ActivationType y_buffer[params::G][params::N][params::Tv][kMaxNumTilesV] = {0};
 #pragma HLS STREAM variable=v_streams depth=kStreamDepth_V
 #pragma HLS ARRAY_PARTITION variable=v_streams complete dim=1
-#pragma HLS ARRAY_PARTITION variable=y_buffer_tmp complete dim=1
-// #pragma HLS ARRAY_PARTITION variable=y_buffer_tmp complete dim=2 // I'm not accessing N dimension in parallel
-#pragma HLS ARRAY_PARTITION variable=y_buffer_tmp complete dim=3
-#pragma HLS BIND_STORAGE variable=y_buffer_tmp type=ram_t2p impl=bram latency=1
-
-  // typename params::VectTvType y_buffer[params::G][params::N][kMaxNumTilesV];
-// #pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=1
-// #pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=2
-// #pragma HLS BIND_STORAGE variable=y_buffer type=ram_t2p impl=bram latency=1
-
+#pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=1
+// #pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=2 // I'm not accessing N dimension in parallel
+#pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=3
+#pragma HLS BIND_STORAGE variable=y_buffer type=ram_t2p impl=bram latency=1
   int R_max = num_refinements[0];
   // int R_total = num_refinements[0] * num_active_inputs; // Total elements.
   Get_Max_R:
@@ -587,20 +582,16 @@ void KernelV(const int num_active_inputs,
   V_Kernel:
   for (int i = 0; i < R_max; ++i) {
     for (int j = 0; j < kNumTilesV; ++j) {
-      V_num_active_inputs:
       for (int k = 0; k < num_active_inputs; ++k) {
 #pragma HLS PIPELINE II=1
         assert(k < params::N);
         if (i < num_refinements[k]) {
           auto xus_val = xus_axis.template PopVector<ActivationType, params::G>();
-          V_G:
           for (int ii = 0; ii < params::G; ++ii) {
             auto v_val = v_streams[ii].read();
-            V_Tv:
             for (int jj = 0; jj < params::Tv; ++jj) {
-              y_buffer_tmp[ii][k][jj][j] += v_val[jj] * xus_val[ii];
+              y_buffer[ii][k][jj][j] += v_val[jj] * xus_val[ii];
             }
-            // y_buffer[ii][k][j] += v_val * xus_val[ii];
           }
         }
       }
@@ -613,8 +604,7 @@ void KernelV(const int num_active_inputs,
           for (int ii = 0; ii < params::Tv; ++ii) {
             for (int jj = 0; jj < params::G; ++jj) {
 #pragma HLS PIPELINE II=1
-              y_out[ii * params::G + jj] = y_buffer_tmp[jj][k][ii][j];
-              // y_out[ii * params::G + jj] = y_buffer[jj][k][j][ii];
+              y_out[ii * params::G + jj] = y_buffer[jj][k][ii][j];
             }
           }
           const bool kIsLast = j == kNumTilesV - 1 && k == num_active_inputs - 1;
