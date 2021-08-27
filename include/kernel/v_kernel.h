@@ -636,9 +636,9 @@ void KernelV(const int num_active_inputs,
               y_out[ii * params::G + jj] = y_buffer[jj][k][ii][j];
             }
           }
-          const bool kIsLast = j == kNumTilesV - 1 && k == num_active_inputs - 1;
+          const bool kIsLast = j == kNumTilesV-1 && k == num_active_inputs-1;
           const int kGTv = params::G * params::Tv;
-          y_axis.template PushVector<ActivationType, kGTv>(y_out);
+          y_axis.template PushVector<ActivationType, kGTv>(y_out, kIsLast);
         }
       }
     }
@@ -654,7 +654,7 @@ static const int kNumInputs = 4;
 static const int kInputSize = 512;
 static const int Tu = 4;
 // NOTE: The rest of the parameters are unused for now.
-static const int kOutputSize = 128;
+static const int kOutputSize = 1024;
 static const int R = 64;
 static const int Tv = 4;
 static const int ZTu = 0;
@@ -666,7 +666,8 @@ typedef svd::SvdParameters<testv::kNumInputs, testv::kInputSize,
     testv::G,
     // svd::ActivationD, svd::WeightD, svd::AccumD> params;
     // short, short, short> params;
-    ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH> > params;
+    // ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH> > params;
+    float, float, float > params;
 
 } // testv
 
