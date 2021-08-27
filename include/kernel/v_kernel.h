@@ -579,60 +579,40 @@ void KernelV(const int num_active_inputs,
     }
   }
 
-  typename params::VectG_Type xus_val;
+  typename params::VectG_Type xus_val[params::N];
   V_Kernel:
   for (int i = 0; i < R_max; ++i) {
+#pragma HLS LOOP_MERGE
     for (int j = 0; j < kNumTilesV; ++j) {
-      for (int ii = 0; ii < params::G; ++ii) {
-        for (int k = 0; k < num_active_inputs; ++k) {
-  #pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1
+      assert(j < kMaxNumTilesV);
+      for (int k = 0; k < num_active_inputs; ++k) {
+        for (int ii = 0; ii < params::G; ++ii) {
           assert(k < params::N);
-          if (i < num_refinements[k] && j == 0 && ii == 0) {
-            xus_val = xus_axis.template PopVector<ActivationType, params::G>();
-          }
           if (i < num_refinements[k]) {
+            if (j == 0 && ii == 0) {
+              xus_val[k] = xus_axis.template PopVector<ActivationType, params::G>();
+            }
             auto v_val = v_streams[ii].read();
             for (int jj = 0; jj < params::Tv; ++jj) {
-              y_buffer[ii][k][jj][j] += v_val[jj] * xus_val[ii];
+              // ActivationType y_buffer[params::G][params::N][params::Tv][kMaxNumTilesV] = {0};
+              y_buffer[ii][k][jj][j] += v_val[jj] * xus_val[k][ii];
               // std::cout << v_val[jj] << "\t" << xus_val[ii] << std::endl;
               // std::cout << y_buffer[ii][k][jj][j] << std::endl;
             }
           }
-
         }
       }
-
-
-//       for (int k = 0; k < num_active_inputs; ++k) {
-// #pragma HLS PIPELINE II=1
-//         assert(k < params::N);
-//         typename params::VectG_Type xus_val;
-//         if (i < num_refinements[k]) {
-//           if (j == 0) {
-//             xus_val = xus_axis.template PopVector<ActivationType, params::G>();
-//           }
-//           for (int ii = 0; ii < params::G; ++ii) {
-//             auto v_val = v_streams[ii].read();
-//             for (int jj = 0; jj < params::Tv; ++jj) {
-// // ActivationType y_buffer[params::G][params::N][params::Tv][kMaxNumTilesV] = {0};
-//               y_buffer[ii][k][jj][j] += v_val[jj] * xus_val[ii];
-//               // std::cout << v_val[jj] << "\t" << xus_val[ii] << std::endl;
-//               // std::cout << y_buffer[ii][k][jj][j] << std::endl;
-//             }
-//           }
-//         }
-//       }
-
     }
     if (i == R_max - 1) {
       // auto y_out = typename params::VectGTvType(0);
-#pragma HLS LOOP_MERGE
-      for (int j = 0; j < kNumTilesV; ++j) {
         for (int k = 0; k < num_active_inputs; ++k) {
+      for (int j = 0; j < kNumTilesV; ++j) {
           typename params::VectGTvType y_out;
           for (int ii = 0; ii < params::Tv; ++ii) {
             for (int jj = 0; jj < params::G; ++jj) {
 #pragma HLS PIPELINE II=1
+              // ActivationType y_buffer[params::G][params::N][params::Tv][kMaxNumTilesV] = {0};
               y_out[ii * params::G + jj] = y_buffer[jj][k][ii][j];
             }
           }

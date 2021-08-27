@@ -32,12 +32,13 @@ int main(int argc, char const *argv[]) {
   if (argc >= 4) {
     num_refinements = atoi(argv[3]);
   }
-  const int kNumRefinementsMax = num_refinements;
-  hls::vector<int, testv::params::N> num_refinements_vect = hls::vector<int, testv::params::N>(kNumRefinementsMax);
-  // for (int i = testv::params::N; i >= 0; --i) {
-  //   int R_tmp = kNumRefinementsMax - 2 * (testv::params::N - i - 1);
-  //   num_refinements_vect[i] = R_tmp > 0 ? R_tmp : 1;
-  // }
+  const int kMaxRefinements = num_refinements;
+  hls::vector<int, testv::params::N> num_refinements_vect = hls::vector<int, testv::params::N>(kMaxRefinements);
+  for (int i = testv::params::N; i >= 0; --i) {
+    num_refinements_vect[i] = kMaxRefinements;
+    // int R_tmp = kMaxRefinements - 2 * (testv::params::N - i - 1);
+    // num_refinements_vect[i] = R_tmp > 0 ? R_tmp : 1;
+  }
   const int kNumTests = 2;
   const int kNumActiveInputs = (num_active_inputs > testv::params::N) ? testv::params::N : num_active_inputs;
   const int kOutputSize = (output_size > testv::params::H) ? testv::params::H : output_size;
@@ -45,11 +46,11 @@ int main(int argc, char const *argv[]) {
   typedef typename testv::params::ActivationD ActivationType;
   assert(testv::params::H == testv::params::PrunedSizeV); // No pruning.
 
-  ActivationType xus[kNumRefinementsMax][testv::params::N][testv::params::G] = {ActivationType(0.001)};
-  ActivationType v[kNumRefinementsMax][testv::params::PrunedSizeV][testv::params::G] = {ActivationType(0.001)};
+  ActivationType xus[kMaxRefinements][testv::params::N][testv::params::G] = {ActivationType(0.001)};
+  ActivationType v[kMaxRefinements][testv::params::PrunedSizeV][testv::params::G] = {ActivationType(0.001)};
   ActivationType y_gold[testv::params::N][testv::params::G][testv::params::H] = {0};
 
-  for (int i = 0; i < kNumRefinementsMax; ++i) {
+  for (int i = 0; i < kMaxRefinements; ++i) {
     for (int j = 0; j < testv::params::G; ++j) {
       for (int k = 0; k < testv::params::N; ++k) {
         xus[i][k][j] = rand() * 0.00001;
@@ -60,12 +61,12 @@ int main(int argc, char const *argv[]) {
     }
   }
 
-  for (int i = 0; i < kNumRefinementsMax; ++i) {
+  for (int i = 0; i < kMaxRefinements; ++i) {
     for (int j = 0; j < kNumActiveInputs; ++j) {
       if (i < num_refinements_vect[j]) {
         for (int k = 0; k < kOutputSize; ++k) {
           for (int ii = 0; ii < testv::params::G; ++ii) {
-            y_gold[j][ii][k] += xus[i][j][ii] * v[i][k][ii];
+            y_gold[j][ii][k] += v[i][k][ii] * xus[i][j][ii];
           }
         }
       }
@@ -84,7 +85,7 @@ int main(int argc, char const *argv[]) {
   for (int t = 0; t < kNumTests; ++t) {
     // Stream XUS
     typename testv::params::VectG_Type xus_val;
-    for (int i = 0; i < kNumRefinementsMax; ++i) {
+    for (int i = 0; i < kMaxRefinements; ++i) {
       for (int j = 0; j < kNumActiveInputs; ++j) {
         if (i < num_refinements_vect[j]) {
           for (int k = 0; k < testv::params::G; ++k) {
@@ -96,7 +97,7 @@ int main(int argc, char const *argv[]) {
     }
     // Stream V
     typename testv::params::VectTvType v_val;
-    for (int i = 0; i < kNumRefinementsMax; ++i) {
+    for (int i = 0; i < kMaxRefinements; ++i) {
       for (int k = 0; k < kNumTilesV; ++k) {
         for (int j = 0; j < testv::params::G; ++j) {
           for (int ii = 0; ii < testv::params::Tv; ++ii) {
@@ -107,33 +108,48 @@ int main(int argc, char const *argv[]) {
       }
     }
   }
+  std::cout << "[INFO] Starting HlsKernelV." << std::endl;
   for (int t = 0; t < kNumTests; ++t) {
-    std::cout << "[INFO] Starting HlsKernelV." << std::endl;
     HlsKernelV(kNumActiveInputs, kOutputSize, num_refinements_vect, xus_port, v_port, y_port);
   }
   for (int t = 0; t < kNumTests; ++t) {
     std::cout << "[INFO] Checking results test n." << t << std::endl;
     int test_errors = 0;
-    for (int j = 0; j < kNumTilesV; ++j) {
+    int num_elems = 0;
       for (int i = 0; i < kNumActiveInputs; ++i) {
+    for (int j = 0; j < kNumTilesV; ++j) {
         const int kGTv = testv::params::G * testv::params::Tv;
         auto y_val = y_axis.PopVector<ActivationType, kGTv>();
         for (int k = 0; k < testv::params::Tv; ++k) {
           for (int ii = 0; ii < testv::params::G; ++ii) {
+            // ActivationType y_gold[testv::params::N][testv::params::G][testv::params::H] = {0};
             if (y_val[k * testv::params::G + ii] != y_gold[i][ii][j * testv::params::Tv + k]) {
-              std::cout << i << ") test/gold: "
+              std::cout << "N:" << i << "][NTv:" << j << "][Tv:" << k << "][G:"
+                        << ii << "] test/gold: "
                         << y_val[k * testv::params::G + ii] << " / "
                         << y_gold[i][ii][j * testv::params::Tv + k] << std::endl;
               ++test_errors;
+            } else {
+              std::cout << "\tN:" << i << "][NTv:" << j << "][Tv:" << k << "][G:"
+                        << ii << "] test/gold: "
+                        << y_val[k * testv::params::G + ii] << " / "
+                        << y_gold[i][ii][j * testv::params::Tv + k] << std::endl;
             }
+            ++num_elems;
           }
         }
       }
     }
-    std::cout << "[INFO] Number of mismatches per test: " << test_errors << std::endl;
+    std::cout << "[INFO] Number of mismatches per test / total: " << test_errors
+              << " / " << num_elems << std::endl;
     num_errors += test_errors;
   }
   std::cout << "[INFO] Total number of mismatches: " << num_errors << std::endl;
+  for (int i = testv::params::N; i >= 0; --i) {
+    std::cout << num_refinements_vect[i] << std::endl;
+    // int R_tmp = kMaxRefinements - 2 * (testv::params::N - i - 1);
+    // num_refinements_vect[i] = R_tmp > 0 ? R_tmp : 1;
+  }
   return 0; // num_errors;
 #endif // end __VITIS_HLS__
 }
