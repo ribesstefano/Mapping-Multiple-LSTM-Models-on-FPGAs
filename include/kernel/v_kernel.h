@@ -580,14 +580,15 @@ void KernelV(const int num_active_inputs,
   }
 
   typename params::VectG_Type xus_val[params::N];
+  typename params::VectGTvType y_out;
   V_Kernel:
   for (int i = 0; i < R_max; ++i) {
 #pragma HLS LOOP_MERGE
     for (int j = 0; j < kNumTilesV; ++j) {
-#pragma HLS PIPELINE II=1
-      assert(j < kMaxNumTilesV);
       for (int k = 0; k < num_active_inputs; ++k) {
+#pragma HLS PIPELINE II=1
         for (int ii = 0; ii < params::G; ++ii) {
+          assert(j < kMaxNumTilesV);
           assert(k < params::N);
           if (i < num_refinements[k]) {
             if (j == 0 && ii == 0) {
@@ -595,24 +596,18 @@ void KernelV(const int num_active_inputs,
             }
             auto v_val = v_streams[ii].read();
             for (int jj = 0; jj < params::Tv; ++jj) {
-              // ActivationType y_buffer[params::G][params::N][params::Tv][kMaxNumTilesV] = {0};
               y_buffer[ii][k][jj][j] += v_val[jj] * xus_val[k][ii];
-              // std::cout << v_val[jj] << "\t" << xus_val[ii] << std::endl;
-              // std::cout << y_buffer[ii][k][jj][j] << std::endl;
             }
           }
         }
       }
     }
     if (i == R_max - 1) {
-      // auto y_out = typename params::VectGTvType(0);
-        for (int k = 0; k < num_active_inputs; ++k) {
       for (int j = 0; j < kNumTilesV; ++j) {
-          typename params::VectGTvType y_out;
-          for (int ii = 0; ii < params::Tv; ++ii) {
-            for (int jj = 0; jj < params::G; ++jj) {
+        for (int k = 0; k < num_active_inputs; ++k) {
+          for (int jj = 0; jj < params::G; ++jj) {
+            for (int ii = 0; ii < params::Tv; ++ii) {
 #pragma HLS PIPELINE II=1
-              // ActivationType y_buffer[params::G][params::N][params::Tv][kMaxNumTilesV] = {0};
               y_out[ii * params::G + jj] = y_buffer[jj][k][ii][j];
             }
           }
@@ -634,7 +629,7 @@ static const int kNumInputs = 4;
 static const int kInputSize = 512;
 static const int Tu = 4;
 // NOTE: The rest of the parameters are unused for now.
-static const int kOutputSize = 1024;
+static const int kOutputSize = 512;
 static const int R = 64;
 static const int Tv = 4;
 static const int ZTu = 0;
@@ -646,7 +641,7 @@ typedef svd::SvdParameters<testv::kNumInputs, testv::kInputSize,
     testv::G,
     // svd::ActivationD, svd::WeightD, svd::AccumD> params;
     // short, short, short> params;
-    // ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH> > params;
+    // ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH, AP_TRN_ZERO>, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH, AP_TRN_ZERO>, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH, AP_TRN_ZERO> > params;
     float, float, float > params;
 
 } // testv

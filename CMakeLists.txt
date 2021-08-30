@@ -47,6 +47,8 @@ add_compile_definitions(NUM_ZERO_TILES_U=1)
 add_compile_definitions(NUM_TILES_V=4)
 add_compile_definitions(NUM_ZERO_TILES_V=1)
 add_compile_definitions(NUM_TIMESTEPS=28)
+add_compile_definitions(FIX_WIDTH=16)
+add_compile_definitions(FIX_FRACT_WIDTH=5)
 
 # Move executable in bin/, along side the DLLs (copied)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
