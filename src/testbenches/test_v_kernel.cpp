@@ -54,10 +54,18 @@ int main(int argc, char const *argv[]) {
   for (int i = 0; i < kMaxRefinements; ++i) {
     for (int j = 0; j < testv::params::G; ++j) {
       for (int k = 0; k < testv::params::N; ++k) {
-        xus[i][k][j] = rand() * 0.00001;
+        if (std::is_same<short, ActivationType>::value) {
+          xus[i][k][j] = ActivationType(rand());
+        } else {
+          xus[i][k][j] = ActivationType(rand() * 0.00001);
+        }
       }
       for (int k = 0; k < testv::params::PrunedSizeV; ++k) {
-        v[i][k][j] = rand() * 0.00001;
+        if (std::is_same<short, ActivationType>::value) {
+          v[i][k][j] = ActivationType(rand());
+        } else {
+          v[i][k][j] = ActivationType(rand() * 0.00001);
+        }
       }
     }
   }
@@ -120,8 +128,8 @@ int main(int argc, char const *argv[]) {
     std::cout << "[INFO] Checking results test n." << t << std::endl;
     int test_errors = 0;
     num_elems = 0;
-    for (int i = 0; i < kNumActiveInputs; ++i) {
-      for (int j = 0; j < kNumTilesV; ++j) {
+    for (int j = 0; j < kNumTilesV; ++j) {
+      for (int i = 0; i < kNumActiveInputs; ++i) {
         const int kGTv = testv::params::G * testv::params::Tv;
         auto y_val = y_axis.PopVector<ActivationType, kGTv>();
         for (int k = 0; k < testv::params::Tv; ++k) {
@@ -134,10 +142,10 @@ int main(int argc, char const *argv[]) {
                         << y_gold[i][ii][j * testv::params::Tv + k] << std::endl;
               ++test_errors;
             } else {
-              std::cout << "\tN:" << i << "][NTv:" << j << "][Tv:" << k << "][G:"
-                        << ii << "] test/gold: "
-                        << y_val[k * testv::params::G + ii] << " / "
-                        << y_gold[i][ii][j * testv::params::Tv + k] << std::endl;
+              // std::cout << "\tN:" << i << "][NTv:" << j << "][Tv:" << k << "][G:"
+              //           << ii << "] test/gold: "
+              //           << y_val[k * testv::params::G + ii] << " / "
+              //           << y_gold[i][ii][j * testv::params::Tv + k] << std::endl;
             }
             ++num_elems;
           }
