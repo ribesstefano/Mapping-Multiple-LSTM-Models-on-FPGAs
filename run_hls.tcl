@@ -15,8 +15,8 @@ set reset_project 1
 set csim 0
 set build_only 0
 set synth 1
-set cosim 1
-set export 0
+set cosim 0
+set export 1
 set place_and_route 0
 set report_info 1
 # ==============================================================================
