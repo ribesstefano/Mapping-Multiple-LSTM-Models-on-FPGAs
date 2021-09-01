@@ -12,3 +12,7 @@ hls/
 vivado/
 vitis_include/
 ./token
+
+# PYNQ
+**/.ipynb_checkpoints
+**/sds_trace_data.dat
