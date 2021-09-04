@@ -104,7 +104,8 @@ public:
    * @return     The value from the FIFO
    */
   template<typename T>
-  T Pop() {
+  inline T Pop() {
+#pragma HLS INLINE
     PacketType packet = this->_port.read();
     return *((T*)&packet);
   }
@@ -120,7 +121,8 @@ public:
    *             otherwise.
    */
   template<typename T>
-  bool isLastPop(T &y) {
+  inline bool isLastPop(T &y) {
+#pragma HLS INLINE
     PacketType packet = this->_port.read();
     y = *((T*)&packet);
     return false;
@@ -243,12 +245,12 @@ public:
    * @return     The vector from the FIFO
    */
   template<typename T, int N>
-  hls::vector<T, N> PopVector() {
+  inline hls::vector<T, N> PopVector() {
 #pragma HLS INLINE
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamPort must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
-    PacketType packet = this->_port.read();
+    const PacketType packet = this->_port.read();
     hls::vector<T, N> y;
     for (int i = 0; i < N; ++i) {
       const int kHi = (i + 1) * kElemBitwidth - 1;
@@ -270,12 +272,12 @@ public:
    * @return     False
    */
   template<typename T, int N>
-  bool isLastPopVector(hls::vector<T, N>& y) {
+  inline bool isLastPopVector(hls::vector<T, N>& y) {
 #pragma HLS INLINE
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamPort must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
-    PacketType packet = this->_port.read();
+    const PacketType packet = this->_port.read();
     for (int i = 0; i < N; ++i) {
       const int kHi = (i + 1) * kElemBitwidth - 1;
       const int kLo = i * kElemBitwidth;
@@ -448,7 +450,8 @@ public:
    * @return     The value from the FIFO
    */
   template<typename T>
-  T Pop() {
+  inline T Pop() {
+#pragma HLS INLINE
     PacketType packet;
     packet = this->_port.read();
     return *((T*)&packet.data);
@@ -467,7 +470,8 @@ public:
    *             otherwise.
    */
   template<typename T>
-  bool isLastPop(T &y) {
+  inline bool isLastPop(T &y) {
+#pragma HLS INLINE
     PacketType packet;
     packet = this->_port.read();
     y = *((T*)&packet.data);
@@ -556,7 +560,7 @@ public:
       packet.data.range(kHi, kLo) = *((ap_uint<kElemBitwidth>*)&tmp);
     }
     packet.last = is_last? 1 : 0;
-    // NOTE: If TKEEP and TSTRB both high, the packet is a data type.
+    // NOTE: If TKEEP and TSTRB are both high, then the packet is a data type.
     packet.keep = this->_all_ones; // Set TKEEP to all ones.
     packet.strb = this->_all_ones; // Set TSTRB to all ones.
     this->_port.write(packet);
@@ -599,13 +603,12 @@ public:
    * @return     The vector from the FIFO
    */
   template<typename T, int N>
-  hls::vector<T, N> PopVector() {
+  inline hls::vector<T, N> PopVector() {
 #pragma HLS INLINE
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamPort must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
     const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
-    PacketType packet;
-    packet = this->_port.read();
+    const PacketType packet = this->_port.read();
     hls::vector<T, N> y;
     for (int i = 0; i < N; ++i) {
       const int kHi = (i + 1) * kElemBitwidth - 1;
@@ -630,7 +633,7 @@ public:
    *             otherwise.
    */
   template<typename T, int N>
-  bool isLastPopVector(hls::vector<T, N>& y) {
+  inline bool isLastPopVector(hls::vector<T, N>& y) {
 #pragma HLS INLINE
     static_assert(hlsutils::Bitwidth<T>::value * N == Bitwidth, "AxiStreamPort must have same bitwidth as hls::vector");
     assert(hlsutils::Bitwidth<T>::value * N == Bitwidth);
@@ -734,7 +737,7 @@ public:
    * @return     The value from the FIFO
    */
   template<typename T>
-  T Pop() {
+  inline T Pop() {
 #pragma HLS INLINE
     return AxiClass::template Pop<T>();
   }
@@ -752,7 +755,7 @@ public:
    *             otherwise.
    */
   template<typename T>
-  bool isLastPop(T &y) {
+  inline bool isLastPop(T &y) {
 #pragma HLS INLINE
     return AxiClass::template isLastPop<T>(y);
   }
@@ -844,7 +847,7 @@ public:
    * @return     The vector from the FIFO
    */
   template<typename T, int N>
-  hls::vector<T, N> PopVector() {
+  inline hls::vector<T, N> PopVector() {
 #pragma HLS INLINE
     return AxiClass::template PopVector<T, N>();
   }
@@ -863,7 +866,7 @@ public:
    *             otherwise.
    */
   template<typename T, int N>
-  bool isLastPopVector(hls::vector<T, N>& y) {
+  inline bool isLastPopVector(hls::vector<T, N>& y) {
 #pragma HLS INLINE
     return AxiClass::template isLastPopVector<T, N>(y);
   }
