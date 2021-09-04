@@ -523,40 +523,52 @@ template <
 >
 void KernelV(const int num_active_inputs,
     const int output_size,
-    const hls::vector<int, params::N> num_refinements,
+    const int num_refinements[params::N],
+    // const hls::vector<int, params::N> num_refinements,
     hls::stream<typename WrapperAxisG::PacketType>& xus_port,
     hls::stream<typename params::VectTvAxiPacketType>& v_port,
     hls::stream<typename WrapperAxisGTv::PacketType>& y_port) {
 #pragma HLS TOP name=KernelV
-#pragma HLS DATAFLOW
+// #pragma HLS DATAFLOW
 #pragma HLS INLINE
 
-#pragma HLS FUNCTION_INSTANTIATE variable=num_active_inputs
-#pragma HLS FUNCTION_INSTANTIATE variable=output_size
-#pragma HLS FUNCTION_INSTANTIATE variable=num_refinements
+#pragma HLS STABLE variable=xus_port
+#pragma HLS STABLE variable=v_port
+#pragma HLS STABLE variable=y_port
+
+// #pragma HLS FUNCTION_INSTANTIATE variable=num_active_inputs
+// #pragma HLS FUNCTION_INSTANTIATE variable=output_size
+// #pragma HLS FUNCTION_INSTANTIATE variable=num_refinements
 
   assert(num_active_inputs <= params::N);
   assert(num_active_inputs > 0);
-  assert(num_refinements >= 0);
+  // assert(num_refinements >= 0);
   assert(params::H % params::Tv == 0);
   assert(output_size % params::Tv == 0);
   assert(output_size <= params::H);
   typedef typename params::ActivationD ActivationType;
   const int kMaxNumTilesV = params::H / params::Tv;
   const int kNumTilesV = output_size / params::Tv;
-  const int kStreamDepth_V = 8 + kMaxNumTilesV * params::N;
+  const int kStreamDepth_V = 32 + kMaxNumTilesV * params::N;
   assert(kNumTilesV <= kMaxNumTilesV);
   auto xus_axis = svd::AxiStreamInterface<WrapperAxisG>(xus_port);
   auto v_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(v_port);
   auto y_axis = svd::AxiStreamInterface<WrapperAxisGTv>(y_port);
-  hls::stream<typename params::VectTvType> v_streams[params::G];
-  ActivationType y_buffer[params::G][params::N][params::Tv][kMaxNumTilesV] = {0};
-#pragma HLS STREAM variable=v_streams depth=kStreamDepth_V
-#pragma HLS ARRAY_PARTITION variable=v_streams complete dim=1
+  hls::stream<typename params::VectTvType, kStreamDepth_V> v_streams[params::G];
+
+  // NOTE: Having y_buffer as static made cosim work in one-process configuration.
+
+  static ActivationType y_buffer[params::G][params::N][params::Tv][kMaxNumTilesV] = {0};
+// #pragma HLS STREAM variable=v_streams depth=kStreamDepth_V
+#pragma HLS ARRAY_PARTITION variable=v_streams complete
 #pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=1
 // #pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=2 // I'm not accessing N dimension in parallel
 #pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=3
 #pragma HLS BIND_STORAGE variable=y_buffer type=ram_t2p impl=bram latency=1
+
+#ifndef __SYNTHESIS__
+  std::cout << "[INFO] V-Kernel, FIFO depth: " << kStreamDepth_V << std::endl;
+#endif
 
   // const int R_max = params::R;
   int R_max = num_refinements[0];
@@ -567,15 +579,18 @@ void KernelV(const int num_active_inputs,
       R_max = num_refinements[i];
     }
   }
+  assert(R_max < 512);
 
+  typename params::VectTvType v_val;
   V_DMA:
   for (int i = 0; i < R_max; ++i) {
     for (int j = 0; j < kNumTilesV; ++j) {
       for (int k = 0; k < params::G; ++k) {
-        auto v_val = v_axis.template PopVector<ActivationType, params::Tv>();
         for (int ii = 0; ii < num_active_inputs; ++ii) {
 #pragma HLS PIPELINE II=1
-            // v_streams[k] << v_val;
+          if (ii == 0) {
+            v_val = v_axis.template PopVector<ActivationType, params::Tv>();
+          }
           if (i < num_refinements[ii]) {
             v_streams[k] << v_val;
           }
@@ -586,6 +601,7 @@ void KernelV(const int num_active_inputs,
 
   typename params::VectG_Type xus_val[params::N];
   typename params::VectGTvType y_out;
+
   V_Kernel:
   for (int i = 0; i < R_max; ++i) {
 // #pragma HLS LOOP_MERGE
@@ -593,21 +609,40 @@ void KernelV(const int num_active_inputs,
       for (int k = 0; k < num_active_inputs; ++k) {
 #pragma HLS PIPELINE II=1
         for (int ii = 0; ii < params::G; ++ii) {
-#pragma HLS UNROLL
           assert(j < kMaxNumTilesV);
           assert(k < params::N);
           if (i < num_refinements[k]) {
+            assert(i < 512);
             if (j == 0 && ii == 0) {
               xus_val[k] = xus_axis.template PopVector<ActivationType, params::G>();
             }
             auto v_val = v_streams[ii].read();
             for (int jj = 0; jj < params::Tv; ++jj) {
-              y_buffer[ii][k][jj][j] += v_val[jj] * xus_val[k][ii];
+              ActivationType y_val;
+              if (i == 0) {
+                y_val = v_val[jj] * xus_val[k][ii];
+              } else {
+                y_val = y_buffer[ii][k][jj][j] + v_val[jj] * xus_val[k][ii];
+              }
+              y_buffer[ii][k][jj][j] = y_val;
+#pragma HLS DEPENDENCE inter variable=y_buffer false
             }
           }
         }
+
+        if (i == R_max - 1) {
+          for (int jj = 0; jj < params::G; ++jj) {
+            for (int ii = 0; ii < params::Tv; ++ii) {
+              y_out[ii * params::G + jj] = y_buffer[jj][k][ii][j];
+            }
+          }
+          const bool kIsLast = j == kNumTilesV-1 && k == num_active_inputs-1;
+          const int kGTv = params::G * params::Tv;
+          y_axis.template PushVector<ActivationType, kGTv>(y_out, kIsLast);
+        }
       }
     }
+
 //     if (i == R_max - 1) {
 //       for (int j = 0; j < kNumTilesV; ++j) {
 //         for (int k = 0; k < num_active_inputs; ++k) {
@@ -623,23 +658,26 @@ void KernelV(const int num_active_inputs,
 //         }
 //       }
 //     }
-//     
+  
   }
   
-  DMA_Out:
-  for (int j = 0; j < kNumTilesV; ++j) {
-    for (int k = 0; k < num_active_inputs; ++k) {
-#pragma HLS PIPELINE II=1
-      for (int jj = 0; jj < params::G; ++jj) {
-        for (int ii = 0; ii < params::Tv; ++ii) {
-          y_out[ii * params::G + jj] = y_buffer[jj][k][ii][j];
-        }
-      }
-      const bool kIsLast = j == kNumTilesV-1 && k == num_active_inputs-1;
-      const int kGTv = params::G * params::Tv;
-      y_axis.template PushVector<ActivationType, kGTv>(y_out, kIsLast);
-    }
-  }
+//   DMA_Out:
+//   for (int j = 0; j < kNumTilesV; ++j) {
+//     for (int k = 0; k < num_active_inputs; ++k) {
+// #pragma HLS PIPELINE II=1
+//       for (int jj = 0; jj < params::G; ++jj) {
+//         for (int ii = 0; ii < params::Tv; ++ii) {
+//           assert(ii * params::G + jj < params::G * params::Tv);
+//           y_out[ii * params::G + jj] = y_buffer[jj][k][ii][j];
+//           // y_out[ii * params::G + jj] = y_val[jj][ii];
+//         }
+//       }
+//       const bool kIsLast = j == kNumTilesV-1 && k == num_active_inputs-1;
+//       const int kGTv = params::G * params::Tv;
+//       y_axis.template PushVector<ActivationType, kGTv>(y_out, kIsLast);
+//     }
+//   }
+
 }
 #endif // end __VITIS_HLS__
 
@@ -651,7 +689,7 @@ static const int kNumInputs = 2;
 static const int kInputSize = 512;
 static const int Tu = 4;
 // NOTE: The rest of the parameters are unused for now.
-static const int kOutputSize = 128;
+static const int kOutputSize = 512;
 static const int R = 32;
 static const int Tv = 4;
 static const int ZTu = 0;
@@ -672,7 +710,8 @@ typedef svd::SvdParameters<testv::kNumInputs, testv::kInputSize,
 #else
 void HlsKernelV(const int num_active_inputs,
     const int output_size,
-    const hls::vector<int, testv::params::N> num_refinements,
+    const int num_refinements[testv::params::N],
+    // const hls::vector<int, testv::params::N> num_refinements,
     hls::stream<typename testv::params::VectG_AxiPacketType>& xus_port,
     hls::stream<typename testv::params::VectTvAxiPacketType>& v_port,
     hls::stream<typename testv::params::VectGTvAxiPacketType>& y_port);
