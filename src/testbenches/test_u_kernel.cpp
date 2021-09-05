@@ -168,7 +168,12 @@ int main(int argc, char const *argv[]) {
       }
     }
     std::cout << "[INFO] Starting HlsKernelU." << std::endl;
-    HlsKernelU(kNumActiveInputs, kInputSize, num_refinements_vect, false, x_axis, u_axis, xu_g_axis);
+    
+    int refinements_tmp[testu::params::N];
+    for (int i = 0; i < testu::params::N; ++i) {
+      refinements_tmp[i] = num_refinements_vect[i];
+    }
+    HlsKernelU(kNumActiveInputs, kInputSize, refinements_tmp, false, x_axis, u_axis, xu_g_axis);
 
     testu::params::VectG_Type xu_g_val;
     int total_cnt = 0;

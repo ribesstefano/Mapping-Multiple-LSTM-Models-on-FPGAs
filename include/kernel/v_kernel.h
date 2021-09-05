@@ -690,7 +690,7 @@ static const int kInputSize = 512;
 static const int Tu = 4;
 // NOTE: The rest of the parameters are unused for now.
 static const int kOutputSize = 512;
-static const int R = 32;
+static const int R = 64;
 static const int Tv = 4;
 static const int ZTu = 0;
 static const int ZTv = 0;
