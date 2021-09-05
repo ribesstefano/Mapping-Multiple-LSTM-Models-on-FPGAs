@@ -57,7 +57,7 @@ void KernelS(const int num_active_inputs,
 #pragma HLS INLINE
   assert(num_active_inputs <= params::N);
   assert(num_active_inputs > 0);
-  assert(num_refinements >= 0);
+  // assert(num_refinements >= 0);
   int R_max = num_refinements[0];
   int R_total = num_refinements[0] * num_active_inputs; // Total elements.
   Get_Total_R:

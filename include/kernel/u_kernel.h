@@ -423,7 +423,7 @@ void KernelU(const int num_active_inputs,
 #pragma HLS INLINE
   assert(num_active_inputs <= params::N);
   assert(num_active_inputs > 0);
-  assert(num_refinements >= 0);
+  // assert(num_refinements >= 0);
   assert(params::I % params::Tu == 0);
   assert(input_size % params::Tu == 0);
   assert(input_size <= params::I);
