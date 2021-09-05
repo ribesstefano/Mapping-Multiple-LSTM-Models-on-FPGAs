@@ -38,18 +38,33 @@ void SvdKernel(const int num_active_inputs,
 #pragma HLS INLINE
 #pragma HLS DATAFLOW
 #pragma HLS STABLE variable=s_port
+#pragma HLS ARRAY_PARTITION variable=num_refinements complete
+// #pragma HLS SHARED variable=num_refinements
   const bool pad_output = false;
   typedef svd::AxiStreamFifo<params::VectG_AxiWidth> WrapperFifoG;
   hls::stream<typename WrapperFifoG::PacketType> xu_port("xu_port");
   hls::stream<typename WrapperFifoG::PacketType> xus_port("xus_port");
 #pragma HLS STREAM variable=xu_port depth=2
 #pragma HLS STREAM variable=xus_port depth=2
+  int num_refinements_u[params::N];
+  int num_refinements_s[params::N];
+  int num_refinements_v[params::N];
+#pragma HLS ARRAY_PARTITION variable=num_refinements_u complete
+#pragma HLS ARRAY_PARTITION variable=num_refinements_s complete
+#pragma HLS ARRAY_PARTITION variable=num_refinements_v complete
+  Duplicate_R_Stream:
+  for (int i = 0; i < params::N; ++i) {
+#pragma HLS UNROLL
+    num_refinements_u[i] = num_refinements[i];
+    num_refinements_s[i] = num_refinements[i];
+    num_refinements_v[i] = num_refinements[i];
+  }
   svd::KernelU<params, WrapperFifoG>(num_active_inputs, input_size,
-    num_refinements, pad_output, x_port, u_port, xu_port);
-  svd::KernelS<params, WrapperFifoG>(num_active_inputs, num_refinements,
+    num_refinements_u, pad_output, x_port, u_port, xu_port);
+  svd::KernelS<params, WrapperFifoG>(num_active_inputs, num_refinements_s,
     xu_port, s_port, xus_port);
   svd::KernelV<params, WrapperFifoG, WrapperAxisGTv>(num_active_inputs,
-    output_size, num_refinements, xus_port, v_port, y_port);
+    output_size, num_refinements_v, xus_port, v_port, y_port);
 }
 
 } // svd

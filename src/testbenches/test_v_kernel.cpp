@@ -41,8 +41,8 @@ int main(int argc, char const *argv[]) {
   const int kNumTilesV = kOutputSize / testv::params::Tv;
   for (int i = kNumActiveInputs-1; i >= 0; --i) {
     // num_refinements_vect[i] = kMaxRefinements;
-     int R_tmp = kMaxRefinements - 2 * (kNumActiveInputs - i - 1);
-     num_refinements_vect[i] = R_tmp > 0 ? R_tmp : 1;
+    int R_tmp = kMaxRefinements - 2 * (kNumActiveInputs - i - 1);
+    num_refinements_vect[i] = R_tmp > 0 ? R_tmp : 1;
   }
   typedef typename testv::params::ActivationD ActivationType;
   assert(testv::params::H == testv::params::PrunedSizeV); // No pruning.
