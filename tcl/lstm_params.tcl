@@ -1,5 +1,6 @@
 proc append_lstm_params {&defines} {
     dict set params NUM_GATES 4
+    dict set params NUM_INPUTS 2
     dict set params NUM_SAMPLES 2
     dict set params INPUT_SIZE 1024
     dict set params HIDDEN_SIZE 512

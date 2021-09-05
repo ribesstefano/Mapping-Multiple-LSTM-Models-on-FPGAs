@@ -342,10 +342,10 @@ void LstmVectNonLinearFunctions(const bool has_bias,
     const hls::vector<T, N> &h_curr) {
 #pragma HLS FUNCTION_INSTANTIATE variable=has_bias
 #pragma HLS PIPELINE II=1
-  const hls::vector<T, N> i_gate = 0;
-  const hls::vector<T, N> f_gate = 0;
-  const hls::vector<T, N> c_gate = 0;
-  const hls::vector<T, N> o_gate = 0;
+  const hls::vector<T, N> i_gate;
+  const hls::vector<T, N> f_gate;
+  const hls::vector<T, N> c_gate;
+  const hls::vector<T, N> o_gate;
   if (has_bias) {
     i_gate = cur_gate_i + rec_gate_i + bias_i;
     f_gate = cur_gate_f + rec_gate_f + bias_f;
@@ -361,22 +361,28 @@ void LstmVectNonLinearFunctions(const bool has_bias,
 #pragma HLS BIND_OP variable=f_gate op=add impl=dsp
 #pragma HLS BIND_OP variable=c_gate op=add impl=dsp
 #pragma HLS BIND_OP variable=o_gate op=add impl=dsp
-
-//   const auto sigma_i = HardSigmoid<ActivationType>(i_gate);
-//   const auto sigma_f = HardSigmoid<ActivationType>(f_gate);
-//   const auto sigma_o = HardSigmoid<ActivationType>(o_gate);
-//   const auto tanh_cell = TanH<ActivationType, LutSize>(c_gate);
-
-//   const auto c_lhs = sigma_f * c_prev;
-//   const auto c_reg = c_lhs + sigma_i * tanh_cell;
-// #pragma HLS RESOURCE variable=c_lhs core=DSP48 latency=3
-// #pragma HLS RESOURCE variable=c_reg core=DSP48 latency=3
-//   c_curr = c_reg;
-
-//   const auto c_tanh = TanH<ActivationType, LutSize>(c_reg);
-//   const auto h_reg = sigma_o * c_tanh;
-// #pragma HLS RESOURCE variable=h_reg core=DSP48 latency=3
-//   h_curr = h_reg;
+  hls::vector<T, N> sigma_i;
+  hls::vector<T, N> sigma_f;
+  hls::vector<T, N> sigma_o;
+  hls::vector<T, N> tanh_cell;
+  hls::vector<T, N> c_tanh;
+  for (int i = 0; i < N; ++i) {
+    sigma_i[i] = HardSigmoid<T>(i_gate[i]);
+    sigma_f[i] = HardSigmoid<T>(f_gate[i]);
+    sigma_o[i] = HardSigmoid<T>(o_gate[i]);
+    tanh_cell[i] = TanH<T, LutSize>(c_gate[i]);
+  }
+  const auto c_lhs = sigma_f * c_prev;
+  const auto c_reg = c_lhs + sigma_i * tanh_cell;
+#pragma HLS BIND_OP variable=c_lhs op=add impl=dsp
+#pragma HLS BIND_OP variable=c_reg op=add impl=dsp
+  c_curr = c_reg;
+  for (int i = 0; i < N; ++i) {
+    c_tanh[i] = TanH<T, LutSize>(c_reg[i]);
+  }
+  const auto h_reg = sigma_o * c_tanh;
+#pragma HLS BIND_OP variable=h_reg op=mul impl=dsp // latency=3
+  h_curr = h_reg;
 }
 #endif // end __VITIS_HLS__
 

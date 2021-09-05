@@ -66,7 +66,7 @@ public:
    * @tparam     T     The type of the buffer
    */
   template<typename T>
-  inline void PushFromBuffer(const int size, const T *x) {
+  inline void PushFromBuffer(const int size, const T *x, bool send_last = false) {
 #pragma HLS INLINE
     PacketType packet;
     for (int i = 0; i < size; ++i) {
@@ -74,6 +74,21 @@ public:
       packet = *((PacketType*)&x[i]);
       this->_port.write(packet);
     }
+  }
+
+  template<typename T>
+  inline void PushBuffer(const int size, const T *x, bool send_last = false) {
+#pragma HLS INLINE
+    assert(hlsutils::Bitwidth<T>::value * size == Bitwidth);
+    const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
+    PacketType packet;
+    for (int i = 0; i < size; ++i) {
+      const int kHi = (i + 1) * kElemBitwidth - 1;
+      const int kLo = i * kElemBitwidth;
+      auto tmp = x[i];
+      packet.range(kHi, kLo) = *((ap_uint<kElemBitwidth>*)&tmp);
+    }
+    this->_port.write(packet);
   }
 
   /**
@@ -400,13 +415,13 @@ public:
    * @tparam     T     The type of the buffer
    */
   template<typename T>
-  inline void PushFromBuffer(const int size, const T *x) {
+  inline void PushFromBuffer(const int size, const T *x, bool send_last = false) {
 #pragma HLS INLINE
     PacketType packet;
     for (int i = 0; i < size; ++i) {
 #pragma HLS PIPELINE II=1
       packet.data = *((ap_uint<Bitwidth>*)&x[i]);
-      if (i == size - 1) { // The last packet needs special care.
+      if (send_last && i == size - 1) { // The last packet needs special care.
         packet.last = 1;
       }
       // NOTE: If TKEEP and TSTRB both high, the packet is a data type.
@@ -414,6 +429,25 @@ public:
       packet.strb = this->_all_ones; // Set TSTRB to all ones.
       this->_port.write(packet);
     }
+  }
+
+  template<typename T>
+  inline void PushBuffer(const int size, const T *x, bool send_last = false) {
+#pragma HLS INLINE
+    assert(hlsutils::Bitwidth<T>::value * size == Bitwidth);
+    const int kElemBitwidth = hlsutils::Bitwidth<T>::value;
+    PacketType packet;
+    for (int i = 0; i < size; ++i) {
+      const int kHi = (i + 1) * kElemBitwidth - 1;
+      const int kLo = i * kElemBitwidth;
+      auto tmp = x[i];
+      packet.data.range(kHi, kLo) = *((ap_uint<kElemBitwidth>*)&tmp);
+    }
+    packet.last = send_last? 1 : 0;
+    // NOTE: If TKEEP and TSTRB are both high, then the packet is a data type.
+    packet.keep = this->_all_ones; // Set TKEEP to all ones.
+    packet.strb = this->_all_ones; // Set TSTRB to all ones.
+    this->_port.write(packet);
   }
 
   /**
@@ -710,9 +744,26 @@ public:
    * @tparam     T     The type of the buffer
    */
   template<typename T>
-  inline void PushFromBuffer(const int size, const T *x) {
+  inline void PushFromBuffer(const int size, const T *x, bool send_last = false) {
 #pragma HLS INLINE
-    AxiClass::template PushFromBuffer<T>(size, x);
+    AxiClass::template PushFromBuffer<T>(size, x, send_last);
+  }
+
+  /**
+   * @brief      Aggregates a buffer into a single packet and pushes it to the
+   *             FIFO.
+   *
+   * @param[in]  size       The size of the buffer: assert(bitwidthElem * size
+   *                        == bitwidthStream)
+   * @param[in]  x          The buffer to read from
+   * @param[in]  send_last  Whether to send TLAST
+   *
+   * @tparam     T          The stream type
+   */
+  template<typename T>
+  inline void PushBuffer(const int size, const T *x, bool send_last = false) {
+#pragma HLS INLINE
+    AxiClass::template PushBuffer<T>(size, x, send_last);
   }
 
   /**
