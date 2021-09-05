@@ -659,7 +659,6 @@ proc create_root_design { parentCell } {
    CONFIG.c_include_mm2s {0} \
    CONFIG.c_include_s2mm_dre {1} \
    CONFIG.c_include_sg {0} \
-   CONFIG.c_m_axi_s2mm_data_width {256} \
    CONFIG.c_micro_dma {0} \
    CONFIG.c_s2mm_burst_size {128} \
    CONFIG.c_s_axis_s2mm_tdata_width {256} \

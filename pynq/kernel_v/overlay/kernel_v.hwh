@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Wed Sep  1 10:14:56 2021" VIVADOVERSION="2020.2">
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Sun Sep  5 11:39:34 2021" VIVADOVERSION="2020.2">
 
   <SYSTEMINFO ARCH="zynq" BOARD="em.avnet.com:zed:part0:1.4" DEVICE="7z020" NAME="design_1" PACKAGE="clg484" SPEEDGRADE="-1"/>
 
@@ -159,7 +159,7 @@
   </EXTERNALINTERFACES>
 
   <MODULES>
-    <MODULE COREREVISION="2109010954" FULLNAME="/HlsKernelV_0" HWVERSION="1.0" INSTANCE="HlsKernelV_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="HlsKernelV" VLNV="xilinx.com:hls:HlsKernelV:1.0">
+    <MODULE COREREVISION="2109051103" FULLNAME="/HlsKernelV_0" HWVERSION="1.0" INSTANCE="HlsKernelV_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="HlsKernelV" VLNV="xilinx.com:hls:HlsKernelV:1.0">
       <DOCUMENTS/>
       <ADDRESSBLOCKS>
         <ADDRESSBLOCK ACCESS="read-write" INTERFACE="s_axi_control" NAME="Reg" RANGE="65536" USAGE="register">
@@ -240,7 +240,27 @@
                   <PROPERTY NAME="WRITE_CONSTRAINT" VALUE="0"/>
                   <PROPERTY NAME="READ_ACTION" VALUE="modify"/>
                   <PROPERTY NAME="BIT_OFFSET" VALUE="8"/>
-                  <PROPERTY NAME="BIT_WIDTH" VALUE="24"/>
+                  <PROPERTY NAME="BIT_WIDTH" VALUE="1"/>
+                </FIELD>
+                <FIELD NAME="RESERVED_3">
+                  <PROPERTY NAME="DESCRIPTION" VALUE="Reserved.  0s on read."/>
+                  <PROPERTY NAME="ADDRESS_OFFSET" VALUE="9"/>
+                  <PROPERTY NAME="ACCESS" VALUE="read-only"/>
+                  <PROPERTY NAME="MODIFIED_READ_VALUES" VALUE=""/>
+                  <PROPERTY NAME="WRITE_CONSTRAINT" VALUE="0"/>
+                  <PROPERTY NAME="READ_ACTION" VALUE="modify"/>
+                  <PROPERTY NAME="BIT_OFFSET" VALUE="9"/>
+                  <PROPERTY NAME="BIT_WIDTH" VALUE="1"/>
+                </FIELD>
+                <FIELD NAME="RESERVED_4">
+                  <PROPERTY NAME="DESCRIPTION" VALUE="Reserved.  0s on read."/>
+                  <PROPERTY NAME="ADDRESS_OFFSET" VALUE="10"/>
+                  <PROPERTY NAME="ACCESS" VALUE="read-only"/>
+                  <PROPERTY NAME="MODIFIED_READ_VALUES" VALUE=""/>
+                  <PROPERTY NAME="WRITE_CONSTRAINT" VALUE="0"/>
+                  <PROPERTY NAME="READ_ACTION" VALUE="modify"/>
+                  <PROPERTY NAME="BIT_OFFSET" VALUE="10"/>
+                  <PROPERTY NAME="BIT_WIDTH" VALUE="22"/>
                 </FIELD>
               </FIELDS>
             </REGISTER>
@@ -394,16 +414,16 @@
                 </FIELD>
               </FIELDS>
             </REGISTER>
-            <REGISTER NAME="num_refinements_1">
-              <PROPERTY NAME="DESCRIPTION" VALUE="Data signal of num_refinements"/>
+            <REGISTER NAME="num_refinements_0">
+              <PROPERTY NAME="DESCRIPTION" VALUE="Data signal of num_refinements_0"/>
               <PROPERTY NAME="ADDRESS_OFFSET" VALUE="32"/>
               <PROPERTY NAME="SIZE" VALUE="32"/>
               <PROPERTY NAME="ACCESS" VALUE="write-only"/>
               <PROPERTY NAME="IS_ENABLED" VALUE="true"/>
               <PROPERTY NAME="RESET_VALUE" VALUE="0"/>
               <FIELDS>
-                <FIELD NAME="num_refinements">
-                  <PROPERTY NAME="DESCRIPTION" VALUE="Bit 31 to 0 of num_refinements"/>
+                <FIELD NAME="num_refinements_0">
+                  <PROPERTY NAME="DESCRIPTION" VALUE="Bit 31 to 0 of num_refinements_0"/>
                   <PROPERTY NAME="ADDRESS_OFFSET" VALUE="0"/>
                   <PROPERTY NAME="ACCESS" VALUE="write-only"/>
                   <PROPERTY NAME="MODIFIED_READ_VALUES" VALUE=""/>
@@ -414,16 +434,16 @@
                 </FIELD>
               </FIELDS>
             </REGISTER>
-            <REGISTER NAME="num_refinements_2">
-              <PROPERTY NAME="DESCRIPTION" VALUE="Data signal of num_refinements"/>
-              <PROPERTY NAME="ADDRESS_OFFSET" VALUE="36"/>
+            <REGISTER NAME="num_refinements_1">
+              <PROPERTY NAME="DESCRIPTION" VALUE="Data signal of num_refinements_1"/>
+              <PROPERTY NAME="ADDRESS_OFFSET" VALUE="40"/>
               <PROPERTY NAME="SIZE" VALUE="32"/>
               <PROPERTY NAME="ACCESS" VALUE="write-only"/>
               <PROPERTY NAME="IS_ENABLED" VALUE="true"/>
               <PROPERTY NAME="RESET_VALUE" VALUE="0"/>
               <FIELDS>
-                <FIELD NAME="num_refinements">
-                  <PROPERTY NAME="DESCRIPTION" VALUE="Bit 63 to 32 of num_refinements"/>
+                <FIELD NAME="num_refinements_1">
+                  <PROPERTY NAME="DESCRIPTION" VALUE="Bit 31 to 0 of num_refinements_1"/>
                   <PROPERTY NAME="ADDRESS_OFFSET" VALUE="0"/>
                   <PROPERTY NAME="ACCESS" VALUE="write-only"/>
                   <PROPERTY NAME="MODIFIED_READ_VALUES" VALUE=""/>
@@ -562,17 +582,17 @@
             <CONNECTION INSTANCE="xus_dma" PORT="m_axis_mm2s_tdata"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="0" NAME="xus_port_TLAST" RIGHT="0" SIGIS="undef" SIGNAME="HlsKernelV_0_xus_port_TLAST">
-          <CONNECTIONS>
-            <CONNECTION INSTANCE="xus_dma" PORT="m_axis_mm2s_tlast"/>
-          </CONNECTIONS>
-        </PORT>
         <PORT DIR="I" LEFT="7" NAME="xus_port_TKEEP" RIGHT="0" SIGIS="undef" SIGNAME="HlsKernelV_0_xus_port_TKEEP">
           <CONNECTIONS>
             <CONNECTION INSTANCE="xus_dma" PORT="m_axis_mm2s_tkeep"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="I" LEFT="7" NAME="xus_port_TSTRB" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" LEFT="0" NAME="xus_port_TLAST" RIGHT="0" SIGIS="undef" SIGNAME="HlsKernelV_0_xus_port_TLAST">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="xus_dma" PORT="m_axis_mm2s_tlast"/>
+          </CONNECTIONS>
+        </PORT>
         <PORT DIR="I" NAME="v_port_TVALID" SIGIS="undef" SIGNAME="HlsKernelV_0_v_port_TVALID">
           <CONNECTIONS>
             <CONNECTION INSTANCE="v_dma" PORT="m_axis_mm2s_tvalid"/>
@@ -588,17 +608,17 @@
             <CONNECTION INSTANCE="v_dma" PORT="m_axis_mm2s_tdata"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="0" NAME="v_port_TLAST" RIGHT="0" SIGIS="undef" SIGNAME="HlsKernelV_0_v_port_TLAST">
-          <CONNECTIONS>
-            <CONNECTION INSTANCE="v_dma" PORT="m_axis_mm2s_tlast"/>
-          </CONNECTIONS>
-        </PORT>
         <PORT DIR="I" LEFT="7" NAME="v_port_TKEEP" RIGHT="0" SIGIS="undef" SIGNAME="HlsKernelV_0_v_port_TKEEP">
           <CONNECTIONS>
             <CONNECTION INSTANCE="v_dma" PORT="m_axis_mm2s_tkeep"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="I" LEFT="7" NAME="v_port_TSTRB" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" LEFT="0" NAME="v_port_TLAST" RIGHT="0" SIGIS="undef" SIGNAME="HlsKernelV_0_v_port_TLAST">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="v_dma" PORT="m_axis_mm2s_tlast"/>
+          </CONNECTIONS>
+        </PORT>
         <PORT DIR="O" NAME="y_port_TVALID" SIGIS="undef" SIGNAME="HlsKernelV_0_y_port_TVALID">
           <CONNECTIONS>
             <CONNECTION INSTANCE="y_dma" PORT="s_axis_s2mm_tvalid"/>
@@ -614,17 +634,17 @@
             <CONNECTION INSTANCE="y_dma" PORT="s_axis_s2mm_tdata"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" LEFT="0" NAME="y_port_TLAST" RIGHT="0" SIGIS="undef" SIGNAME="HlsKernelV_0_y_port_TLAST">
-          <CONNECTIONS>
-            <CONNECTION INSTANCE="y_dma" PORT="s_axis_s2mm_tlast"/>
-          </CONNECTIONS>
-        </PORT>
         <PORT DIR="O" LEFT="31" NAME="y_port_TKEEP" RIGHT="0" SIGIS="undef" SIGNAME="HlsKernelV_0_y_port_TKEEP">
           <CONNECTIONS>
             <CONNECTION INSTANCE="y_dma" PORT="s_axis_s2mm_tkeep"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="O" LEFT="31" NAME="y_port_TSTRB" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="O" LEFT="0" NAME="y_port_TLAST" RIGHT="0" SIGIS="undef" SIGNAME="HlsKernelV_0_y_port_TLAST">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="y_dma" PORT="s_axis_s2mm_tlast"/>
+          </CONNECTIONS>
+        </PORT>
       </PORTS>
       <BUSINTERFACES>
         <BUSINTERFACE BUSNAME="ps7_0_axi_periph_M00_AXI" DATAWIDTH="32" NAME="s_axi_control" TYPE="SLAVE" VLNV="xilinx.com:interface:aximm:1.0">
@@ -649,8 +669,8 @@
           <PARAMETER NAME="HAS_BRESP" VALUE="1"/>
           <PARAMETER NAME="HAS_RRESP" VALUE="1"/>
           <PARAMETER NAME="SUPPORTS_NARROW_BURST" VALUE="0"/>
-          <PARAMETER NAME="NUM_READ_OUTSTANDING" VALUE="2"/>
-          <PARAMETER NAME="NUM_WRITE_OUTSTANDING" VALUE="2"/>
+          <PARAMETER NAME="NUM_READ_OUTSTANDING" VALUE="1"/>
+          <PARAMETER NAME="NUM_WRITE_OUTSTANDING" VALUE="1"/>
           <PARAMETER NAME="MAX_BURST_LENGTH" VALUE="1"/>
           <PARAMETER NAME="PHASE" VALUE="0.000"/>
           <PARAMETER NAME="CLK_DOMAIN" VALUE="design_1_processing_system7_0_0_FCLK_CLK0"/>
@@ -682,7 +702,7 @@
         <BUSINTERFACE BUSNAME="xus_dma_M_AXIS_MM2S" NAME="xus_port" TYPE="TARGET" VLNV="xilinx.com:interface:axis:1.0">
           <PARAMETER NAME="TDATA_NUM_BYTES" VALUE="8"/>
           <PARAMETER NAME="TUSER_WIDTH" VALUE="0"/>
-          <PARAMETER NAME="LAYERED_METADATA" VALUE="undef"/>
+          <PARAMETER NAME="LAYERED_METADATA"/>
           <PARAMETER NAME="TDEST_WIDTH" VALUE="0"/>
           <PARAMETER NAME="TID_WIDTH" VALUE="0"/>
           <PARAMETER NAME="HAS_TREADY" VALUE="1"/>
@@ -697,15 +717,15 @@
             <PORTMAP LOGICAL="TVALID" PHYSICAL="xus_port_TVALID"/>
             <PORTMAP LOGICAL="TREADY" PHYSICAL="xus_port_TREADY"/>
             <PORTMAP LOGICAL="TDATA" PHYSICAL="xus_port_TDATA"/>
-            <PORTMAP LOGICAL="TLAST" PHYSICAL="xus_port_TLAST"/>
             <PORTMAP LOGICAL="TKEEP" PHYSICAL="xus_port_TKEEP"/>
             <PORTMAP LOGICAL="TSTRB" PHYSICAL="xus_port_TSTRB"/>
+            <PORTMAP LOGICAL="TLAST" PHYSICAL="xus_port_TLAST"/>
           </PORTMAPS>
         </BUSINTERFACE>
         <BUSINTERFACE BUSNAME="v_dma_M_AXIS_MM2S" NAME="v_port" TYPE="TARGET" VLNV="xilinx.com:interface:axis:1.0">
           <PARAMETER NAME="TDATA_NUM_BYTES" VALUE="8"/>
           <PARAMETER NAME="TUSER_WIDTH" VALUE="0"/>
-          <PARAMETER NAME="LAYERED_METADATA" VALUE="undef"/>
+          <PARAMETER NAME="LAYERED_METADATA"/>
           <PARAMETER NAME="TDEST_WIDTH" VALUE="0"/>
           <PARAMETER NAME="TID_WIDTH" VALUE="0"/>
           <PARAMETER NAME="HAS_TREADY" VALUE="1"/>
@@ -720,9 +740,9 @@
             <PORTMAP LOGICAL="TVALID" PHYSICAL="v_port_TVALID"/>
             <PORTMAP LOGICAL="TREADY" PHYSICAL="v_port_TREADY"/>
             <PORTMAP LOGICAL="TDATA" PHYSICAL="v_port_TDATA"/>
-            <PORTMAP LOGICAL="TLAST" PHYSICAL="v_port_TLAST"/>
             <PORTMAP LOGICAL="TKEEP" PHYSICAL="v_port_TKEEP"/>
             <PORTMAP LOGICAL="TSTRB" PHYSICAL="v_port_TSTRB"/>
+            <PORTMAP LOGICAL="TLAST" PHYSICAL="v_port_TLAST"/>
           </PORTMAPS>
         </BUSINTERFACE>
         <BUSINTERFACE BUSNAME="HlsKernelV_0_y_port" NAME="y_port" TYPE="INITIATOR" VLNV="xilinx.com:interface:axis:1.0">
@@ -743,9 +763,9 @@
             <PORTMAP LOGICAL="TVALID" PHYSICAL="y_port_TVALID"/>
             <PORTMAP LOGICAL="TREADY" PHYSICAL="y_port_TREADY"/>
             <PORTMAP LOGICAL="TDATA" PHYSICAL="y_port_TDATA"/>
-            <PORTMAP LOGICAL="TLAST" PHYSICAL="y_port_TLAST"/>
             <PORTMAP LOGICAL="TKEEP" PHYSICAL="y_port_TKEEP"/>
             <PORTMAP LOGICAL="TSTRB" PHYSICAL="y_port_TSTRB"/>
+            <PORTMAP LOGICAL="TLAST" PHYSICAL="y_port_TLAST"/>
           </PORTMAPS>
         </BUSINTERFACE>
       </BUSINTERFACES>

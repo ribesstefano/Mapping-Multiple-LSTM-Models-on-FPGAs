@@ -47,7 +47,8 @@ template <
   typename PortWrapper = svd::AxiStreamPort<params::VectG_AxiWidth>
 >
 void KernelS(const int num_active_inputs,
-    const hls::vector<int, params::N> num_refinements,
+    const int num_refinements[params::N],
+    // const hls::vector<int, params::N> num_refinements,
     hls::stream<typename PortWrapper::PacketType>& xu_port,
     hls::stream<typename params::VectG_AxiPacketType>& s_port,
     hls::stream<typename PortWrapper::PacketType>& xus_port) {
@@ -109,7 +110,9 @@ typedef svd::SvdParameters<tests::kNumInputs, tests::kInputSize,
 
 #ifndef __VITIS_HLS__
 #else
-void HlsKernelS(const hls::vector<int, tests::params::N> num_refinements,
+void HlsKernelS(
+  const int num_refinements[tests::params::N],
+  // const hls::vector<int, tests::params::N> num_refinements,
   hls::stream<typename tests::params::VectG_AxiPacketType>& xu_port,
   hls::stream<typename tests::params::VectG_AxiPacketType>& s_port,
   hls::stream<typename tests::params::VectG_AxiPacketType>& xus_port);

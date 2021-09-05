@@ -3,7 +3,8 @@
 void HlsSvdKernel(const int num_active_inputs,
     const int input_size,
     const int output_size,
-    const hls::vector<int, svd::svd_params::N> num_refinements,
+    const int num_refinements[svd::svd_params::N],
+    // const hls::vector<int, svd::svd_params::N> num_refinements,
     hls::stream<typename svd::svd_params::VectTuAxiPacketType>& x_port,
     hls::stream<typename svd::svd_params::VectTuAxiPacketType>& u_port,
     hls::stream<typename svd::svd_params::VectG_AxiPacketType>& s_port,
@@ -40,7 +41,7 @@ void HlsSvdKernelFixed(
   const int kNumActiveInputs = svd::svd_params::N;
   const int kInputSize = svd::svd_params::I;
   const int kOutputSize = svd::svd_params::H;
-  const hls::vector<int, svd::svd_params::N> kNumRefinements = svd::svd_params::R;
+  const int kNumRefinements[svd::svd_params::N] = {svd::svd_params::R};
   svd::SvdKernel<svd::svd_params>(kNumActiveInputs, kInputSize, kOutputSize,
     kNumRefinements, x_port, u_port, s_port, v_port, y_port);
 }

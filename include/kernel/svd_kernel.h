@@ -27,7 +27,8 @@ template <
 void SvdKernel(const int num_active_inputs,
     const int input_size,
     const int output_size,
-    const hls::vector<int, params::N> num_refinements,
+    const int num_refinements[params::N],
+    // const hls::vector<int, params::N> num_refinements,
     hls::stream<typename params::VectTuAxiPacketType>& x_port,
     hls::stream<typename params::VectTuAxiPacketType>& u_port,
     hls::stream<typename params::VectG_AxiPacketType>& s_port,
@@ -45,8 +46,8 @@ void SvdKernel(const int num_active_inputs,
 #pragma HLS STREAM variable=xus_port depth=2
   svd::KernelU<params, WrapperFifoG>(num_active_inputs, input_size,
     num_refinements, pad_output, x_port, u_port, xu_port);
-  svd::KernelS<params, WrapperFifoG>(num_active_inputs, num_refinements, xu_port,
-    s_port, xus_port);
+  svd::KernelS<params, WrapperFifoG>(num_active_inputs, num_refinements,
+    xu_port, s_port, xus_port);
   svd::KernelV<params, WrapperFifoG, WrapperAxisGTv>(num_active_inputs,
     output_size, num_refinements, xus_port, v_port, y_port);
 }

@@ -8,7 +8,8 @@
 
 #ifdef __VITIS_HLS__
 void HlsKernelS(const int num_active_inputs,
-    const hls::vector<int, tests::params::N> num_refinements,
+    const int num_refinements[tests::params::N],
+    // const hls::vector<int, tests::params::N> num_refinements,
     hls::stream<typename tests::params::VectG_AxiPacketType>& xu_port,
     hls::stream<typename tests::params::VectG_AxiPacketType>& s_port,
     hls::stream<typename tests::params::VectG_AxiPacketType>& xus_port) {
