@@ -1,4 +1,5 @@
 #include "layers/lstm/hls/lstm_svd.h"
+#include "layers/dense/hls/dense_svd.h"
 #include "svd_params.h"
 #include "dma/svd_dma.h"
 #include "kernel/u_kernel.h"
@@ -418,4 +419,72 @@ void HlsLstmSvd(const int num_active_inputs,
     h_prev_port, u_rec_port, s_rec_port, v_rec_port, bias_port, c_prev_port,
     h_curr_port, c_curr_port);
 }
-#endif
+#endif // __VITIS_HLS__
+
+/**
+ * @brief      HLS Wrapper that calls a DenseSvd accelerator.
+ *
+ *             Useful in Cosimulation.
+ *
+ * @param[in]  num_active_inputs  The number of active inputs
+ * @param[in]  input_size         The input size
+ * @param[in]  output_size        The output size
+ * @param[in]  num_refinements    The number of refinements
+ * @param[in]  x                  The input array. Shape: (N, I)
+ * @param[in]  u                  The u array. Shape: (R, I, G)
+ * @param[in]  s                  The s array. Shape: (R, N, G)
+ * @param[in]  v                  The v array. Shape: (R, H, G)
+ * @param[in]  bias               The bias array. Shape: (N, G, H)
+ * @param      y                  The y array. Shape: (N, G, H)
+ */
+void HlsWrapperLstmSvd(
+    const int num_active_inputs,
+    const int input_size,
+    const int output_size,
+    const int num_refinements[svd::lstm_params::N],
+    // Current Gates
+    const typename svd::lstm_params::ActivationD* x,
+    const typename svd::lstm_params::ActivationD* u_cur,
+    const typename svd::lstm_params::ActivationD* s_cur,
+    const typename svd::lstm_params::ActivationD* v_cur,
+    // Recurrent Gates
+    const typename svd::lstm_params::ActivationD* h,
+    const typename svd::lstm_params::ActivationD* u_rec,
+    const typename svd::lstm_params::ActivationD* s_rec,
+    const typename svd::lstm_params::ActivationD* v_rec,
+    // Non-Linearities
+    const typename svd::lstm_params::ActivationD* bias,
+    const typename svd::lstm_params::ActivationD* c_prev,
+    const typename svd::lstm_params::ActivationD* h_curr,
+    const typename svd::lstm_params::ActivationD* c_curr
+) {
+#ifdef __VITIS_HLS__
+  // Current Gates
+  hls::stream<typename svd::lstm_params::VectTuAxiPacketType> x_port;
+  hls::stream<typename svd::lstm_params::VectTuAxiPacketType> u_cur_port;
+  hls::stream<typename svd::lstm_params::VectG_AxiPacketType> s_cur_port;
+  hls::stream<typename svd::lstm_params::VectTvAxiPacketType> v_cur_port;
+  // Recurrent Gates
+  hls::stream<typename svd::lstm_params::VectTuAxiPacketType> h_prev_port;
+  hls::stream<typename svd::lstm_params::VectTuAxiPacketType> u_rec_port;
+  hls::stream<typename svd::lstm_params::VectG_AxiPacketType> s_rec_port;
+  hls::stream<typename svd::lstm_params::VectTvAxiPacketType> v_rec_port;
+  // Non-Linearities
+  hls::stream<typename svd::lstm_params::VectGTvAxiPacketType> bias_port;
+  hls::stream<typename svd::lstm_params::VectTvAxiPacketType> c_prev_port;
+  hls::stream<typename svd::lstm_params::VectTvAxiPacketType> h_curr_port;
+  hls::stream<typename svd::lstm_params::VectTvAxiPacketType> c_curr_port;
+  svd::SetLstmSvdInputs<svd::lstm_params>(
+    num_active_inputs, input_size, output_size, num_refinements,
+    x, u_cur, s_cur, v_cur, bias,
+    h, u_rec, s_rec, v_rec,
+    x_port, u_cur_port, s_cur_port, v_cur_port,
+    h_prev_port, u_rec_port, s_rec_port, v_rec_port,
+    bias_port, c_prev_port);
+  HlsLstmSvd(num_active_inputs, input_size, output_size, num_refinements, x_port, u_cur_port, s_cur_port, v_cur_port, h_prev_port, u_rec_port, s_rec_port, v_rec_port, bias_port, c_prev_port, h_curr_port, c_curr_port);
+  // svd::GetSvdKernelOutputs<svd::lstm_params>(num_active_inputs, output_size,
+  //   h_curr_port, h_curr);
+  // svd::GetSvdKernelOutputs<svd::lstm_params>(num_active_inputs, output_size,
+  //   h_curr_port, h_curr);
+#endif // __VITIS_HLS__
+}

@@ -103,10 +103,8 @@ void SetDenseSvdInputs(const int num_active_inputs,
     hls::stream<typename params::VectGTvAxiPacketType>& bias_port) {
   typedef typename params::ActivationD ActivationType;
   const int kG = params::G; // NOTE: G is actually equal to 1.
-  const int kTu = params::Tu;
   const int kTv = params::Tv;
   const int kGTv = kG * kTv;
-  const int kNumTilesU = input_size / kTu;
   const int kNumTilesV = output_size / kTv;
   auto bias_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(bias_port);
   typename params::VectGTvType bias_val;

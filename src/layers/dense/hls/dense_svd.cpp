@@ -56,13 +56,6 @@ void HlsWrapperDenseSvd(const int num_active_inputs,
     const typename svd::dense_params::ActivationD* bias,
     typename svd::dense_params::ActivationD* y) {
 #ifdef __VITIS_HLS__
-  typedef typename svd::dense_params::ActivationD ActivationType;
-  const int kG = svd::dense_params::G; // NOTE: G is actually equal to 1.
-  const int kTu = svd::dense_params::Tu;
-  const int kTv = svd::dense_params::Tv;
-  const int kGTv = kG * kTv;
-  const int kNumTilesU = input_size / kTu;
-  const int kNumTilesV = output_size / kTv;
   hls::stream<typename svd::dense_params::VectTuAxiPacketType> x_port("x_port");
   hls::stream<typename svd::dense_params::VectTuAxiPacketType> u_port("u_port");
   hls::stream<typename svd::dense_params::VectG_AxiPacketType> s_port("s_port");
