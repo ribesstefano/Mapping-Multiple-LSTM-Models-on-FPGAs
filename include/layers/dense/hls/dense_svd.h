@@ -49,16 +49,15 @@ void DenseSvdKernel(const int num_active_inputs,
   svd::SvdKernel<params, WrapperFifoGTv>(num_active_inputs, input_size,
     output_size, num_refinements, x_port, u_port, s_port, v_port, y_fifo);
   Apply_Bias:
-  for (int i = 0; i < output_size / params::Tv; ++i) {
-    for (int j = 0; j < num_active_inputs; ++j) {
+  for (int i = 0; i < output_size / params::Tv * num_active_inputs; ++i) {
 #pragma HLS PIPELINE II=1
-      const int kGTv = params::G * params::Tv; // NOTE: G is actually equal to 1.
-      const auto y_val = y_axis.template PopVector<ActivationType, kGTv>();
-      const auto bias_val = bias_axis.template PopVector<ActivationType, kGTv>();
-      const auto y_out = y_val + bias_val;
+    const int kGTv = params::G * params::Tv; // NOTE: G is actually equal to 1.
+    const auto y_val = y_axis.template PopVector<ActivationType, kGTv>();
+    const auto bias_val = bias_axis.template PopVector<ActivationType, kGTv>();
+    const auto y_out = y_val + bias_val;
 // #pragma HLS BIND_OP variable=y_out op=add impl=dsp latency=3
-      y_out_axis.template PushVector<ActivationType, kGTv>(y_out);
-    }
+    const bool kIsLast = i == output_size / params::Tv * num_active_inputs - 1;
+    y_out_axis.template PushVector<ActivationType, kGTv>(y_out, kIsLast);
   }
 }
 #endif // end __VITIS_HLS__

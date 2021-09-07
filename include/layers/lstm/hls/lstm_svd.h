@@ -242,7 +242,7 @@ void LstmSvdKernel(const int num_active_inputs,
           bias[j * params::G + 2], bias[j * params::G + 3],
           c_prev[j], c_curr[j], h_curr[j]);
       }
-      const bool kIsLast = i == output_size - 1 && k == num_active_inputs - 1; 
+      const bool kIsLast = i == output_size / params::Tv - 1 && k == num_active_inputs - 1;
       c_curr_axis.template PushBuffer<ActivationType>(params::Tv, c_curr, kIsLast);
       h_curr_axis.template PushBuffer<ActivationType>(params::Tv, h_curr, kIsLast);
     }
