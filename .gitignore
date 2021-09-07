@@ -8,7 +8,7 @@ data/windows*
 # Hardware Directories
 vivado_hls.log
 vitis_hls.log
-hls/
+hls_prj/
 vivado/
 vitis_include/
 ./token

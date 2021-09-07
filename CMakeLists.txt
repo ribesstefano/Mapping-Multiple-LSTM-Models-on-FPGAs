@@ -23,16 +23,11 @@ else()
 	set(CMAKE_CXX_STANDARD_REQUIRED True)
 	set(HLS_INCLUDE_DIRS ${VIVADO_INCLUDE_DIRS})
 endif()
-find_package(OpenCv REQUIRED)
+# find_package(OpenCv REQUIRED)
 
 message(${HLS_INCLUDE_DIRS})
 
 # Add all definitions
-if (WIN32)
-	add_compile_definitions(IMAGE_OUTPUT_PATH="C:/Users/ste/phd/hls_projects/hls_svd/data")
-else()
-	add_compile_definitions(IMAGE_OUTPUT_PATH="/mnt/c/Users/ste/phd/hls_projects/hls_svd/data")
-endif()
 # The following definitions is required for compiling half-precision numbers.
 add_compile_definitions(HLS_NO_XIL_FPO_LIB)
 # add_compile_definitions(USE_FLOAT)
@@ -52,7 +47,7 @@ add_compile_definitions(FIX_FRACT_WIDTH=5)
 
 # Move executable in bin/, along side the DLLs (copied)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-file(COPY ${OpenCv_LIBS} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
+# file(COPY ${OpenCv_LIBS} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 
 # NOTE: an object file becomes a library. All libraries/objects must be LINKED later!
 # Tell the application where to find the other CMake config files.

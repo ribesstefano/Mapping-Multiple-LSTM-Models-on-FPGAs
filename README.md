@@ -149,4 +149,6 @@ List of TODOs:
 
 List of possible bugs:
 
-* Constructing data handler storage might lead to segmentation faults. More checks needed.
+* Constructing data handler storage might lead to segmentation faults.
+* Having `R == 1` might trigger some asserts.
+* Having `output_size == H` in HlsKernelV might break hardware runs.

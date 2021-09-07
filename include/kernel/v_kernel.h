@@ -565,11 +565,6 @@ void KernelV(const int num_active_inputs,
 // #pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=2 // I'm not accessing N dimension in parallel
 #pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=3
 #pragma HLS BIND_STORAGE variable=y_buffer type=ram_t2p impl=bram latency=1
-
-#ifndef __SYNTHESIS__
-  std::cout << "[INFO] V-Kernel, FIFO depth: " << kStreamDepth_V << std::endl;
-#endif
-
   // const int R_max = params::R;
   int R_max = num_refinements[0];
   Get_Max_R:
