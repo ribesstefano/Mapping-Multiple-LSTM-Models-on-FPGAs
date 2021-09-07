@@ -5,7 +5,7 @@ set PRJ_PATH [pwd]
 
 exec mkdir -p -- ./hls_prj
 exec mkdir -p -- ./hls_prj/reports
-cd hls
+cd hls_prj
 
 set USE_VITIS 1
 # ==============================================================================
@@ -109,8 +109,8 @@ if {${reset_project}} {
 set_top ${TOP}
 
 set HLS_REPORT_PATH "${PROJECT_NAME}/solution_${TOP}/syn/report/"
-set REPORT_DIR "${PRJ_PATH}/hls/reports"
-set REPORT_FILE_PATH "${PRJ_PATH}/hls/reports/"
+set REPORT_DIR "${PRJ_PATH}/hls_prj/reports"
+set REPORT_FILE_PATH "${PRJ_PATH}/hls_prj/reports/"
 # set VIVADO_LIB "C:/Xilinx/Vivado/2018.3/include/"
 set BLAS_LIB "C:/Users/ste/.caffe/dependencies/libraries_v140_x64_py27_1.1.0/libraries/lib/libopenblas.a"
 set BLAS_LIB_DIR "C:/Users/ste/.caffe/dependencies/libraries_v140_x64_py27_1.1.0/libraries/lib"
@@ -300,7 +300,7 @@ if {${export}} {
 }
 
 puts "================================================================"
-puts "\[INFO\] Closing project: ./hls/${PROJECT_NAME}"
+puts "\[INFO\] Closing project: ./hls_prj/${PROJECT_NAME}"
 puts "================================================================"
 
 exit
