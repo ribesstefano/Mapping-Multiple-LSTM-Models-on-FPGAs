@@ -4,8 +4,10 @@
 #include "svd_params.h"
 #include "kernel/svd_kernel.h"
 #include "math_utils/activation_functions.h"
+#include "layers/dense/hls/dense_svd.h"
 
 #include "ap_int.h"
+#include "hls_stream.h"
 
 namespace svd {
 
@@ -245,6 +247,137 @@ void LstmSvdKernel(const int num_active_inputs,
       h_curr_axis.template PushBuffer<ActivationType>(params::Tv, h_curr, kIsLast);
     }
   }
+}
+#endif // end __VITIS_HLS__
+
+/**
+ * @brief      Sets the LstmSvd kernel inputs, i.e. streams from arrays into
+ *             hls::streams.
+ *
+ * @param[in]  num_active_inputs  The number of active inputs
+ * @param[in]  input_size         The input size
+ * @param[in]  output_size        The output size
+ * @param[in]  num_refinements    The number of refinements
+ * @param[in]  x                  The input array. Shape: (N, I)
+ * @param[in]  u                  The u array. Shape: (R, I, G)
+ * @param[in]  s                  The s array. Shape: (R, N, G)
+ * @param[in]  v                  The v array. Shape: (R, H, G)
+ * @param[in]  bias               The bias array. Shape: (N, G, H)
+ * @param      x_port             The x port to be used as argument to SvdKernel
+ * @param      u_port             The u port to be used as argument to SvdKernel
+ * @param      s_port             The s port to be used as argument to SvdKernel
+ * @param      v_port             The v port to be used as argument to SvdKernel
+ * @param      bias_port          The bias port to be used as argument to
+ *                                SvdKernel
+ *
+ * @tparam     params             Collection of SVD configuration params.
+ */
+#ifdef __VITIS_HLS__
+template <typename params>
+void SetLstmSvdInputs(const int num_active_inputs,
+    const int input_size,
+    const int output_size,
+    const int num_refinements[params::N],
+    // Current Gates
+    const typename params::ActivationD* x,
+    const typename params::ActivationD* u_cur,
+    const typename params::ActivationD* s_cur,
+    const typename params::ActivationD* v_cur,
+    // Recurrent Gates
+    const typename params::ActivationD* h,
+    const typename params::ActivationD* u_rec,
+    const typename params::ActivationD* s_rec,
+    const typename params::ActivationD* v_rec,
+    // Non-Linearities
+    const typename params::ActivationD* bias,
+      // Current Gates
+    hls::stream<typename params::VectTuAxiPacketType>& x_port,
+    hls::stream<typename params::VectTuAxiPacketType>& u_cur_port,
+    hls::stream<typename params::VectG_AxiPacketType>& s_cur_port,
+    hls::stream<typename params::VectTvAxiPacketType>& v_cur_port,
+    // Recurrent Gates
+    hls::stream<typename params::VectTuAxiPacketType>& h_prev_port,
+    hls::stream<typename params::VectTuAxiPacketType>& u_rec_port,
+    hls::stream<typename params::VectG_AxiPacketType>& s_rec_port,
+    hls::stream<typename params::VectTvAxiPacketType>& v_rec_port,
+    // Non-Linearities
+    hls::stream<typename params::VectGTvAxiPacketType>& bias_port,
+    hls::stream<typename params::VectTvAxiPacketType>& c_prev_port
+    ) {
+  svd::SetDenseSvdInputs<params>(num_active_inputs, input_size, output_size,
+    num_refinements, x, u_cur, s_cur, v_cur, bias, x_port, u_cur_port,
+    s_cur_port, v_cur_port, bias_port);
+  svd::SetSvdKernelInputs<params>(num_active_inputs, output_size, output_size,
+    num_refinements, h, u_rec, s_rec, v_rec, h_prev_port, u_rec_port,
+    s_rec_port, v_rec_port);
+
+  // typedef typename params::ActivationD ActivationType;
+  // const int kG = params::G; // NOTE: G is actually equal to 1.
+  // const int kTu = params::Tu;
+  // const int kTv = params::Tv;
+  // const int kGTv = kG * kTv;
+  // const int kNumTilesU = input_size / kTu;
+  // const int kNumTilesV = output_size / kTv;
+  // auto bias_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(bias_port);
+  // typename params::VectGTvType bias_val;
+  // for (int i = 0; i < kNumTilesV; ++i) {
+  //   for (int j = 0; j < num_active_inputs; ++j) {
+  //     for (int k = 0; k < kTv; ++k) {
+  //       for (int ii = 0; ii < kG; ++ii) {
+  //         int bias_idx = j * output_size * kG + ii * output_size + i * kTv + k;
+  //         bias_val[k * kG + ii] = bias[bias_idx];
+  //       }
+  //     }
+  //     bias_axis.template PushVector<ActivationType, kGTv>(bias_val);
+  //   }
+  // }
+  // svd::SetSvdKernelInputs<params>(num_active_inputs, input_size,
+  //   output_size, num_refinements, x, u, s, v, x_port, u_port, s_port, v_port);
+}
+#endif // end __VITIS_HLS__
+
+#ifdef __VITIS_HLS__
+template <typename params>
+void GetLstmSvdOutputs(const int num_active_inputs,
+    const int input_size,
+    const int output_size,
+    const int num_refinements[params::N],
+    // Non-Linearities
+    const typename params::ActivationD* h_curr,
+    const typename params::ActivationD* c_curr,
+    // Non-Linearities
+    hls::stream<typename params::VectTvAxiPacketType>& h_curr_port,
+    hls::stream<typename params::VectTvAxiPacketType>& c_curr_port
+    ) {
+  // svd::SetDenseSvdInputs<params>(num_active_inputs, input_size, output_size,
+  //   num_refinements, x, u_cur, s_cur, v_cur, bias, x_port, u_cur_port,
+  //   s_cur_port, v_cur_port, bias_port);
+  // svd::SetSvdKernelInputs<params>(num_active_inputs, output_size, output_size,
+  //   num_refinements, h, u_rec, s_rec, v_rec, h_prev_port, u_rec_port,
+  //   s_rec_port, v_rec_port);
+
+  // typedef typename params::ActivationD ActivationType;
+  // const int kG = params::G; // NOTE: G is actually equal to 1.
+  // const int kTu = params::Tu;
+  // const int kTv = params::Tv;
+  // const int kGTv = kG * kTv;
+  // const int kNumTilesU = input_size / kTu;
+  // const int kNumTilesV = output_size / kTv;
+  // auto bias_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(bias_port);
+  // typename params::VectGTvType bias_val;
+  // for (int i = 0; i < kNumTilesV; ++i) {
+  //   for (int j = 0; j < num_active_inputs; ++j) {
+  //     for (int k = 0; k < kTv; ++k) {
+  //       for (int ii = 0; ii < kG; ++ii) {
+  //         int bias_idx = j * output_size * kG + ii * output_size + i * kTv + k;
+  //         bias_val[k * kG + ii] = bias[bias_idx];
+  //       }
+  //     }
+  //     bias_axis.template PushVector<ActivationType, kGTv>(bias_val);
+  //   }
+  // }
+  // svd::SetSvdKernelInputs<params>(num_active_inputs, input_size,
+  //   output_size, num_refinements, x, u, s, v, x_port, u_port, s_port, v_port);
 }
 #endif // end __VITIS_HLS__
 
