@@ -35,7 +35,7 @@ int main(int argc, char const *argv[]) {
   typedef hls::vector<ActivationType, testu::params::Tu> VectTuAct_Type;
   assert(testu::params::I == testu::params::PrunedSizeU);
 
-  ActivationType x[testu::params::N][testu::params::I]; 
+  ActivationType x[testu::params::N][testu::params::I];
   ActivationType u[num_refinements][testu::params::PrunedSizeU][testu::params::G];
   ActivationType xu[num_refinements][testu::params::N][testu::params::G];
 

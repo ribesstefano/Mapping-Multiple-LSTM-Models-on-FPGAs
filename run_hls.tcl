@@ -3,8 +3,8 @@ source tcl/lstm_params.tcl
 
 set PRJ_PATH [pwd]
 
-exec mkdir -p -- ./hls
-exec mkdir -p -- ./hls/reports
+exec mkdir -p -- ./hls_prj
+exec mkdir -p -- ./hls_prj/reports
 cd hls
 
 set USE_VITIS 1
@@ -15,7 +15,7 @@ set reset_project 1
 set csim 0
 set build_only 0
 set synth 1
-set cosim 0
+set cosim 1
 set export 0
 set place_and_route 0
 set report_info 1
@@ -44,7 +44,7 @@ if {${use_zedboard}} {
 # Top function name, testbench file
 # ==============================================================================
 # NOTE: The namespace must also be included.
-set TOP "HlsLstmSvd" ;# "HlsDenseSvd" ;# "HlsKernelV" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
+set TOP "HlsDenseSvd" ;# "HlsLstmSvd" ;# "HlsKernelV" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
 set TB "test_v_kernel" ; #"test_gemv_kernel"
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
@@ -52,7 +52,7 @@ set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
 # Project name
 # ==============================================================================
 set prefix ":"
-set TOP_NO_NAMESPACE "HlsLstmSvd" ;# "HlsDenseSvd" ;# "HlsKernelV" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
+set TOP_NO_NAMESPACE "HlsDenseSvd" ;# "HlsLstmSvd" ;# "HlsKernelV" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
 puts ${TOP_NO_NAMESPACE}
 set PROJECT_NAME "vitis_${board_name}_${TOP_NO_NAMESPACE}"
 # ==============================================================================

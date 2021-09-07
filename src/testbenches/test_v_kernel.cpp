@@ -30,7 +30,7 @@ int main(int argc, char const *argv[]) {
     output_size = atoi(argv[2]);
   }
   if (argc >= 4) {
-     num_refinements = atoi(argv[3]);
+    num_refinements = atoi(argv[3]);
   }
   const int kMaxRefinements = num_refinements;
   typedef hls::vector<int, testv::params::N> VectN;
