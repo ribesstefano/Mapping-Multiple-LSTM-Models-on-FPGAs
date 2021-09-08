@@ -34,9 +34,12 @@ void DenseSvdKernel(const int num_active_inputs,
 #pragma HLS TOP name=DenseSvdKernel
 // #pragma HLS INLINE
 #pragma HLS DATAFLOW
+#pragma HLS STABLE variable=x_port
+#pragma HLS STABLE variable=u_port
 #pragma HLS STABLE variable=s_port
 #pragma HLS STABLE variable=v_port
 #pragma HLS STABLE variable=bias_port
+#pragma HLS STABLE variable=y_port
   static_assert(params::G == 1, "DenseSvdKernel must have params::G equal to one.");
   assert(params::G == 1);
   typedef typename params::ActivationD ActivationType;
