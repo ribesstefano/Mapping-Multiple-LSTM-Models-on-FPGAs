@@ -38,9 +38,12 @@ void SvdKernel(const int num_active_inputs,
 #pragma HLS TOP name=SvdKernel
 #pragma HLS INLINE
 #pragma HLS DATAFLOW
+#pragma HLS STABLE variable=x_port
+#pragma HLS STABLE variable=u_port
 #pragma HLS STABLE variable=s_port
+#pragma HLS STABLE variable=v_port
+#pragma HLS STABLE variable=y_port
 #pragma HLS ARRAY_PARTITION variable=num_refinements complete
-// #pragma HLS SHARED variable=num_refinements
   const bool pad_output = false;
   typedef svd::AxiStreamFifo<params::VectG_AxiWidth> WrapperFifoG;
   hls::stream<typename WrapperFifoG::PacketType> xu_port("xu_port");
