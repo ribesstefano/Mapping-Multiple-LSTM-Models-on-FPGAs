@@ -12,10 +12,10 @@ namespace svd {
 static const int kDenseNumGates = 1;
 
 typedef svd::SvdParameters<NUM_INPUTS, INPUT_SIZE, HIDDEN_SIZE, NUM_ITERATIONS,
-    NUM_TILES_U, NUM_TILES_V, NUM_ZERO_TILES_U, NUM_ZERO_TILES_V,
-    kDenseNumGates, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>,
-    ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>,
-    ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH> > dense_params;
+  NUM_TILES_U, NUM_TILES_V, NUM_ZERO_TILES_U, NUM_ZERO_TILES_V,
+  kDenseNumGates, ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>,
+  ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>,
+  ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH> > dense_params;
 
 #ifndef __VITIS_HLS__
 #else

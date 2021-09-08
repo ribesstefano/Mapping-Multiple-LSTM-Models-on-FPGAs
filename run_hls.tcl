@@ -44,7 +44,7 @@ if {${use_zedboard}} {
 # Top function name, testbench file
 # ==============================================================================
 # NOTE: The namespace must also be included.
-set TOP "HlsDenseSvd" ;# "HlsLstmSvd" ;# "HlsKernelV" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
+set TOP "HlsSvdKernel" ;# "HlsDenseSvd" ;# "HlsLstmSvd" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
 set TB "test_v_kernel" ; #"test_gemv_kernel"
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
@@ -52,7 +52,7 @@ set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
 # Project name
 # ==============================================================================
 set prefix ":"
-set TOP_NO_NAMESPACE "HlsDenseSvd" ;# "HlsLstmSvd" ;# "HlsKernelV" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
+set TOP_NO_NAMESPACE "HlsSvdKernel" ;# "HlsDenseSvd" ;# "HlsLstmSvd" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
 puts ${TOP_NO_NAMESPACE}
 set PROJECT_NAME "vitis_${board_name}_${TOP_NO_NAMESPACE}"
 # ==============================================================================
@@ -123,6 +123,7 @@ if {${reset_project}} {
     add_files ${PRJ_PATH}/src/kernel/u_kernel.cpp -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/src/kernel/s_kernel.cpp -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/src/kernel/v_kernel.cpp -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/src/kernel/svd_kernel.cpp -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/src/layers/dense/hls/dense_svd.cpp -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/src/layers/lstm/hls/lstm_svd.cpp -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/src/hls_utils/adder_tree.cpp -cflags ${CFLAGS}
@@ -131,6 +132,7 @@ if {${reset_project}} {
     add_files ${PRJ_PATH}/include/kernel/u_kernel.h -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/include/kernel/s_kernel.h -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/include/kernel/v_kernel.h -cflags ${CFLAGS}
+    add_files ${PRJ_PATH}/include/kernel/svd_kernel.h -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/include/layers/dense/hls/dense_svd.h -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/include/layers/lstm/hls/lstm_svd.h -cflags ${CFLAGS}
     add_files ${PRJ_PATH}/include/math_utils/activation_functions.h -cflags ${CFLAGS}
