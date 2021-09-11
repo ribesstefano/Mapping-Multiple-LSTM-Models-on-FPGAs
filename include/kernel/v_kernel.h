@@ -524,48 +524,39 @@ template <
 void KernelV(const int num_active_inputs,
     const int output_size,
     const int num_refinements[params::N],
-    // const hls::vector<int, params::N> num_refinements,
     hls::stream<typename WrapperAxisG::PacketType>& xus_port,
     hls::stream<typename params::VectTvAxiPacketType>& v_port,
     hls::stream<typename WrapperAxisGTv::PacketType>& y_port) {
 #pragma HLS TOP name=KernelV
-// #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
 #pragma HLS INLINE
-
 #pragma HLS STABLE variable=xus_port
 #pragma HLS STABLE variable=v_port
 #pragma HLS STABLE variable=y_port
-
-// #pragma HLS FUNCTION_INSTANTIATE variable=num_active_inputs
-// #pragma HLS FUNCTION_INSTANTIATE variable=output_size
-// #pragma HLS FUNCTION_INSTANTIATE variable=num_refinements
-
   assert(num_active_inputs <= params::N);
   assert(num_active_inputs > 0);
-  // assert(num_refinements >= 0);
   assert(params::H % params::Tv == 0);
   assert(output_size % params::Tv == 0);
   assert(output_size <= params::H);
   typedef typename params::ActivationD ActivationType;
   const int kMaxNumTilesV = params::H / params::Tv;
   const int kNumTilesV = output_size / params::Tv;
-  const int kStreamDepth_V = 32 + kMaxNumTilesV * params::N;
+  const int kStreamDepth_V = 32 + kMaxNumTilesV * params::G;
   assert(kNumTilesV <= kMaxNumTilesV);
   auto xus_axis = svd::AxiStreamInterface<WrapperAxisG>(xus_port);
   auto v_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(v_port);
   auto y_axis = svd::AxiStreamInterface<WrapperAxisGTv>(y_port);
   hls::stream<typename params::VectTvType, kStreamDepth_V> v_streams[params::G];
-
   // NOTE: Having y_buffer as static made cosim work in one-process configuration.
-
   static ActivationType y_buffer[params::G][params::N][params::Tv][kMaxNumTilesV] = {0};
-// #pragma HLS STREAM variable=v_streams depth=kStreamDepth_V
+  typename params::VectTvType v_val;
+  typename params::VectG_Type xus_val[params::N];
+  typename params::VectGTvType y_out;
+// NOTE: I'm not accessing dimension N of y_buffer in parallel.
 #pragma HLS ARRAY_PARTITION variable=v_streams complete
 #pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=1
-// #pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=2 // I'm not accessing N dimension in parallel
 #pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=3
 #pragma HLS BIND_STORAGE variable=y_buffer type=ram_t2p impl=bram latency=1
-  // const int R_max = params::R;
   int R_max = num_refinements[0];
   Get_Max_R:
   for (int i = 1; i < num_active_inputs; ++i) {
@@ -574,9 +565,6 @@ void KernelV(const int num_active_inputs,
       R_max = num_refinements[i];
     }
   }
-  assert(R_max < 512);
-
-  typename params::VectTvType v_val;
   V_DMA:
   for (int i = 0; i < R_max; ++i) {
     for (int j = 0; j < kNumTilesV; ++j) {
@@ -593,13 +581,8 @@ void KernelV(const int num_active_inputs,
       }
     }
   }
-
-  typename params::VectG_Type xus_val[params::N];
-  typename params::VectGTvType y_out;
-
   V_Kernel:
   for (int i = 0; i < R_max; ++i) {
-// #pragma HLS LOOP_MERGE
     for (int j = 0; j < kNumTilesV; ++j) {
       for (int k = 0; k < num_active_inputs; ++k) {
 #pragma HLS PIPELINE II=1
@@ -620,11 +603,10 @@ void KernelV(const int num_active_inputs,
                 y_val = y_buffer[ii][k][jj][j] + v_val[jj] * xus_val[k][ii];
               }
               y_buffer[ii][k][jj][j] = y_val;
-#pragma HLS DEPENDENCE inter variable=y_buffer false
+// #pragma HLS DEPENDENCE inter variable=y_buffer false
             }
           }
         }
-
         if (i == R_max - 1) {
           for (int jj = 0; jj < params::G; ++jj) {
             for (int ii = 0; ii < params::Tv; ++ii) {
@@ -637,7 +619,6 @@ void KernelV(const int num_active_inputs,
         }
       }
     }
-
 //     if (i == R_max - 1) {
 //       for (int j = 0; j < kNumTilesV; ++j) {
 //         for (int k = 0; k < num_active_inputs; ++k) {
@@ -653,9 +634,7 @@ void KernelV(const int num_active_inputs,
 //         }
 //       }
 //     }
-  
   }
-  
 //   DMA_Out:
 //   for (int j = 0; j < kNumTilesV; ++j) {
 //     for (int k = 0; k < num_active_inputs; ++k) {
