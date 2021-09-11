@@ -15,8 +15,8 @@ set reset_project 1
 set csim 0
 set build_only 0
 set synth 1
-set cosim 0
-set export 1
+set cosim 1
+set export 0
 set place_and_route 0
 set report_info 1
 # ==============================================================================
@@ -44,15 +44,15 @@ if {${use_zedboard}} {
 # Top function name, testbench file
 # ==============================================================================
 # NOTE: The namespace must also be included.
-set TB "test_v_kernel" ; #"test_gemv_kernel"
-set TOP "HlsDenseSvd" ;# "HlsSvdKernel" ;# "HlsLstmSvd" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
+set TB "test_lstm_svd" ; #"test_gemv_kernel"
+set TOP "HlsLstmSvd" ;# "HlsDenseSvd" ;# "HlsSvdKernel" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
 # ==============================================================================
 # Project name
 # ==============================================================================
 set prefix ":"
-set TOP_NO_NAMESPACE "HlsDenseSvd" ;# "HlsSvdKernel" ;# "HlsLstmSvd" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
+set TOP_NO_NAMESPACE "HlsLstmSvd" ;# "HlsDenseSvd" ;# "HlsSvdKernel" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
 puts ${TOP_NO_NAMESPACE}
 set PROJECT_NAME "vitis_${board_name}_${TOP_NO_NAMESPACE}"
 # ==============================================================================
@@ -81,7 +81,7 @@ set LDFLAGS ""
 # ==============================================================================
 # TB arguments
 # ==============================================================================
-set ARGV "2 16 16"
+set ARGV "2 256 128 4"
 # ==============================================================================
 # CFlags
 # ==============================================================================

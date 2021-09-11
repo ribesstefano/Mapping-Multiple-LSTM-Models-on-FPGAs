@@ -5,6 +5,7 @@
 #include "kernel/svd_kernel.h"
 #include "math_utils/activation_functions.h"
 #include "layers/dense/hls/dense_svd.h"
+#include "dma/axis_lib.h"
 
 #include "ap_int.h"
 #include "hls_stream.h"
@@ -179,13 +180,22 @@ void LstmSvdKernel(const int num_active_inputs,
 #pragma HLS TOP name=LstmSvdKernel
 // #pragma HLS INLINE
 #pragma HLS DATAFLOW
+// Current Gates
+#pragma HLS ARRAY_PARTITION variable=num_refinements complete
+#pragma HLS STABLE variable=x_port
+#pragma HLS STABLE variable=u_cur_port
 #pragma HLS STABLE variable=s_cur_port
-#pragma HLS STABLE variable=s_rec_port
 #pragma HLS STABLE variable=v_cur_port
+// Recurrent Gates
+#pragma HLS STABLE variable=h_prev_port
+#pragma HLS STABLE variable=u_rec_port
+#pragma HLS STABLE variable=s_rec_port
 #pragma HLS STABLE variable=v_rec_port
+// Non-Linearities
 #pragma HLS STABLE variable=bias_port
 #pragma HLS STABLE variable=c_prev_port
-#pragma HLS ARRAY_PARTITION variable=num_refinements complete
+#pragma HLS STABLE variable=h_curr_port
+#pragma HLS STABLE variable=c_curr_port
   int refinements[2][params::N];
 #pragma HLS ARRAY_PARTITION variable=refinements complete dim=0
   for (int i = 0; i < 2; ++i) {
@@ -217,35 +227,33 @@ void LstmSvdKernel(const int num_active_inputs,
   // Non-Linearities
   const int kTypeBitwidth = hlsutils::Bitwidth<ActivationType>::value;
   const int kLutSize = (kTypeBitwidth > 16) ? 256 : 512;
+  const int kGTv = params::G * params::Tv;
   const bool kApplyBias = true;
   NonLinearities:
-  for (int i = 0; i < output_size / params::Tv; ++i) {
-    for (int k = 0; k < num_active_inputs; ++k) {
+  for (int i = 0; i < output_size / params::Tv * num_active_inputs; ++i) {
 #pragma HLS PIPELINE II=1
-      const int kGTv = params::G * params::Tv;
-      auto y_cur = y_cur_axis.template PopVector<ActivationType, kGTv>();
-      auto y_rec = y_rec_axis.template PopVector<ActivationType, kGTv>();
-      auto bias = bias_axis.template PopVector<ActivationType, kGTv>();
-      auto c_prev = c_prev_axis.template PopVector<ActivationType, params::Tv>();
-      ActivationType c_curr[params::Tv];
-      ActivationType h_curr[params::Tv];
+    auto y_cur = y_cur_axis.template PopVector<ActivationType, kGTv>();
+    auto y_rec = y_rec_axis.template PopVector<ActivationType, kGTv>();
+    auto bias = bias_axis.template PopVector<ActivationType, kGTv>();
+    auto c_prev = c_prev_axis.template PopVector<ActivationType, params::Tv>();
+    ActivationType c_curr[params::Tv];
+    ActivationType h_curr[params::Tv];
 #pragma HLS ARRAY_PARTITION variable=c_curr complete dim=0
 #pragma HLS ARRAY_PARTITION variable=h_curr complete dim=0
-      for (int j = 0; j < params::Tv; ++j) {
-        svd::LstmNonLinearFunctions<ActivationType, ActivationType, kLutSize>(
-          kApplyBias,
-          y_cur[j * params::G + 0], y_cur[j * params::G + 1],
-          y_cur[j * params::G + 2], y_cur[j * params::G + 3],
-          y_rec[j * params::G + 0], y_rec[j * params::G + 1],
-          y_rec[j * params::G + 2], y_rec[j * params::G + 3],
-          bias[j * params::G + 0], bias[j * params::G + 1],
-          bias[j * params::G + 2], bias[j * params::G + 3],
-          c_prev[j], c_curr[j], h_curr[j]);
-      }
-      const bool kIsLast = i == output_size / params::Tv - 1 && k == num_active_inputs - 1;
-      c_curr_axis.template PushBuffer<ActivationType>(params::Tv, c_curr, kIsLast);
-      h_curr_axis.template PushBuffer<ActivationType>(params::Tv, h_curr, kIsLast);
+    for (int j = 0; j < params::Tv; ++j) {
+      svd::LstmNonLinearFunctions<ActivationType, ActivationType, kLutSize>(
+        kApplyBias,
+        y_cur[j * params::G + 0], y_cur[j * params::G + 1],
+        y_cur[j * params::G + 2], y_cur[j * params::G + 3],
+        y_rec[j * params::G + 0], y_rec[j * params::G + 1],
+        y_rec[j * params::G + 2], y_rec[j * params::G + 3],
+        bias[j * params::G + 0], bias[j * params::G + 1],
+        bias[j * params::G + 2], bias[j * params::G + 3],
+        c_prev[j], c_curr[j], h_curr[j]);
     }
+    const bool kIsLast = i == output_size / params::Tv * num_active_inputs - 1;
+    c_curr_axis.template PushBuffer<ActivationType>(params::Tv, c_curr, kIsLast);
+    h_curr_axis.template PushBuffer<ActivationType>(params::Tv, h_curr, kIsLast);
   }
 }
 #endif // end __VITIS_HLS__
@@ -290,6 +298,7 @@ void SetLstmSvdInputs(const int num_active_inputs,
     const typename params::ActivationD* v_rec,
     // Non-Linearities
     const typename params::ActivationD* bias,
+    const typename params::ActivationD* c_prev,
       // Current Gates
     hls::stream<typename params::VectTuAxiPacketType>& x_port,
     hls::stream<typename params::VectTuAxiPacketType>& u_cur_port,
@@ -302,82 +311,53 @@ void SetLstmSvdInputs(const int num_active_inputs,
     hls::stream<typename params::VectTvAxiPacketType>& v_rec_port,
     // Non-Linearities
     hls::stream<typename params::VectGTvAxiPacketType>& bias_port,
-    hls::stream<typename params::VectTvAxiPacketType>& c_prev_port
-    ) {
+    hls::stream<typename params::VectTvAxiPacketType>& c_prev_port) {
   svd::SetDenseSvdInputs<params>(num_active_inputs, input_size, output_size,
     num_refinements, x, u_cur, s_cur, v_cur, bias, x_port, u_cur_port,
     s_cur_port, v_cur_port, bias_port);
   svd::SetSvdKernelInputs<params>(num_active_inputs, output_size, output_size,
     num_refinements, h, u_rec, s_rec, v_rec, h_prev_port, u_rec_port,
     s_rec_port, v_rec_port);
-
-  // typedef typename params::ActivationD ActivationType;
-  // const int kG = params::G; // NOTE: G is actually equal to 1.
-  // const int kTu = params::Tu;
-  // const int kTv = params::Tv;
-  // const int kGTv = kG * kTv;
-  // const int kNumTilesU = input_size / kTu;
-  // const int kNumTilesV = output_size / kTv;
-  // auto bias_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(bias_port);
-  // typename params::VectGTvType bias_val;
-  // for (int i = 0; i < kNumTilesV; ++i) {
-  //   for (int j = 0; j < num_active_inputs; ++j) {
-  //     for (int k = 0; k < kTv; ++k) {
-  //       for (int ii = 0; ii < kG; ++ii) {
-  //         int bias_idx = j * output_size * kG + ii * output_size + i * kTv + k;
-  //         bias_val[k * kG + ii] = bias[bias_idx];
-  //       }
-  //     }
-  //     bias_axis.template PushVector<ActivationType, kGTv>(bias_val);
-  //   }
-  // }
-  // svd::SetSvdKernelInputs<params>(num_active_inputs, input_size,
-  //   output_size, num_refinements, x, u, s, v, x_port, u_port, s_port, v_port);
+  auto c_prev_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(c_prev_port);
+  typedef typename params::ActivationD ActivationType;
+  const int kTv = params::Tv;
+  const int kNumTilesV = output_size / kTv;
+  typename params::VectTvType c_prev_val;
+  for (int i = 0; i < kNumTilesV; ++i) {
+    for (int j = 0; j < num_active_inputs; ++j) {
+      for (int k = 0; k < kTv; ++k) {
+        c_prev_val[k] = c_prev[j * output_size + i * kTv + k];
+      }
+      c_prev_axis.template PushVector<ActivationType, kTv>(c_prev_val);
+    }
+  }
 }
 #endif // end __VITIS_HLS__
 
 #ifdef __VITIS_HLS__
 template <typename params>
-void GetLstmSvdOutputs(const int num_active_inputs,
-    const int input_size,
-    const int output_size,
-    const int num_refinements[params::N],
-    // Non-Linearities
-    const typename params::ActivationD* h_curr,
-    const typename params::ActivationD* c_curr,
-    // Non-Linearities
+void GetLstmSvdOutputs(const int num_active_inputs, const int output_size,
+    typename params::ActivationD* h_curr,
+    typename params::ActivationD* c_curr,
     hls::stream<typename params::VectTvAxiPacketType>& h_curr_port,
-    hls::stream<typename params::VectTvAxiPacketType>& c_curr_port
-    ) {
-  // svd::SetDenseSvdInputs<params>(num_active_inputs, input_size, output_size,
-  //   num_refinements, x, u_cur, s_cur, v_cur, bias, x_port, u_cur_port,
-  //   s_cur_port, v_cur_port, bias_port);
-  // svd::SetSvdKernelInputs<params>(num_active_inputs, output_size, output_size,
-  //   num_refinements, h, u_rec, s_rec, v_rec, h_prev_port, u_rec_port,
-  //   s_rec_port, v_rec_port);
-
-  // typedef typename params::ActivationD ActivationType;
-  // const int kG = params::G; // NOTE: G is actually equal to 1.
-  // const int kTu = params::Tu;
-  // const int kTv = params::Tv;
-  // const int kGTv = kG * kTv;
-  // const int kNumTilesU = input_size / kTu;
-  // const int kNumTilesV = output_size / kTv;
-  // auto bias_axis = svd::AxiStreamPort<params::VectGTvAxiWidth>(bias_port);
-  // typename params::VectGTvType bias_val;
-  // for (int i = 0; i < kNumTilesV; ++i) {
-  //   for (int j = 0; j < num_active_inputs; ++j) {
-  //     for (int k = 0; k < kTv; ++k) {
-  //       for (int ii = 0; ii < kG; ++ii) {
-  //         int bias_idx = j * output_size * kG + ii * output_size + i * kTv + k;
-  //         bias_val[k * kG + ii] = bias[bias_idx];
-  //       }
-  //     }
-  //     bias_axis.template PushVector<ActivationType, kGTv>(bias_val);
-  //   }
-  // }
-  // svd::SetSvdKernelInputs<params>(num_active_inputs, input_size,
-  //   output_size, num_refinements, x, u, s, v, x_port, u_port, s_port, v_port);
+    hls::stream<typename params::VectTvAxiPacketType>& c_curr_port) {
+  typedef typename params::ActivationD ActivationType;
+  const int kTv = params::Tv;
+  const int kNumTilesV = output_size / kTv;
+  auto h_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(h_curr_port);
+  auto c_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(c_curr_port);
+  typename params::VectTvType h_val;
+  typename params::VectTvType c_val;
+  for (int i = 0; i < kNumTilesV; ++i) {
+    for (int j = 0; j < num_active_inputs; ++j) {
+      h_val = h_axis.template PopVector<ActivationType, kTv>();
+      c_val = c_axis.template PopVector<ActivationType, kTv>();
+      for (int k = 0; k < kTv; ++k) {
+        c_curr[j * output_size + i * kTv + k] = c_val[k];
+        h_curr[j * output_size + i * kTv + k] = h_val[k];
+      }
+    }
+  }
 }
 #endif // end __VITIS_HLS__
 
@@ -403,5 +383,26 @@ void HlsLstmSvd(const int num_active_inputs,
     hls::stream<typename svd::svd_params::VectTvAxiPacketType>& c_prev_port,
     hls::stream<typename svd::svd_params::VectTvAxiPacketType>& h_curr_port,
     hls::stream<typename svd::svd_params::VectTvAxiPacketType>& c_curr_port);
+
+void HlsWrapperLstmSvd(
+    const int num_active_inputs,
+    const int input_size,
+    const int output_size,
+    const int num_refinements[svd::lstm_params::N],
+    // Current Gates
+    const typename svd::lstm_params::ActivationD* x,
+    const typename svd::lstm_params::ActivationD* u_cur,
+    const typename svd::lstm_params::ActivationD* s_cur,
+    const typename svd::lstm_params::ActivationD* v_cur,
+    // Recurrent Gates
+    const typename svd::lstm_params::ActivationD* h,
+    const typename svd::lstm_params::ActivationD* u_rec,
+    const typename svd::lstm_params::ActivationD* s_rec,
+    const typename svd::lstm_params::ActivationD* v_rec,
+    // Non-Linearities
+    const typename svd::lstm_params::ActivationD* bias,
+    const typename svd::lstm_params::ActivationD* c_prev,
+    typename svd::lstm_params::ActivationD* h_curr,
+    typename svd::lstm_params::ActivationD* c_curr);
 
 #endif // end LSTM_HLS_LSTM_SVD_H_
