@@ -435,7 +435,7 @@ void HlsLstmSvd(const int num_active_inputs,
  * @param[in]  s                  The s array. Shape: (R, N, G)
  * @param[in]  v                  The v array. Shape: (R, H, G)
  * @param[in]  bias               The bias array. Shape: (N, G, H)
- * @param      y                  The y array. Shape: (N, G, H)
+ * @param      y                  The y array. Shape: (H / Tv, N, Tv)
  */
 void HlsWrapperLstmSvd(
     const int num_active_inputs,
@@ -455,9 +455,8 @@ void HlsWrapperLstmSvd(
     // Non-Linearities
     const typename svd::lstm_params::ActivationD* bias,
     const typename svd::lstm_params::ActivationD* c_prev,
-    const typename svd::lstm_params::ActivationD* h_curr,
-    const typename svd::lstm_params::ActivationD* c_curr
-) {
+    typename svd::lstm_params::ActivationD* h_curr,
+    typename svd::lstm_params::ActivationD* c_curr) {
 #ifdef __VITIS_HLS__
   // Current Gates
   hls::stream<typename svd::lstm_params::VectTuAxiPacketType> x_port;
@@ -476,15 +475,14 @@ void HlsWrapperLstmSvd(
   hls::stream<typename svd::lstm_params::VectTvAxiPacketType> c_curr_port;
   svd::SetLstmSvdInputs<svd::lstm_params>(
     num_active_inputs, input_size, output_size, num_refinements,
-    x, u_cur, s_cur, v_cur, bias,
-    h, u_rec, s_rec, v_rec,
+    x, u_cur, s_cur, v_cur, h, u_rec, s_rec, v_rec, bias, c_prev,
+    x_port, u_cur_port, s_cur_port, v_cur_port,
+    h_prev_port, u_rec_port, s_rec_port, v_rec_port, bias_port, c_prev_port);
+  HlsLstmSvd(num_active_inputs, input_size, output_size, num_refinements,
     x_port, u_cur_port, s_cur_port, v_cur_port,
     h_prev_port, u_rec_port, s_rec_port, v_rec_port,
-    bias_port, c_prev_port);
-  HlsLstmSvd(num_active_inputs, input_size, output_size, num_refinements, x_port, u_cur_port, s_cur_port, v_cur_port, h_prev_port, u_rec_port, s_rec_port, v_rec_port, bias_port, c_prev_port, h_curr_port, c_curr_port);
-  // svd::GetSvdKernelOutputs<svd::lstm_params>(num_active_inputs, output_size,
-  //   h_curr_port, h_curr);
-  // svd::GetSvdKernelOutputs<svd::lstm_params>(num_active_inputs, output_size,
-  //   h_curr_port, h_curr);
+    bias_port, c_prev_port, h_curr_port, c_curr_port);
+  svd::GetLstmSvdOutputs<svd::lstm_params>(num_active_inputs,
+    output_size, h_curr, c_curr, h_curr_port, c_curr_port);
 #endif // __VITIS_HLS__
 }

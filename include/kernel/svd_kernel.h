@@ -154,10 +154,10 @@ void SetSvdKernelInputs(const int num_active_inputs,
     }
   }
   for (int i = 0; i < max_R; ++i) {
-    for (int k = 0; k < kNumTilesV; ++k) {
-      for (int j = 0; j < kG; ++j) {
+    for (int j = 0; j < kNumTilesV; ++j) {
+      for (int k = 0; k < kG; ++k) {
         for (int ii = 0; ii < kTv; ++ii) {
-          v_val[ii] = v[i * kNumTilesV * kTv * kG + (k * kTv + ii) * kG + j];
+          v_val[ii] = v[i * kNumTilesV * kTv * kG + (j * kTv + ii) * kG + k];
         }
         v_axis.template PushVector<ActivationType, kTv>(v_val);
       }
