@@ -44,7 +44,8 @@ if {${use_zedboard}} {
 # Top function name, testbench file
 # ==============================================================================
 # NOTE: The namespace must also be included.
-set TB "test_lstm_svd" ; #"test_gemv_kernel"
+set TB "test_svd_kernel" ; #"test_gemv_kernel"
+set ARGV "2 32 256 128 4"
 set TOP "HlsSvdKernel" ;# "HlsLstmSvd" ;# "HlsDenseSvd" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
@@ -78,10 +79,6 @@ append_lstm_params DEFINES
 set LDFLAGS ""
 # set LDFLAGS "-lpthread -fopenmp"
 # append LDFLAGS " /usr/local/lib/libblas.a"
-# ==============================================================================
-# TB arguments
-# ==============================================================================
-set ARGV "2 256 128 4"
 # ==============================================================================
 # CFlags
 # ==============================================================================
@@ -203,7 +200,7 @@ if {${reset_project}} {
 # ==============================================================================
 # Configure HLS
 # ==============================================================================
-config_compile -name_max_length=12
+config_compile -name_max_length=12 -pipeline_style=frp -enable_auto_rewind=1
 
 if {${relax_ii}} {
     config_schedule -effort ${scheduler_effort} -relax_ii_for_timing=1
@@ -223,7 +220,9 @@ if {${USE_VITIS}} {
 config_core DSP48 -latency 3
 # config_dataflow -default_channel fifo ;#pingpong
 set MAX_DEPTH 65536
-# config_dataflow -fifo_depth=${MAX_DEPTH} -start_fifo_depth=${MAX_DEPTH} -scalar_fifo_depth=${MAX_DEPTH} -task_level_fifo_depth=${MAX_DEPTH} -override_user_fifo_depth=${MAX_DEPTH}
+config_dataflow -fifo_depth=${MAX_DEPTH} -start_fifo_depth=${MAX_DEPTH} \
+    -scalar_fifo_depth=${MAX_DEPTH} -task_level_fifo_depth=${MAX_DEPTH} \
+    -override_user_fifo_depth=${MAX_DEPTH}
 
 # ==============================================================================
 # Start C-Simulation
@@ -265,8 +264,7 @@ if {${cosim}} {
 
     if {${USE_VITIS}} {
         cosim_design -trace_level port -ldflags ${LDFLAGS} -argv ${ARGV} \
-            -enable_dataflow_profiling
-            # -enable_fifo_sizing
+            -enable_dataflow_profiling=1 -enable_fifo_sizing=1
             # -disable_deadlock_detection
             # -disable_dependency_check
     } else {

@@ -48,16 +48,17 @@ template <
 >
 void KernelS(const int num_active_inputs,
     const int num_refinements[params::N],
-    // const hls::vector<int, params::N> num_refinements,
     hls::stream<typename PortWrapper::PacketType>& xu_port,
     hls::stream<typename params::VectG_AxiPacketType>& s_port,
     hls::stream<typename PortWrapper::PacketType>& xus_port) {
 #pragma HLS TOP name=KernelS
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
+#pragma HLS STABLE variable=xu_port
+#pragma HLS STABLE variable=s_port
+#pragma HLS STABLE variable=xus_port
   assert(num_active_inputs <= params::N);
   assert(num_active_inputs > 0);
-  // assert(num_refinements >= 0);
   int R_max = num_refinements[0];
   int R_total = num_refinements[0] * num_active_inputs; // Total elements.
   Get_Total_R:
@@ -79,7 +80,7 @@ void KernelS(const int num_active_inputs,
     auto xu_val = xu_axis.template PopVector<ActivationType, params::G>();
     auto s_val = s_axis.template PopVector<ActivationType, params::G>();
     auto xus_val = xu_val * s_val;
-    const bool kIsLast = (i == R_total - 1) ? true : false;
+    const bool kIsLast = i == R_total - 1;
     xus_axis.template PushVector<ActivationType, params::G>(xus_val, kIsLast);
   }
 }

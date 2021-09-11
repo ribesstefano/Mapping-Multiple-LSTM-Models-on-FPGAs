@@ -421,6 +421,9 @@ void KernelU(const int num_active_inputs,
 #pragma HLS TOP name=KernelU
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
+#pragma HLS STABLE variable=x_port
+#pragma HLS STABLE variable=u_port
+#pragma HLS STABLE variable=xu_port
   assert(num_active_inputs <= params::N);
   assert(num_active_inputs > 0);
   // assert(num_refinements >= 0);
