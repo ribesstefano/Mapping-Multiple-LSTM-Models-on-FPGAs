@@ -204,4 +204,14 @@ void GetSvdKernelOutputs(const int num_active_inputs, const int output_size,
 
 } // svd
 
+void HlsSvdKernel(const int num_active_inputs,
+    const int input_size,
+    const int output_size,
+    const int num_refinements[svd::svd_params::N],
+    hls::stream<typename svd::svd_params::VectTuAxiPacketType>& x_port,
+    hls::stream<typename svd::svd_params::VectTuAxiPacketType>& u_port,
+    hls::stream<typename svd::svd_params::VectG_AxiPacketType>& s_port,
+    hls::stream<typename svd::svd_params::VectTvAxiPacketType>& v_port,
+    hls::stream<typename svd::svd_params::VectGTvAxiPacketType>& y_port);
+
 #endif // end KERNEL_SVD_KERNEL_H_
