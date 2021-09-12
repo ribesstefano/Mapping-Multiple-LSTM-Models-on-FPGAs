@@ -19,6 +19,7 @@ set cosim 1
 set export 0
 set place_and_route 0
 set report_info 1
+set set_max_fifo_depth 0
 # ==============================================================================
 # HLS Synthesis Options + Platform Selection
 # ==============================================================================
@@ -37,15 +38,11 @@ if {${use_zedboard}} {
     set board_name "ZCU102"
 }
 # ==============================================================================
-# Hardware parameters
-# ==============================================================================
-
-# ==============================================================================
 # Top function name, testbench file
 # ==============================================================================
 # NOTE: The namespace must also be included.
 set TB "test_svd_kernel" ; #"test_gemv_kernel"
-set ARGV "2 32 256 128 4"
+set ARGV "2 32 256 128 2"
 set TOP "HlsSvdKernel" ;# "HlsLstmSvd" ;# "HlsDenseSvd" ;# "HlsLstmSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
@@ -219,10 +216,12 @@ if {${USE_VITIS}} {
 
 config_core DSP48 -latency 3
 # config_dataflow -default_channel fifo ;#pingpong
-set MAX_DEPTH 65536
-config_dataflow -fifo_depth=${MAX_DEPTH} -start_fifo_depth=${MAX_DEPTH} \
-    -scalar_fifo_depth=${MAX_DEPTH} -task_level_fifo_depth=${MAX_DEPTH} \
-    -override_user_fifo_depth=${MAX_DEPTH}
+if {${set_max_fifo_depth}} {
+    set MAX_DEPTH 65536
+    config_dataflow -fifo_depth=${MAX_DEPTH} -start_fifo_depth=${MAX_DEPTH} \
+        -scalar_fifo_depth=${MAX_DEPTH} -task_level_fifo_depth=${MAX_DEPTH} \
+        -override_user_fifo_depth=${MAX_DEPTH}
+}
 
 # ==============================================================================
 # Start C-Simulation
@@ -264,7 +263,7 @@ if {${cosim}} {
 
     if {${USE_VITIS}} {
         cosim_design -trace_level port -ldflags ${LDFLAGS} -argv ${ARGV} \
-            -enable_dataflow_profiling=1 -enable_fifo_sizing=1
+            -enable_dataflow_profiling=1 -enable_fifo_sizing=0
             # -disable_deadlock_detection
             # -disable_dependency_check
     } else {
