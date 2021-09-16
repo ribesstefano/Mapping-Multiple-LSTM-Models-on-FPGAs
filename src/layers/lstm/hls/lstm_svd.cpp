@@ -388,25 +388,12 @@ void SvdModel2LstmSDSoCV2(
   // ===========================================================================
   // Output Non-Linearities
   // ===========================================================================
-  // NOTE: The output FIFOs in NonLinearityUnit have been resized! Check for deadlocks!
   svd::NonLinearityUnit<kOutputLength, kNumTilesV, kNumCurGates>(c_t1_prev_port,
     cur_acc1_streams, rec_acc1_streams, h_t1_curr_port, c_t1_curr_port, true,
     bias1_port);
   svd::NonLinearityUnit<kOutputLength, kNumTilesV, kNumCurGates>(c_t2_prev_port,
     cur_acc2_streams, rec_acc2_streams, h_t2_curr_port, c_t2_curr_port, true,
     bias2_port);
-
-#ifdef DEBUG_FIFOS
-  const int kNumPEsU = NUM_TILES_U - NUM_ZERO_TILES_U;
-  const int kNumPEsVCur = INPUT_SIZE / NUM_TILES_V;
-  const int kNumPEsVRec = HIDDEN_SIZE / NUM_TILES_V;
-  const int kNumUprobes = kNumGates * kNumPEsU * 3; // one for each: x1, x2, u streams
-  const int kNumVprobes = kNumGates / 2 * (kNumPEsVCur + kNumPEsVRec); // one for v streams
-  const int kNumProbes = kNumUprobes + kNumVprobes;
-  svd::ProbeStream stop_ctrl;
-  svd::ProbeStream probe_ctrl[kNumUprobes];
-  svd::ClockCounter<svd::CounterD, kNumProbes>(probe_ctrl, stop_ctrl, counters_port, clk_count_port);
-#endif
 }
 
 } // svd

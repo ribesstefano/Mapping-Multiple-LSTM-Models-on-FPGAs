@@ -78,7 +78,6 @@ void UDotUnit2LstmPe(const int vect_length, const int num_tiles,
 #pragma HLS FUNCTION_INSTANTIATE variable=vect_length
 #pragma HLS FUNCTION_INSTANTIATE variable=num_iter
 #pragma HLS FUNCTION_INSTANTIATE variable=num_tiles
-#pragma HLS FUNCTION_INSTANTIATE variable=num_timesteps
   assert(vect_length % num_tiles == 0);
   const int kNumInputs = 2;
   const int kTileSize = vect_length / num_tiles;
