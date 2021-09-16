@@ -392,25 +392,25 @@ void StreamSplitter(const int output_size,
  *
  * @param[in]  use_nz_dim       If true, there are #num_non_zero_tiles different
  *                              PEs (for the U-unit), else there are
- *                              #num_elems_per_tile different PEs (for the V-unit).
+ *                              #tile_size different PEs (for the V-unit).
  * @param[in]  gate_port        The gate port
  * @param      gate_stream      The gate PEs stream
  *
  * @tparam     NumIter          Number of refinement steps.
  * @tparam     num_non_zero_tiles  Number of non pruned tiles.
- * @tparam     num_elems_per_tile  Number of elements per tile.
+ * @tparam     tile_size  Number of elements per tile.
  */
 template <typename T>
 void DispatchGateFromArray(const bool use_nz_dim, const int num_iter,
-    const int num_non_zero_tiles, const int num_elems_per_tile,
+    const int num_non_zero_tiles, const int tile_size,
     const T* gate_port, hls::stream<T>* gate_streams) {
 #pragma HLS INLINE
 #pragma HLS FUNCTION_INSTANTIATE variable=num_iter
 #pragma HLS FUNCTION_INSTANTIATE variable=num_non_zero_tiles
-#pragma HLS FUNCTION_INSTANTIATE variable=num_elems_per_tile
+#pragma HLS FUNCTION_INSTANTIATE variable=tile_size
   const int kI = num_iter;
   const int kNZ = num_non_zero_tiles;
-  const int kE = num_elems_per_tile;
+  const int kE = tile_size;
   I : for (int i = 0; i < kI; ++i) {
     Z : for (int z = 0; z < kNZ; ++z) {
       E : for (int e = 0; e < kE; ++e) {
@@ -426,25 +426,23 @@ void DispatchGateFromArray(const bool use_nz_dim, const int num_iter,
   }
 }
 
-template <typename T>
-void DispatchGateFromStream(const bool use_nz_dim, const int num_iter,
-    const int num_non_zero_tiles, const int num_elems_per_tile,
-    hls::stream<T>& gate_port, hls::stream<T>* gate_streams) {
+template <typename T, int NumGates, int NumStreams>
+void DispatchGateFromStream(const bool use_nz_dim, const int num_refinements,
+    const int num_non_zero_tiles, const int tile_size,
+    hls::stream<T>* gate_port, hls::stream<T> gate_streams[NumGates][NumStreams]) {
 #pragma HLS INLINE
-#pragma HLS FUNCTION_INSTANTIATE variable=num_iter
+#pragma HLS FUNCTION_INSTANTIATE variable=num_refinements
 #pragma HLS FUNCTION_INSTANTIATE variable=num_non_zero_tiles
-#pragma HLS FUNCTION_INSTANTIATE variable=num_elems_per_tile
-  const int kI = num_iter;
-  const int kNZ = num_non_zero_tiles;
-  const int kE = num_elems_per_tile;
-  I : for (int i = 0; i < kI; ++i) {
-    Z : for (int z = 0; z < kNZ; ++z) {
-      E : for (int e = 0; e < kE; ++e) {
+  I : for (int i = 0; i < num_refinements; ++i) {
+    Z : for (int z = 0; z < num_non_zero_tiles; ++z) {
+      E : for (int e = 0; e < tile_size; ++e) {
 #pragma HLS PIPELINE II=1
-        if (use_nz_dim) {
-          gate_streams[z].write(gate_port.read()); // for U weights
-        } else {
-          gate_streams[e].write(gate_port.read()); // for V weights
+        for (int g = 0; g < NumGates; ++g) {
+          if (use_nz_dim) {
+            gate_streams[g][z].write(gate_port[g].read()); // for U weights
+          } else {
+            gate_streams[g][e].write(gate_port[g].read()); // for V weights
+          }
         }
       }
     }

@@ -332,57 +332,59 @@ void SvdModel2LstmSDSoCV2(
   // ===========================================================================
   // Current Dot Product Unit
   // ===========================================================================
+#ifndef __VITIS_HLS__
   Current_SVD_Kernels:
   for (int g = 0; g < kNumCurGates; ++g) {
 #pragma HLS UNROLL
-#ifndef __VITIS_HLS__
     svd::DispatchGateFromArray(kUweights, kNumIter, kNumNonZeroTilesU,
       kTileSizeUCurrent, u_cur_gate_streams[g], cur_u_streams[g]);
     svd::DispatchGateFromArray(!kUweights, kNumIter, kNumNonZeroTilesV, kTileSizeV,
       v_gate_streams[g], cur_v_streams[g]);
-#else
-    svd::DispatchGateFromStream(kUweights, kNumIter, kNumNonZeroTilesU,
-      kTileSizeUCurrent, u_cur_gate_streams[g], cur_u_streams[g]);
-    svd::DispatchGateFromStream(!kUweights, kNumIter, kNumNonZeroTilesV, kTileSizeV,
-      v_gate_streams[g], cur_v_streams[g]);
-#endif
-    svd::UDotUnit2Lstm<kInputLength, kNumTilesU, kNumZeroTilesU, kNumIter, 1>(
-      x1_streams[g], x2_streams[g], cur_u_streams[g], cur_dot1_streams[g],
-      cur_dot2_streams[g]);
-    svd::VDotUnit2LstmV2<kOutputLength, kNumTilesV, kNumZeroTilesV, kNumIter, 1>(
-      false, nullptr, nullptr,
-      cur_dot1_streams[g], cur_dot2_streams[g],
-      gates_s1_streams[g], gates_s2_streams[g],
-      cur_v_streams[g], nz_v_stream1_cur[g],
-      cur_acc1_streams[g], cur_acc2_streams[g]);
   }
+#else
+  svd::DispatchGateFromStream<svd::WeightD, kNumCurGates, kNumNonZeroTilesU>(
+    kUweights, kNumIter, kNumNonZeroTilesU, kTileSizeUCurrent,
+    u_cur_gate_streams, cur_u_streams);
+  svd::DispatchGateFromStream<svd::WeightD, kNumCurGates, kTileSizeV>(
+    !kUweights, kNumIter, kNumNonZeroTilesV, kTileSizeV,
+    v_gate_streams, cur_v_streams);
+#endif
+  svd::UDotUnit2Lstm<kInputLength, kNumTilesU, kNumZeroTilesU, kNumIter, kNumCurGates>(
+    x1_streams, x2_streams, cur_u_streams, cur_dot1_streams,
+    cur_dot2_streams);
+  svd::VDotUnit2LstmV2<kOutputLength, kNumTilesV, kNumZeroTilesV, kNumIter, kNumCurGates>(
+    false, nullptr, nullptr,
+    cur_dot1_streams, cur_dot2_streams,
+    gates_s1_streams, gates_s2_streams,
+    cur_v_streams, nz_v_stream1_cur,
+    cur_acc1_streams, cur_acc2_streams);
   // ===========================================================================
   // Recur Dot Product Unit
   // ===========================================================================
+#ifndef __VITIS_HLS__
   Recurrent_SVD_Kernels:
   for (int g = 0; g < kNumRecGates; ++g) {
 #pragma HLS UNROLL
-#ifndef __VITIS_HLS__
     svd::DispatchGateFromArray(kUweights, kNumIter, kNumNonZeroTilesU,
       kTileSizeURecur, u_rec_gate_streams[g], rec_u_streams[g]);
     svd::DispatchGateFromArray(!kUweights, kNumIter, kNumNonZeroTilesV, kTileSizeV,
       v_gate_streams[kNumCurGates + g], rec_v_streams[g]);
-#else
-    svd::DispatchGateFromStream(kUweights, kNumIter, kNumNonZeroTilesU,
-      kTileSizeURecur, u_rec_gate_streams[g], rec_u_streams[g]);
-    svd::DispatchGateFromStream(!kUweights, kNumIter, kNumNonZeroTilesV, kTileSizeV,
-      v_gate_streams[kNumCurGates + g], rec_v_streams[g]);
-#endif
-    svd::UDotUnit2Lstm<kOutputLength, kNumTilesU, kNumZeroTilesU, kNumIter, 1>(
-      h1_streams[g], h2_streams[g], rec_u_streams[g], rec_dot1_streams[g],
-      rec_dot2_streams[g]);
-    svd::VDotUnit2LstmV2<kOutputLength, kNumTilesV, kNumZeroTilesV, kNumIter, 1>(
-      false, nullptr, nullptr,
-      rec_dot1_streams[g], rec_dot2_streams[g],
-      gates_s1_streams[kNumCurGates + g], gates_s2_streams[kNumCurGates + g],
-      rec_v_streams[g], nz_v_stream1_rec[g],
-      rec_acc1_streams[g], rec_acc2_streams[g]);
   }
+#else
+  svd::DispatchGateFromStream<svd::WeightD, kNumRecGates, kNumNonZeroTilesU>(
+    kUweights, kNumIter, kNumNonZeroTilesU, kTileSizeURecur,
+    u_rec_gate_streams, rec_u_streams);
+  svd::DispatchGateFromStream<svd::WeightD, kNumRecGates, kTileSizeV>(
+    !kUweights, kNumIter, kNumNonZeroTilesV, kTileSizeV,
+    &v_gate_streams[kNumRecGates], rec_v_streams);
+#endif
+  svd::UDotUnit2Lstm<kOutputLength, kNumTilesU, kNumZeroTilesU, kNumIter, kNumRecGates>(
+    h1_streams, h2_streams, rec_u_streams, rec_dot1_streams,
+    rec_dot2_streams);
+  svd::VDotUnit2LstmV2<kOutputLength, kNumTilesV, kNumZeroTilesV, kNumIter, kNumRecGates>(
+    false, nullptr, nullptr, rec_dot1_streams, rec_dot2_streams,
+    &gates_s1_streams[kNumRecGates], &gates_s2_streams[kNumRecGates],
+    rec_v_streams, nz_v_stream1_rec, rec_acc1_streams, rec_acc2_streams);
   // ===========================================================================
   // Output Non-Linearities
   // ===========================================================================

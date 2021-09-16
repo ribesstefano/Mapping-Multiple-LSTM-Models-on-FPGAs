@@ -99,18 +99,18 @@ void KernelV(const int num_refinements, svd::SvdStreams<params> &streams) {
   }
 }
 
-template <int VectLength, int NumTiles, int NumZeroTiles, int NumIter, int NumTimesteps>
+template <int VectLength, int NumTiles, int NumZeroTiles, int NumIter, int NumGates>
 void VDotUnit2LstmV2(const bool has_bias,
                    svd::WeightStream *bias1,
                    svd::WeightStream *bias2,
-                   svd::ActivationStream &gate_dot1_streams,
-                   svd::ActivationStream &gate_dot2_streams,
-                   svd::WeightStream &gate_s1_streams,
-                   svd::WeightStream &gate_s2_streams,
-                   svd::WeightStream (&gate_v_streams)[VectLength / NumTiles],
-                   hls::stream<ap_uint<NumTiles> > &nz_port,
-                   svd::ActivationStream (&gate_out1_streams)[VectLength / NumTiles],
-                   svd::ActivationStream (&gate_out2_streams)[VectLength / NumTiles]) {
+                   svd::ActivationStream gate_dot1_streams[NumGates],
+                   svd::ActivationStream gate_dot2_streams[NumGates],
+                   svd::WeightStream gate_s1_streams[NumGates],
+                   svd::WeightStream gate_s2_streams[NumGates],
+                   svd::WeightStream gate_v_streams[NumGates][VectLength / NumTiles],
+                   hls::stream<ap_uint<NumTiles> > nz_port[NumGates],
+                   svd::ActivationStream gate_out1_streams[NumGates][VectLength / NumTiles],
+                   svd::ActivationStream gate_out2_streams[NumGates][VectLength / NumTiles]) {
 #pragma HLS INLINE
 #pragma HLS DATAFLOW
   assert(VectLength % NumTiles == 0);
@@ -124,25 +124,27 @@ void VDotUnit2LstmV2(const bool has_bias,
   // NOTE: By the time the dot products are available at the ports, the weight
   // values s1, s2 and v should be already at the FIFO ports.
   const int kStreamDepth = NumIter / kFifoResizeFactor;
-  hls::stream<svd::MultD> xus_streams[kNumInputs][kTileSize];
+  hls::stream<svd::MultD> xus_streams[NumGates][kNumInputs][kTileSize];
 #pragma HLS STREAM variable=xus_streams depth=kStreamDepth dim=0
   S_Kernel:
   for (int i = 0; i < NumIter; ++i) {
 #pragma HLS INLINE off
 #pragma HLS PIPELINE II=1
-    svd::MultD xus_val[kNumInputs];
-#pragma HLS ARRAY_PARTITION variable=xus_val complete dim=0
-    xus_val[0] = gate_s1_streams.read() * gate_dot1_streams.read();
-    xus_val[1] = gate_s2_streams.read() * gate_dot2_streams.read();
-#pragma HLS RESOURCE variable=xus_val[0] core=DSP48 latency=3
-#pragma HLS RESOURCE variable=xus_val[1] core=DSP48 latency=3
-    for (int j = 0; j < kTileSize; ++j) {
-      for (int k = 0; k < kNumInputs; ++k) {
-        xus_streams[k][j].write(xus_val[k]);
+    for (int g = 0; g < NumGates; ++g) {
+      svd::MultD xus_val[kNumInputs];
+  #pragma HLS ARRAY_PARTITION variable=xus_val complete dim=0
+      xus_val[0] = gate_s1_streams[g].read() * gate_dot1_streams[g].read();
+      xus_val[1] = gate_s2_streams[g].read() * gate_dot2_streams[g].read();
+  #pragma HLS RESOURCE variable=xus_val[0] core=DSP48 latency=3
+  #pragma HLS RESOURCE variable=xus_val[1] core=DSP48 latency=3
+      for (int j = 0; j < kTileSize; ++j) {
+        for (int k = 0; k < kNumInputs; ++k) {
+          xus_streams[g][k][j].write(xus_val[k]);
+        }
       }
     }
   }
-  svd::WeightStream bias_streams[kNumInputs][kTileSize];
+  svd::WeightStream bias_streams[NumGates][kNumInputs][kTileSize];
   if (has_bias) {
 #pragma HLS ARRAY_PARTITION variable=bias_streams complete dim=0
 #pragma HLS STREAM variable=bias_streams depth=NumTiles
@@ -150,15 +152,17 @@ void VDotUnit2LstmV2(const bool has_bias,
     for (int i = 0; i < NumTiles; ++i) {
       for (int j = 0; j < kTileSize; ++j) {
 #pragma HLS PIPELINE II=1
-        bias_streams[0][j].write(bias1->read());
-        bias_streams[1][j].write(bias2->read());
+        for (int k = 0; k < NumGates; ++k) {
+          bias_streams[k][0][j].write(bias1[k].read());
+          bias_streams[k][1][j].write(bias2[k].read());
+        }
       }
     }
   }
   const int kCombStreamDepth = NumIter * NumZeroTiles / (kFifoResizeFactor * 2);
   const int kNzBitLength = hlsutils::log2<NumTiles>::value;
-  hls::stream<ap_uint<kNzBitLength> > nz_idx_streams[kTileSize];
-#pragma HLS STREAM variable=nz_idx_streams depth=kCombStreamDepth dim=1
+  hls::stream<ap_uint<kNzBitLength> > nz_idx_streams[NumGates][kTileSize];
+#pragma HLS STREAM variable=nz_idx_streams depth=kCombStreamDepth dim=0
 #pragma HLS RESOURCE variable=nz_idx_streams core=FIFO_SRL
 // #define V_UNIT_USE_PRIORITY_ENCODER
 #ifdef V_UNIT_USE_PRIORITY_ENCODER
@@ -189,9 +193,10 @@ void VDotUnit2LstmV2(const bool has_bias,
     }
   }
 #else
-  ap_uint<NumTiles> z_idx;
-  int nz_cnt = 0;
-  assert(nz_cnt < kNonZeroTiles);
+  ap_uint<NumTiles> z_idx[NumGates];
+  int nz_cnt[NumGates] = {0};
+#pragma HLS ARRAY_PARTITION variable=z_idx complete dim=0
+#pragma HLS ARRAY_PARTITION variable=nz_cnt complete dim=0
   ZIndex_Converter:
   for (int i = 0; i < NumIter; ++i) {
 #pragma HLS INLINE off
@@ -199,24 +204,27 @@ void VDotUnit2LstmV2(const bool has_bias,
 #pragma HLS LOOP_FLATTEN
 #pragma HLS PIPELINE II=1
 #pragma HLS LOOP_TRIPCOUNT min=kNonZeroTiles max=kNonZeroTiles
-      if (j == 0) {
-        z_idx = nz_port.read();
-        if (z_idx[0] == 1) {
-          for (int k = 0; k < kTileSize; ++k) {
-            nz_idx_streams[k].write(0);
+      for (int g = 0; g < NumGates; ++g) {
+        assert(nz_cnt[g] < kNonZeroTiles);
+        if (j == 0) {
+          z_idx[g] = nz_port[g].read();
+          if (z_idx[g][0] == 1) {
+            for (int k = 0; k < kTileSize; ++k) {
+              nz_idx_streams[g][k].write(0);
+            }
+            ++nz_cnt[g];
           }
-          nz_cnt++;
-        }
-      } else {
-        if (z_idx[j] == 1) {
-          for (int k = 0; k < kTileSize; ++k) {
-            nz_idx_streams[k].write(j);
-          }
-          if (nz_cnt == kNonZeroTiles - 1) {
-            nz_cnt = 0;
-            break;
-          } else {
-            nz_cnt++;
+        } else {
+          if (z_idx[g][j] == 1) {
+            for (int k = 0; k < kTileSize; ++k) {
+              nz_idx_streams[g][k].write(j);
+            }
+            if (nz_cnt[g] == kNonZeroTiles - 1) {
+              nz_cnt[g] = 0;
+              break;
+            } else {
+              ++nz_cnt[g];
+            }
           }
         }
       }
@@ -225,45 +233,50 @@ void VDotUnit2LstmV2(const bool has_bias,
 #endif
   V_Kernel: {
 #pragma HLS INLINE off
-    svd::AccumD acc_buffer[kNumInputs][kTileSize][NumTiles];
+    svd::AccumD acc_buffer[NumGates][kNumInputs][kTileSize][NumTiles];
 #pragma HLS ARRAY_PARTITION variable=acc_buffer complete dim=1
 #pragma HLS ARRAY_PARTITION variable=acc_buffer complete dim=2
+#pragma HLS ARRAY_PARTITION variable=acc_buffer complete dim=3
     Init_buffer:
     for (int i = 0; i < NumTiles; ++i) {
 #pragma HLS PIPELINE II=1
       for (int j = 0; j < kTileSize; ++j) {
         for (int k = 0; k < kNumInputs; ++k) {
-          acc_buffer[k][j][i] = 0;
+          for (int g = 0; g < NumGates; ++g) {
+            acc_buffer[g][k][j][i] = 0;
+          }
         }
       }
     }
-    ap_uint<kNzBitLength> nz_idx[kTileSize];
-    svd::AccumD xus[kNumInputs][kTileSize];
-    svd::AccumD mac[kNumInputs][kTileSize];
-    svd::AccumD acc[kNumInputs][kTileSize];
-    svd::WeightD v[kTileSize];
-#pragma HLS ARRAY_PARTITION variable=nz_idx complete
+    ap_uint<kNzBitLength> nz_idx[NumGates][kTileSize];
+    svd::AccumD xus[NumGates][kNumInputs][kTileSize];
+    svd::AccumD mac[NumGates][kNumInputs][kTileSize];
+    svd::AccumD acc[NumGates][kNumInputs][kTileSize];
+    svd::WeightD v[NumGates][kTileSize];
+#pragma HLS ARRAY_PARTITION variable=nz_idx complete dim=0
 #pragma HLS ARRAY_PARTITION variable=xus complete dim=0
 #pragma HLS ARRAY_PARTITION variable=mac complete dim=0
 #pragma HLS ARRAY_PARTITION variable=acc complete dim=0
-#pragma HLS ARRAY_PARTITION variable=v complete
+#pragma HLS ARRAY_PARTITION variable=v complete dim=0
     for (int i = 0; i < NumIter; ++i) {
       for (int k = 0; k < kNonZeroTiles; ++k) {
 #pragma HLS LOOP_FLATTEN
 #pragma HLS PIPELINE II=1
-        for (int j = 0; j < kTileSize; ++j) {
-          if (k == 0) {
-            for (int ii = 0; ii < kNumInputs; ++ii) {
-              xus[ii][j] = xus_streams[ii][j].read();
+        for (int g = 0; g < NumGates; ++g) {
+          for (int j = 0; j < kTileSize; ++j) {
+            if (k == 0) {
+              for (int ii = 0; ii < kNumInputs; ++ii) {
+                xus[g][ii][j] = xus_streams[g][ii][j].read();
+              }
             }
-          }
-          nz_idx[j] = nz_idx_streams[j].read();
-          v[j] = gate_v_streams[j].read();
-          for (int ii = 0; ii < kNumInputs; ++ii) {
-            mac[ii][j] = (xus[ii][j] * v[j]) + acc_buffer[ii][j][nz_idx[j]];
-#pragma HLS RESOURCE variable=mac[ii][j] core=DSP48 latency=3
+            nz_idx[g][j] = nz_idx_streams[g][j].read();
+            v[g][j] = gate_v_streams[g][j].read();
+            for (int ii = 0; ii < kNumInputs; ++ii) {
+              mac[g][ii][j] = (xus[g][ii][j] * v[g][j]) + acc_buffer[g][ii][j][nz_idx[g][j]];
+#pragma HLS RESOURCE variable=mac[g][ii][j] core=DSP48 latency=3
 #pragma HLS DEPENDENCE variable=acc_buffer RAW false inter distance=kNonZeroTiles
-            acc_buffer[ii][j][nz_idx[j]] = mac[ii][j];  
+              acc_buffer[g][ii][j][nz_idx[g][j]] = mac[g][ii][j];
+            }
           }
         }
       }
@@ -272,16 +285,18 @@ void VDotUnit2LstmV2(const bool has_bias,
     for (int i = 0; i < NumTiles; ++i) {
 #pragma HLS PIPELINE II=1
       for (int j = 0; j < kTileSize; ++j) {
-        if (has_bias) {
-          auto acc_1 = acc_buffer[0][j][i] + bias_streams[0][j].read();
-          auto acc_2 = acc_buffer[1][j][i] + bias_streams[1][j].read();
+        for (int k = 0; k < NumGates; ++k) {
+          if (has_bias) {
+            auto acc_1 = acc_buffer[k][0][j][i] + bias_streams[k][0][j].read();
+            auto acc_2 = acc_buffer[k][1][j][i] + bias_streams[k][1][j].read();
 #pragma HLS RESOURCE variable=acc_1 core=AddSub_DSP
 #pragma HLS RESOURCE variable=acc_2 core=AddSub_DSP
-          gate_out1_streams[j].write(acc_1);
-          gate_out2_streams[j].write(acc_2);
-        } else {
-          gate_out1_streams[j].write(acc_buffer[0][j][i]);
-          gate_out2_streams[j].write(acc_buffer[1][j][i]);
+            gate_out1_streams[k][j].write(acc_1);
+            gate_out2_streams[k][j].write(acc_2);
+          } else {
+            gate_out1_streams[k][j].write(acc_buffer[k][0][j][i]);
+            gate_out2_streams[k][j].write(acc_buffer[k][1][j][i]);
+          }
         }
       }
     }
