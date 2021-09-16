@@ -7,7 +7,7 @@ proc append_lstm_params {&defines} {
     dict set params NUM_ITERATIONS 32
     dict set params NUM_TILES_U 8
     dict set params NUM_ZERO_TILES_U 2
-    dict set params NUM_TILES_V 8
+    dict set params NUM_TILES_V 16 ;# NOTE: The parallelism is HIDDEN_SIZE / NUM_TILES_V!
     dict set params NUM_ZERO_TILES_V 2
     dict set params NUM_TIMESTEPS 28
     dict set params FIX_WIDTH 16
