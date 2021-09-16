@@ -37,7 +37,6 @@ int main(int argc, char const *argv[]) {
   ActivationType* u = new ActivationType[max_R * input_size * kG];
   ActivationType* s = new ActivationType[max_R * num_active_inputs * kG];
   ActivationType* v = new ActivationType[max_R * output_size * kG];
-  ActivationType* bias = new ActivationType[num_active_inputs * kG * output_size];
   ActivationType* y = new ActivationType[num_active_inputs * kG * output_size];
   hls::stream<typename svd::svd_params::VectTuAxiPacketType> x_port("x_port");
   hls::stream<typename svd::svd_params::VectTuAxiPacketType> u_port("u_port");
@@ -53,14 +52,19 @@ int main(int argc, char const *argv[]) {
       }
     }
   };
+  auto init_zero = [&](const int size, ActivationType* x) {
+    for (int i = 0; i < size; ++i) {
+      x[i] = ActivationType(0);
+    }
+  };
   for (int i = 0; i < svd::svd_params::N; ++i) {
     num_refinements[i] = max_R;
   }
   init_random(num_active_inputs * input_size, x);
+  init_random(num_active_inputs * kG * output_size, y);
   init_random(max_R * input_size * kG, u);
   init_random(max_R * num_active_inputs * kG, s);
   init_random(max_R * output_size * kG, v);
-  init_random(num_active_inputs * kG * output_size, bias);
   std::cout << "[INFO] Calling accelerator." << std::endl;
   for (int i = 0; i < num_tests; ++i) {
     svd::SetSvdKernelInputs<svd::svd_params>(num_active_inputs, input_size,

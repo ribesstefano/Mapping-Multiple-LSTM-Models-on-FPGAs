@@ -182,6 +182,7 @@ void LstmSvdKernel(const int num_active_inputs,
 #pragma HLS DATAFLOW
 // Current Gates
 #pragma HLS ARRAY_PARTITION variable=num_refinements complete
+#ifndef __VITIS_HLS__
 #pragma HLS STABLE variable=x_port
 #pragma HLS STABLE variable=u_cur_port
 #pragma HLS STABLE variable=s_cur_port
@@ -196,6 +197,7 @@ void LstmSvdKernel(const int num_active_inputs,
 #pragma HLS STABLE variable=c_prev_port
 #pragma HLS STABLE variable=h_curr_port
 #pragma HLS STABLE variable=c_curr_port
+#endif
   int refinements[2][params::N];
 #pragma HLS ARRAY_PARTITION variable=refinements complete dim=0
   for (int i = 0; i < 2; ++i) {

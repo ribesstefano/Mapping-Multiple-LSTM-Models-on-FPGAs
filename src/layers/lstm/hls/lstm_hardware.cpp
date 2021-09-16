@@ -2290,7 +2290,7 @@ void dummy_gemm(svd::DmaInterfaceD a[2], svd::DmaInterfaceD b[2], svd::DmaInterf
   }
 }
 
-#if 1
+#if 0
 void dummy_dispatcher(hls::stream<ap_uint<1 * 8> > &x, hls::stream<ap_uint<1 * 8> > y[4]) {
   const int kNumInputElem = 32;
   const int kNumPE = 4;

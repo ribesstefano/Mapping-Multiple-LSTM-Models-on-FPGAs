@@ -326,9 +326,10 @@ private:
 template <int Bitwidth>
 class AxiStreamPort {
 public:
-  // typedef AxiuPacketTlastOnlyType<Bitwidth> PacketType;
+  static_assert(Bitwidth % 8 == 0, "ERROR. Bitwidth not byte aligned.");
   typedef ap_axiu<Bitwidth, 0, 0, 0> PacketType;
-  typedef ap_uint<hls::bytewidth<ap_uint<Bitwidth> > > SideChannelsType;
+  typedef ap_uint<Bitwidth / 8> SideChannelsType;
+  // typedef ap_uint<hls::bytewidth<ap_uint<Bitwidth> > > SideChannelsType;
 
   AxiStreamPort(hls::stream<PacketType>& port) : _port(port),
     _all_ones(~(SideChannelsType(0))), _has_side_channels(true) {
