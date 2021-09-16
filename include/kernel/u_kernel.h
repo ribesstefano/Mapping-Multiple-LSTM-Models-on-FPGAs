@@ -31,7 +31,7 @@ void KernelU(const int num_refinements, svd::SvdStreams<params> &streams) {
 #pragma HLS ARRAY_PARTITION variable=xu complete dim=0
   for (int i = 0; i < num_refinements; ++i) {
     for (int j = 0; j < params::PrunedSizeU / params::PeU; ++j) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
       for (int k = 0; k < params::PeU; ++k) {
         for (int g = 0; g < params::G; ++g) {
           auto u = streams.u[g][k].read();
@@ -90,7 +90,7 @@ void UDotUnit2LstmPe(const int vect_length, const int num_tiles,
   for (int i = 0; i < num_iter * num_timesteps; ++i) {
     ReduceProd_PE_Loop:
     for (int j = 0; j < kNumElemsPerTile; ++j) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
       if (j == 0) {
         y1_mac = 0;
         y2_mac = 0;
@@ -154,7 +154,7 @@ void UDotUnit2LstmAccumulator(svd::AccumStream (&acc1_streams)[NumTiles-NumZeroT
     unsigned rank_size = kNumPEs;
 
     for (int i = 0; i < NumIter * NumTimesteps; ++i) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
       add_level_loop:
       for(int adder_tree_rank = kNumRanks - 1; adder_tree_rank >= 0; --adder_tree_rank) {
         const bool kLoopInit = adder_tree_rank == kNumRanks - 1 ? true : false;
@@ -216,7 +216,7 @@ void UDotUnit2LstmAccumulator(svd::AccumStream (&acc1_streams)[NumTiles-NumZeroT
     for (int i = 0; i < NumIter * NumTimesteps; ++i) {
       AdderTree_PE_Loop:
       for (int j = 0; j < kNumPEs; ++j) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
         if (j == 0) {
           y1_acc = 0;
           y2_acc = 0;
@@ -304,7 +304,7 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
       y2_mul[i] = 0;
       ReduceProd_Tile_Loop:
       for (int j = 0; j < kNumElemsPerTile / 2; ++j) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
         // auto p0_tmp = y_dsp * w_dsp + y_lut * w_lut;
         // auto p1_tmp = x_dsp * w_dsp + x_lut * w_lut;
         // p0 += p0_tmp;
@@ -341,7 +341,7 @@ void UDotUnit2Lstm(svd::ActivationStream (&x1_streams)[NumTiles-NumZeroTiles],
   ReduceProd_Accumulation_Loop:
   for (int i = 0; i < NumIter * NumTimesteps; ++i) {
     for (int j = 0; j < kNumPEs; ++j) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
       y1_acc += y1_mul[j];
       y2_acc += y2_mul[j];
     }
@@ -413,7 +413,6 @@ template <
 void KernelU(const int num_active_inputs,
     const int input_size,
     const int num_refinements[params::N],
-    // const hls::vector<int, params::N> num_refinements,
     const bool pad_output,
     hls::stream<typename params::VectTuAxiPacketType>& x_port,
     hls::stream<typename params::VectTuAxiPacketType>& u_port,
@@ -421,12 +420,13 @@ void KernelU(const int num_active_inputs,
 #pragma HLS TOP name=KernelU
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
+#ifndef __VITIS_HLS__
 #pragma HLS STABLE variable=x_port
 #pragma HLS STABLE variable=u_port
 #pragma HLS STABLE variable=xu_port
+#endif
   assert(num_active_inputs <= params::N);
   assert(num_active_inputs > 0);
-  // assert(num_refinements >= 0);
   assert(params::I % params::Tu == 0);
   assert(input_size % params::Tu == 0);
   assert(input_size <= params::I);
@@ -437,11 +437,9 @@ void KernelU(const int num_active_inputs,
   const int kStreamDepth_XU = 2 + params::G;
   assert(kNumTilesU <= kMaxNumTilesU);
   typedef typename params::ActivationD ActivationType;
-
   auto x_axis = svd::AxiStreamPort<params::VectTuAxiWidth>(x_port);
   auto u_axis = svd::AxiStreamPort<params::VectTuAxiWidth>(u_port);
   auto xu_axis = svd::AxiStreamInterface<WrapperAxisG>(xu_port);
-
   hls::stream<typename params::VectTuType> x_stream("x_stream");
   hls::stream<typename params::VectTuType> u_streams[params::G];
   hls::stream<ActivationType> xu_streams[params::G];
@@ -472,7 +470,7 @@ void KernelU(const int num_active_inputs,
   int R_total = num_refinements[0] * num_active_inputs; // Total elements.
   Get_Total_R:
   for (int i = 1; i < num_active_inputs; ++i) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
     if (num_refinements[i] > R_max) {
       R_max = num_refinements[i];
     }
@@ -488,7 +486,7 @@ void KernelU(const int num_active_inputs,
       assert(num_refinements[ii] - R_prev >= 1);
       for (int j = 0; j < kNumTilesU; ++j) {
         for (int k = 0; k < num_active_inputs - ii; ++k) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
           assert(num_active_inputs - ii >= 1);
           if (ii == 0 && i == 0) {
             auto x_val = x_axis.template PopVector<ActivationType, params::Tu>();
@@ -509,7 +507,6 @@ void KernelU(const int num_active_inputs,
     }
     R_prev = num_refinements[ii];
   }
-
   U_DMA:
   for (int i = 0; i < R_max; ++i) {
 #pragma HLS LOOP_TRIPCOUNT min=params::R max=params::R
@@ -517,7 +514,7 @@ void KernelU(const int num_active_inputs,
       for (int k = 0; k < params::G; ++k) {
         auto u_val = u_axis.template PopVector<ActivationType, params::Tu>();
         for (int ii = 0; ii < num_active_inputs; ++ii) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
           if (i < num_refinements[ii]) {
             u_streams[k] << u_val;
           }
@@ -525,11 +522,10 @@ void KernelU(const int num_active_inputs,
       }
     }
   }
-
   U_Kernel:
   for (int i = 0; i < R_total; ++i) {
     for (int j = 0; j < kNumTilesU; ++j) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
       auto x_val = x_stream.read();
       for (int k = 0; k < params::G; ++k) {
         xu_streams[k] << hlsutils::adder_tree<ActivationType, params::Tu>(x_val * u_streams[k].read());
@@ -544,7 +540,7 @@ void KernelU(const int num_active_inputs,
 #pragma HLS ARRAY_PARTITION variable=xu_out complete dim=1
     for (int j = 0; j < kNumTilesU; ++j) {
       for (int k = 0; k < num_active_inputs; ++k) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
         for (int ii = 0; ii < params::G; ++ii) {
           if (i < num_refinements[k]) {
             xu_out[k][ii] += xu_streams[ii].read();
@@ -564,7 +560,7 @@ void KernelU(const int num_active_inputs,
     }
   }
 }
-#endif
+#endif // end __VITIS_HLS__
 
 } // svd
 
@@ -590,9 +586,11 @@ typedef svd::SvdParameters<testu::kNumInputs, testu::kInputSize,
 static const int VectTuAxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::Tu;
 static const int VectN_AxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::N;
 static const int VectGN_AxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::G * params::N;
+#ifdef __VITIS_HLS__
 typedef hls::vector<typename params::ActivationD, params::Tu> VectTuType;
 typedef hls::vector<typename params::ActivationD, params::N> VectN_Type;
 typedef hls::vector<typename params::ActivationD, params::G * params::N> VectGN_Type;
+#endif
 typedef svd::AxiStreamPort<VectTuAxiBitwidth>::PacketType VectTuAxiPacketType;
 typedef svd::AxiStreamPort<VectN_AxiBitwidth>::PacketType VectN_AxiPacketType;
 typedef svd::AxiStreamPort<VectGN_AxiBitwidth>::PacketType VectGN_AxiPacketType;

@@ -54,9 +54,11 @@ void KernelS(const int num_active_inputs,
 #pragma HLS TOP name=KernelS
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
+#ifndef __VITIS_HLS__
 #pragma HLS STABLE variable=xu_port
 #pragma HLS STABLE variable=s_port
 #pragma HLS STABLE variable=xus_port
+#endif
   assert(num_active_inputs <= params::N);
   assert(num_active_inputs > 0);
   int R_max = num_refinements[0];
@@ -75,7 +77,7 @@ void KernelS(const int num_active_inputs,
   auto xus_axis = svd::AxiStreamInterface<PortWrapper>(xus_port);
   S_Kernel:
   for (int i = 0; i < R_total; ++i) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
     typedef typename params::ActivationD ActivationType;
     auto xu_val = xu_axis.template PopVector<ActivationType, params::G>();
     auto s_val = s_axis.template PopVector<ActivationType, params::G>();

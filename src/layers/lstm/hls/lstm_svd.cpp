@@ -56,19 +56,22 @@ void SvdModel2LstmSDSoCV2(
   const int kNumTimesteps = NUM_TIMESTEPS;
   const int kNumNonZeroTilesU = kNumTilesU - kNumZeroTilesU;
   const int kNumNonZeroTilesV = kNumTilesV - kNumZeroTilesV;
-  const int kNumElemsTileUCurrent = kInputLength / kNumTilesU;
-  const int kNumElemsTileURecur = kOutputLength / kNumTilesU;
-  const int kNumElemsTileV = kOutputLength / kNumTilesV;
+  const int kTileSizeUCurrent = kInputLength / kNumTilesU;
+  const int kTileSizeURecur = kOutputLength / kNumTilesU;
+  const int kTileSizeV = kOutputLength / kNumTilesV;
   assert(kNumTilesU % 2 == 0);
   assert(kNumTilesV % 2 == 0);
   // assert(kNumZeroTilesU % 2 == 0);
   // assert(kNumZeroTilesV % 2 == 0);
   // assert(kNumIter % 2 == 0);
-  hlsutils::Log(0, "[INFO] assert passed.");
+  hlsutils::Log(0, "[INFO] asserts passed.");
 
-  const int kNumElemsTileU = kInputLength / kNumTilesU;
-  const int kPrunedLengthU = kInputLength - kNumZeroTilesU * kNumElemsTileU;
-  const int kPrunedLengthV = kOutputLength - kNumZeroTilesV * kNumElemsTileV;
+  const int kTileSizeU = kInputLength / kNumTilesU;
+  const int kPrunedLengthU = kInputLength - kNumZeroTilesU * kTileSizeU;
+  const int kPrunedLengthV = kOutputLength - kNumZeroTilesV * kTileSizeV;
+  const int kInputLengthPruned = kInputLength - kTileSizeU * kNumZeroTilesU;
+  const int kOutputLengthPrunedU = kOutputLength - kOutputLength / kNumTilesU * kNumZeroTilesU;
+  const int kOutputLengthPrunedV = kOutputLength - kOutputLength / kNumTilesV * kNumZeroTilesV;
   const int kNumSamples = NUM_SAMPLES; // Used for cosimulation only
   const int kNumReadsR = 8 * kNumIter;
   const int kNumReadsC = 8 * kNumIter;
@@ -82,9 +85,6 @@ void SvdModel2LstmSDSoCV2(
 #ifndef SDS_DESIGN
 #pragma HLS INTERFACE s_axilite port=return bundle=ctrl
 
-  const int kInputLengthPruned = kInputLength - kInputLength / kNumTilesU * kNumZeroTilesU;
-  const int kOutputLengthPrunedU = kOutputLength - kOutputLength / kNumTilesU * kNumZeroTilesU;
-  const int kOutputLengthPrunedV = kOutputLength - kOutputLength / kNumTilesV * kNumZeroTilesV;
   const int kUSize = kNumIter*(kNumCurGates * kInputLengthPruned + kNumRecGates * kOutputLengthPrunedU);
   const int kVSize = kNumIter*(kNumCurGates * kOutputLengthPrunedV + kNumRecGates * kOutputLengthPrunedV);
   const int kSSize = kNumIter * 2 * (kNumCurGates + kNumRecGates);
@@ -97,98 +97,89 @@ void SvdModel2LstmSDSoCV2(
   const int kVportDepth = kVSize;
   const int kS1portDepth = kSSize / 2;
   const int kS2portDepth = kSSize / 2;
-#pragma HLS INTERFACE m_axi port=u_cur_port offset=slave depth=kUcurPortDepth bundle=u_cur_dmem
-#pragma HLS INTERFACE m_axi port=u_rec_port offset=slave depth=kUrecPortDepth bundle=u_rec_dmem
-#pragma HLS INTERFACE m_axi port=v_port offset=slave depth=kVportDepth bundle=v_dmem
-#pragma HLS INTERFACE m_axi port=s1_port offset=slave depth=kS1portDepth bundle=s1_dmem
-#pragma HLS INTERFACE m_axi port=s2_port offset=slave depth=kS2portDepth bundle=s2_dmem
+// #pragma HLS INTERFACE m_axi port=u_cur_port offset=slave depth=kUcurPortDepth bundle=u_cur_dmem
+// #pragma HLS INTERFACE m_axi port=u_rec_port offset=slave depth=kUrecPortDepth bundle=u_rec_dmem
+// #pragma HLS INTERFACE m_axi port=v_port offset=slave depth=kVportDepth bundle=v_dmem
+// #pragma HLS INTERFACE m_axi port=s1_port offset=slave depth=kS1portDepth bundle=s1_dmem
+// #pragma HLS INTERFACE m_axi port=s2_port offset=slave depth=kS2portDepth bundle=s2_dmem
+#pragma HLS INTERFACE axis port=u_cur_port
+#pragma HLS INTERFACE axis port=u_rec_port
+#pragma HLS INTERFACE axis port=v_port
+#pragma HLS INTERFACE axis port=s1_port
+#pragma HLS INTERFACE axis port=s2_port
 
-#pragma HLS INTERFACE ap_fifo port=x1_port
-#pragma HLS INTERFACE ap_fifo port=x2_port
-#pragma HLS INTERFACE ap_fifo port=bias1_port
-#pragma HLS INTERFACE ap_fifo port=bias2_port
-#pragma HLS INTERFACE ap_fifo port=nz_v_port
-#pragma HLS INTERFACE ap_fifo port=nz_u_port
-#pragma HLS INTERFACE ap_fifo port=h_t1_prev_port
-#pragma HLS INTERFACE ap_fifo port=h_t2_prev_port
-#pragma HLS INTERFACE ap_fifo port=h_t1_curr_port
-#pragma HLS INTERFACE ap_fifo port=h_t2_curr_port
-#pragma HLS INTERFACE ap_fifo port=c_t1_prev_port
-#pragma HLS INTERFACE ap_fifo port=c_t2_prev_port
-#pragma HLS INTERFACE ap_fifo port=c_t1_curr_port
-#pragma HLS INTERFACE ap_fifo port=c_t2_curr_port
+#pragma HLS INTERFACE axis port=x1_port
+#pragma HLS INTERFACE axis port=x2_port
+#pragma HLS INTERFACE axis port=bias1_port
+#pragma HLS INTERFACE axis port=bias2_port
+#pragma HLS INTERFACE axis port=nz_v_port
+#pragma HLS INTERFACE axis port=nz_u_port
+#pragma HLS INTERFACE axis port=h_t1_prev_port
+#pragma HLS INTERFACE axis port=h_t2_prev_port
+#pragma HLS INTERFACE axis port=h_t1_curr_port
+#pragma HLS INTERFACE axis port=h_t2_curr_port
+#pragma HLS INTERFACE axis port=c_t1_prev_port
+#pragma HLS INTERFACE axis port=c_t2_prev_port
+#pragma HLS INTERFACE axis port=c_t1_curr_port
+#pragma HLS INTERFACE axis port=c_t2_curr_port
 #endif // SDS_DESIGN
 
 #pragma HLS DATAFLOW
-  hlsutils::Log(0, "[INFO] DATAFLOW passed.");
-
   // ===========================================================================
-  // Current streams
-  // ===========================================================================
-  svd::WeightStream cur_u_streams[kNumCurGates][kNumNonZeroTilesU];
-  svd::WeightStream cur_v_streams[kNumCurGates][kNumElemsTileV]; // [kNumNonZeroTilesV];
-  svd::ActivationStream cur_dot1_streams[kNumCurGates];
-  svd::ActivationStream cur_dot2_streams[kNumCurGates];
-  svd::ActivationStream cur_out1_streams[kNumCurGates][kNumNonZeroTilesV];
-  svd::ActivationStream cur_out2_streams[kNumCurGates][kNumNonZeroTilesV];
-  svd::ActivationStream cur_acc1_streams[kNumCurGates][kNumElemsTileV]; // [kNumTilesV];
-  svd::ActivationStream cur_acc2_streams[kNumCurGates][kNumElemsTileV]; // [kNumTilesV];
-#pragma HLS ARRAY_PARTITION variable=cur_u_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=cur_v_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=cur_dot1_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=cur_dot2_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=cur_out1_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=cur_out2_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=cur_acc1_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=cur_acc2_streams complete dim=0
-  // ===========================================================================
-  // Recur streams
-  // ===========================================================================
-  svd::WeightStream rec_u_streams[kNumRecGates][kNumNonZeroTilesU];
-  svd::WeightStream rec_v_streams[kNumRecGates][kNumElemsTileV]; // [kNumNonZeroTilesV];
-  svd::ActivationStream rec_dot1_streams[kNumRecGates];
-  svd::ActivationStream rec_dot2_streams[kNumRecGates];
-  svd::ActivationStream rec_out1_streams[kNumRecGates][kNumNonZeroTilesV];
-  svd::ActivationStream rec_out2_streams[kNumRecGates][kNumNonZeroTilesV];
-  svd::ActivationStream rec_acc1_streams[kNumRecGates][kNumElemsTileV]; // [kNumTilesV];
-  svd::ActivationStream rec_acc2_streams[kNumRecGates][kNumElemsTileV]; // [kNumTilesV];
-#pragma HLS ARRAY_PARTITION variable=rec_u_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=rec_v_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=rec_dot1_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=rec_dot2_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=rec_out1_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=rec_out2_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=rec_acc1_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=rec_acc2_streams complete dim=0
-  // ===========================================================================
-  // Scalar streams
-  // ===========================================================================
-  svd::WeightStream gates_s1_streams[kNumGates]; // used for both curr and recur
-  svd::WeightStream gates_s2_streams[kNumGates]; // used for both curr and recur
-#pragma HLS ARRAY_PARTITION variable=gates_s1_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=gates_s2_streams complete dim=0
-  // ===========================================================================
-  // Current input streams
-  // ===========================================================================
-  svd::ActivationStream x1_streams[kNumCurGates][kNumNonZeroTilesU];
-  svd::ActivationStream x2_streams[kNumCurGates][kNumNonZeroTilesU];
-#pragma HLS ARRAY_PARTITION variable=x1_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=x2_streams complete dim=0
-  // ===========================================================================
-  // Recurrent input streams
-  // ===========================================================================
-  svd::ActivationStream h1_streams[kNumRecGates][kNumNonZeroTilesU];
-  svd::ActivationStream h2_streams[kNumRecGates][kNumNonZeroTilesU];
-#pragma HLS ARRAY_PARTITION variable=h1_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=h2_streams complete dim=0
-  // ===========================================================================
-  // Zero Combinations DMA
+  // Streams Depth Sizing
   // ===========================================================================
   // NOTE: We divide the FIFO depths by a certain factor to save BRAMs. Be aware
   // that a wrong factor could lead to deadlocks!
   const int kFIFOdepthDivider = 8;
   const int kStreamDepthIter = kNumIter / kFIFOdepthDivider;
-  hlsutils::Log(0, "[INFO] DATAFLOW passed.");
+  const int kFIFOdepthFactor = kNumIter * 2;
+  const int kStreamDepthUCurrent = kNumIter * kTileSizeUCurrent / kFIFOdepthFactor == 0 ? 2 : kNumIter * kTileSizeUCurrent / kFIFOdepthFactor;
+  const int kStreamDepthURecurrent = kNumIter * kTileSizeURecur / kFIFOdepthFactor == 0 ? 2 : kNumIter * kTileSizeURecur / kFIFOdepthFactor;
+  const int kStreamDepthV = kNumIter * kNumTilesV / kFIFOdepthFactor == 0 ? 2 : kNumIter * kNumTilesV / kFIFOdepthFactor;
+  const int kTileAccStreamDepth = 2;
+  const int kOutStreamDepth = 2; // kNumIter * kTileSizeV;
+  // ===========================================================================
+  // Current streams
+  // ===========================================================================
+  svd::WeightStream cur_u_streams[kNumCurGates][kNumNonZeroTilesU];
+  svd::WeightStream cur_v_streams[kNumCurGates][kTileSizeV]; // [kNumNonZeroTilesV];
+  svd::ActivationStream cur_dot1_streams[kNumCurGates];
+  svd::ActivationStream cur_dot2_streams[kNumCurGates];
+  svd::ActivationStream cur_out1_streams[kNumCurGates][kNumNonZeroTilesV];
+  svd::ActivationStream cur_out2_streams[kNumCurGates][kNumNonZeroTilesV];
+  svd::ActivationStream cur_acc1_streams[kNumCurGates][kTileSizeV]; // [kNumTilesV];
+  svd::ActivationStream cur_acc2_streams[kNumCurGates][kTileSizeV]; // [kNumTilesV];
+  // ===========================================================================
+  // Recur streams
+  // ===========================================================================
+  svd::WeightStream rec_u_streams[kNumRecGates][kNumNonZeroTilesU];
+  svd::WeightStream rec_v_streams[kNumRecGates][kTileSizeV]; // [kNumNonZeroTilesV];
+  svd::ActivationStream rec_dot1_streams[kNumRecGates];
+  svd::ActivationStream rec_dot2_streams[kNumRecGates];
+  svd::ActivationStream rec_out1_streams[kNumRecGates][kNumNonZeroTilesV];
+  svd::ActivationStream rec_out2_streams[kNumRecGates][kNumNonZeroTilesV];
+  svd::ActivationStream rec_acc1_streams[kNumRecGates][kTileSizeV]; // [kNumTilesV];
+  svd::ActivationStream rec_acc2_streams[kNumRecGates][kTileSizeV]; // [kNumTilesV];
+  // ===========================================================================
+  // Scalar streams
+  // ===========================================================================
+  svd::WeightStream gates_s1_streams[kNumGates]; // used for both curr and recur
+  svd::WeightStream gates_s2_streams[kNumGates]; // used for both curr and recur
+  // ===========================================================================
+  // Current input streams
+  // ===========================================================================
+  svd::ActivationStream x1_streams[kNumCurGates][kNumNonZeroTilesU];
+  svd::ActivationStream x2_streams[kNumCurGates][kNumNonZeroTilesU];
+  // ===========================================================================
+  // Recurrent input streams
+  // ===========================================================================
+  svd::ActivationStream h1_streams[kNumRecGates][kNumNonZeroTilesU];
+  svd::ActivationStream h2_streams[kNumRecGates][kNumNonZeroTilesU];
+  // ===========================================================================
+  // Zero Combinations DMA
+  // ===========================================================================
+  // NOTE: We divide the FIFO depths by a certain factor to save BRAMs. Be aware
+  // that a wrong factor could lead to deadlocks!
   hls::stream<ap_uint<kNumTilesV> > nz_v_stream1_cur[kNumCurGates];
   hls::stream<ap_uint<kNumTilesV> > nz_v_stream1_rec[kNumRecGates];
   hls::stream<ap_uint<kNumTilesV> > nz_v_stream2_cur[kNumCurGates];
@@ -197,26 +188,6 @@ void SvdModel2LstmSDSoCV2(
   hls::stream<ap_uint<kNumTilesU> > nz_u_stream1_rec[kNumRecGates];
   hls::stream<ap_uint<kNumTilesU> > nz_u_stream2_cur[kNumCurGates];
   hls::stream<ap_uint<kNumTilesU> > nz_u_stream2_rec[kNumRecGates];
-#pragma HLS ARRAY_PARTITION variable=nz_v_stream1_cur complete
-#pragma HLS ARRAY_PARTITION variable=nz_v_stream1_rec complete
-#pragma HLS ARRAY_PARTITION variable=nz_v_stream2_cur complete
-#pragma HLS ARRAY_PARTITION variable=nz_v_stream2_rec complete
-#pragma HLS ARRAY_PARTITION variable=nz_u_stream1_cur complete
-#pragma HLS ARRAY_PARTITION variable=nz_u_stream1_rec complete
-#pragma HLS ARRAY_PARTITION variable=nz_u_stream2_cur complete
-#pragma HLS ARRAY_PARTITION variable=nz_u_stream2_rec complete
-  // ===========================================================================
-  // Streams Depth Sizing
-  // ===========================================================================
-  // NOTE: We divide the FIFO depths by a certain factor to save BRAMs. Be aware
-  // that a wrong factor could lead to deadlocks!
-  const int kFIFOdepthFactor = kNumIter * 2;
-  const int kStreamDepthUCurrent = kNumIter * kNumElemsTileUCurrent / kFIFOdepthFactor == 0 ? 2 : kNumIter * kNumElemsTileUCurrent / kFIFOdepthFactor;
-  const int kStreamDepthURecurrent = kNumIter * kNumElemsTileURecur / kFIFOdepthFactor == 0 ? 2 : kNumIter * kNumElemsTileURecur / kFIFOdepthFactor;
-  const int kStreamDepthV = kNumIter * kNumTilesV / kFIFOdepthFactor == 0 ? 2 : kNumIter * kNumTilesV / kFIFOdepthFactor;
-  const int kTileAccStreamDepth = 2;
-  const int kOutStreamDepth = 2; // kNumIter * kNumElemsTileV;
-
 #pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream1_cur
 #pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream1_rec
 #pragma HLS STREAM depth=kStreamDepthIter variable=nz_v_stream2_cur
@@ -226,15 +197,15 @@ void SvdModel2LstmSDSoCV2(
 #pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream2_cur
 #pragma HLS STREAM depth=kStreamDepthIter variable=nz_u_stream2_rec
 
-#pragma HLS STREAM variable=x1_streams depth=kStreamDepthUCurrent dim=2
-#pragma HLS STREAM variable=x2_streams depth=kStreamDepthUCurrent dim=2
-#pragma HLS STREAM variable=h1_streams depth=kStreamDepthURecurrent dim=2
-#pragma HLS STREAM variable=h2_streams depth=kStreamDepthURecurrent dim=2
+#pragma HLS STREAM variable=x1_streams depth=kStreamDepthUCurrent // dim=2
+#pragma HLS STREAM variable=x2_streams depth=kStreamDepthUCurrent // dim=2
+#pragma HLS STREAM variable=h1_streams depth=kStreamDepthURecurrent // dim=2
+#pragma HLS STREAM variable=h2_streams depth=kStreamDepthURecurrent // dim=2
 
-#pragma HLS STREAM variable=cur_u_streams depth=kStreamDepthUCurrent dim=2
-#pragma HLS STREAM variable=rec_u_streams depth=kStreamDepthURecurrent dim=2
-#pragma HLS STREAM variable=cur_v_streams depth=kStreamDepthV dim=2
-#pragma HLS STREAM variable=rec_v_streams depth=kStreamDepthV dim=2
+#pragma HLS STREAM variable=cur_u_streams depth=kStreamDepthUCurrent // dim=2
+#pragma HLS STREAM variable=rec_u_streams depth=kStreamDepthURecurrent // dim=2
+#pragma HLS STREAM variable=cur_v_streams depth=kStreamDepthV // dim=2
+#pragma HLS STREAM variable=rec_v_streams depth=kStreamDepthV // dim=2
 
 #pragma HLS STREAM variable=gates_s1_streams depth=kStreamDepthIter
 #pragma HLS STREAM variable=gates_s2_streams depth=kStreamDepthIter
@@ -243,23 +214,55 @@ void SvdModel2LstmSDSoCV2(
 #pragma HLS STREAM variable=cur_dot2_streams depth=kStreamDepthIter
 #pragma HLS STREAM variable=rec_dot1_streams depth=kStreamDepthIter
 #pragma HLS STREAM variable=rec_dot2_streams depth=kStreamDepthIter
-#pragma HLS STREAM variable=cur_acc1_streams depth=kTileAccStreamDepth dim=2
-#pragma HLS STREAM variable=cur_acc2_streams depth=kTileAccStreamDepth dim=2
-#pragma HLS STREAM variable=rec_acc1_streams depth=kTileAccStreamDepth dim=2
-#pragma HLS STREAM variable=rec_acc2_streams depth=kTileAccStreamDepth dim=2
+#pragma HLS STREAM variable=cur_acc1_streams depth=kTileAccStreamDepth // dim=2
+#pragma HLS STREAM variable=cur_acc2_streams depth=kTileAccStreamDepth // dim=2
+#pragma HLS STREAM variable=rec_acc1_streams depth=kTileAccStreamDepth // dim=2
+#pragma HLS STREAM variable=rec_acc2_streams depth=kTileAccStreamDepth // dim=2
 
-#pragma HLS STREAM variable=cur_out1_streams depth=kOutStreamDepth dim=2
-#pragma HLS STREAM variable=cur_out2_streams depth=kOutStreamDepth dim=2
-#pragma HLS STREAM variable=rec_out1_streams depth=kOutStreamDepth dim=2
-#pragma HLS STREAM variable=rec_out2_streams depth=kOutStreamDepth dim=2
-  hlsutils::Log(0, "[INFO] Depth sizing passed.");
-
+#pragma HLS STREAM variable=cur_out1_streams depth=kOutStreamDepth // dim=2
+#pragma HLS STREAM variable=cur_out2_streams depth=kOutStreamDepth // dim=2
+#pragma HLS STREAM variable=rec_out1_streams depth=kOutStreamDepth // dim=2
+#pragma HLS STREAM variable=rec_out2_streams depth=kOutStreamDepth // dim=2
+  // ===========================================================================
+  // Partitioning
+  // ===========================================================================
+#ifndef __VITIS_HLS__
+#pragma HLS ARRAY_PARTITION variable=cur_u_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=cur_v_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=cur_dot1_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=cur_dot2_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=cur_out1_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=cur_out2_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=cur_acc1_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=cur_acc2_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=rec_u_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=rec_v_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=rec_dot1_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=rec_dot2_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=rec_out1_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=rec_out2_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=rec_acc1_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=rec_acc2_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=gates_s1_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=gates_s2_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=x1_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=x2_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=h1_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=h2_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=nz_v_stream1_cur complete dim=0
+#pragma HLS ARRAY_PARTITION variable=nz_v_stream1_rec complete dim=0
+#pragma HLS ARRAY_PARTITION variable=nz_v_stream2_cur complete dim=0
+#pragma HLS ARRAY_PARTITION variable=nz_v_stream2_rec complete dim=0
+#pragma HLS ARRAY_PARTITION variable=nz_u_stream1_cur complete dim=0
+#pragma HLS ARRAY_PARTITION variable=nz_u_stream1_rec complete dim=0
+#pragma HLS ARRAY_PARTITION variable=nz_u_stream2_cur complete dim=0
+#pragma HLS ARRAY_PARTITION variable=nz_u_stream2_rec complete dim=0
+#endif
   hlsutils::Log(0, "Starting ZeroTileCombinationDMA");
-  hlsutils::Log(0, "Starting ZeroTileCombinationDMA");
-  svd::ZeroTileCombination2LstmDMA<kNumIter, kNumTilesU, kNumGates>(nz_u_port,
+  svd::NZIndex2LstmDMA<kNumIter, kNumTilesU, kNumGates>(nz_u_port,
     nz_u_stream1_cur, nz_u_stream1_rec, nz_u_stream2_cur,
     nz_u_stream2_rec);
-  svd::ZeroTileCombinationDMA<kNumIter, kNumTilesV, kNumGates>(nz_v_port,
+  svd::NZIndexDMA<kNumIter, kNumTilesV, kNumGates>(nz_v_port,
     nz_v_stream1_cur, nz_v_stream1_rec);
   // ===========================================================================
   // Current Input DMA
@@ -279,22 +282,23 @@ void SvdModel2LstmSDSoCV2(
   // ===========================================================================
   // Gates DMA
   // ===========================================================================
-  const int kUcurSize = kNumGates / 2 * kNumIter * kInputLength / kNumTilesU * (kNumTilesU - kNumZeroTilesU);
-  const int kUrecSize = kNumGates / 2 * kNumIter * kOutputLength / kNumTilesU * (kNumTilesU - kNumZeroTilesU);
+  const int kUcurSize = kNumGates / 2 * kNumIter * kPrunedLengthU;
+  const int kUrecSize = kNumGates / 2 * kNumIter * kOutputLengthPrunedU;
   const int kSsize = kNumGates * kNumIter;
-  const int kVsize = kNumGates * kNumIter * kOutputLength / kNumTilesV * (kNumTilesV - kNumZeroTilesV);
+  const int kVsize = kNumGates * kNumIter * kPrunedLengthV;
   const int kBitWidthU = FIX_WIDTH * 4;
   const int kBitWidthV = FIX_WIDTH * 8;
   const int kBitWidthS = FIX_WIDTH * 8;
-  svd::WeightD u_cur_gate_streams[kNumGates / 2][kNumIter * kInputLength / kNumTilesU * (kNumTilesU - kNumZeroTilesU)];
-  svd::WeightD u_rec_gate_streams[kNumGates / 2][kNumIter * kOutputLength / kNumTilesU * (kNumTilesU - kNumZeroTilesU)];
-  svd::WeightD v_gate_streams[kNumGates][kNumIter * kOutputLength / kNumTilesV * (kNumTilesV - kNumZeroTilesV)];
-#pragma HLS STREAM variable=u_cur_gate_streams depth=1 dim=1
-#pragma HLS STREAM variable=u_rec_gate_streams depth=1 dim=1
-#pragma HLS STREAM variable=v_gate_streams depth=1 dim=1
+#ifndef __VITIS_HLS__
+  svd::WeightD u_cur_gate_streams[kNumGates / 2][kNumIter * kPrunedLengthU];
+  svd::WeightD u_rec_gate_streams[kNumGates / 2][kNumIter * kOutputLengthPrunedU];
+  svd::WeightD v_gate_streams[kNumGates][kNumIter * kPrunedLengthV];
 #pragma HLS ARRAY_PARTITION variable=u_cur_gate_streams complete dim=1
 #pragma HLS ARRAY_PARTITION variable=u_rec_gate_streams complete dim=1
 #pragma HLS ARRAY_PARTITION variable=v_gate_streams complete dim=1
+#pragma HLS STREAM variable=u_cur_gate_streams depth=1 dim=1
+#pragma HLS STREAM variable=u_rec_gate_streams depth=1 dim=1
+#pragma HLS STREAM variable=v_gate_streams depth=1 dim=1
   hlsutils::Log(0, "Starting ArraySplitter");
   svd::ArraySplitter<ap_uint<kBitWidthU>, svd::WeightD, kBitWidthU, FIX_WIDTH, kUcurSize>(
     u_cur_port, u_cur_gate_streams);
@@ -302,6 +306,24 @@ void SvdModel2LstmSDSoCV2(
     u_rec_port, u_rec_gate_streams);
   svd::ArraySplitter<ap_uint<kBitWidthV>, svd::WeightD, kBitWidthV, FIX_WIDTH, kVsize>(
     v_port, v_gate_streams);
+#else
+  hls::stream<svd::WeightD> u_cur_gate_streams[kNumGates / 2];
+  hls::stream<svd::WeightD> u_rec_gate_streams[kNumGates / 2];
+  hls::stream<svd::WeightD> v_gate_streams[kNumGates];
+#pragma HLS ARRAY_PARTITION variable=u_cur_gate_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=u_rec_gate_streams complete dim=0
+#pragma HLS ARRAY_PARTITION variable=v_gate_streams complete dim=0
+#pragma HLS STREAM variable=u_cur_gate_streams depth=2
+#pragma HLS STREAM variable=u_rec_gate_streams depth=2
+#pragma HLS STREAM variable=v_gate_streams depth=2
+  hlsutils::Log(0, "Starting ArraySplitter");
+  svd::StreamSplitter<ap_uint<kBitWidthU>, svd::WeightD, kBitWidthU, FIX_WIDTH>(
+    kUcurSize, u_cur_port, u_cur_gate_streams);
+  svd::StreamSplitter<ap_uint<kBitWidthU>, svd::WeightD, kBitWidthU, FIX_WIDTH>(
+    kUrecSize, u_rec_port, u_rec_gate_streams);
+  svd::StreamSplitter<ap_uint<kBitWidthV>, svd::WeightD, kBitWidthV, FIX_WIDTH>(
+    kVsize, v_port, v_gate_streams);
+#endif
   svd::StreamSplitter<ap_uint<kBitWidthS>, svd::WeightD, kBitWidthS, FIX_WIDTH>(
     kSsize, s1_port, gates_s1_streams);
   svd::StreamSplitter<ap_uint<kBitWidthS>, svd::WeightD, kBitWidthS, FIX_WIDTH>(
@@ -310,13 +332,20 @@ void SvdModel2LstmSDSoCV2(
   // ===========================================================================
   // Current Dot Product Unit
   // ===========================================================================
-  Current_Gates_Dot_Product_Loop:
+  Current_SVD_Kernels:
   for (int g = 0; g < kNumCurGates; ++g) {
 #pragma HLS UNROLL
-    svd::GateDispatcher(kUweights, kNumIter, kNumNonZeroTilesU,
-      kNumElemsTileUCurrent, u_cur_gate_streams[g], cur_u_streams[g]);
-    svd::GateDispatcher(!kUweights, kNumIter, kNumNonZeroTilesV, kNumElemsTileV,
+#ifndef __VITIS_HLS__
+    svd::DispatchGateFromArray(kUweights, kNumIter, kNumNonZeroTilesU,
+      kTileSizeUCurrent, u_cur_gate_streams[g], cur_u_streams[g]);
+    svd::DispatchGateFromArray(!kUweights, kNumIter, kNumNonZeroTilesV, kTileSizeV,
       v_gate_streams[g], cur_v_streams[g]);
+#else
+    svd::DispatchGateFromStream(kUweights, kNumIter, kNumNonZeroTilesU,
+      kTileSizeUCurrent, u_cur_gate_streams[g], cur_u_streams[g]);
+    svd::DispatchGateFromStream(!kUweights, kNumIter, kNumNonZeroTilesV, kTileSizeV,
+      v_gate_streams[g], cur_v_streams[g]);
+#endif
     svd::UDotUnit2Lstm<kInputLength, kNumTilesU, kNumZeroTilesU, kNumIter, 1>(
       x1_streams[g], x2_streams[g], cur_u_streams[g], cur_dot1_streams[g],
       cur_dot2_streams[g]);
@@ -330,13 +359,20 @@ void SvdModel2LstmSDSoCV2(
   // ===========================================================================
   // Recur Dot Product Unit
   // ===========================================================================
-  Recur_Gates_Dot_Product_Loop:
+  Recurrent_SVD_Kernels:
   for (int g = 0; g < kNumRecGates; ++g) {
 #pragma HLS UNROLL
-    svd::GateDispatcher(kUweights, kNumIter, kNumNonZeroTilesU,
-      kNumElemsTileURecur, u_rec_gate_streams[g], rec_u_streams[g]);
-    svd::GateDispatcher(!kUweights, kNumIter, kNumNonZeroTilesV, kNumElemsTileV,
+#ifndef __VITIS_HLS__
+    svd::DispatchGateFromArray(kUweights, kNumIter, kNumNonZeroTilesU,
+      kTileSizeURecur, u_rec_gate_streams[g], rec_u_streams[g]);
+    svd::DispatchGateFromArray(!kUweights, kNumIter, kNumNonZeroTilesV, kTileSizeV,
       v_gate_streams[kNumCurGates + g], rec_v_streams[g]);
+#else
+    svd::DispatchGateFromStream(kUweights, kNumIter, kNumNonZeroTilesU,
+      kTileSizeURecur, u_rec_gate_streams[g], rec_u_streams[g]);
+    svd::DispatchGateFromStream(!kUweights, kNumIter, kNumNonZeroTilesV, kTileSizeV,
+      v_gate_streams[kNumCurGates + g], rec_v_streams[g]);
+#endif
     svd::UDotUnit2Lstm<kOutputLength, kNumTilesU, kNumZeroTilesU, kNumIter, 1>(
       h1_streams[g], h2_streams[g], rec_u_streams[g], rec_dot1_streams[g],
       rec_dot2_streams[g]);
@@ -359,7 +395,6 @@ void SvdModel2LstmSDSoCV2(
     bias2_port);
 
 #ifdef DEBUG_FIFOS
-
   const int kNumPEsU = NUM_TILES_U - NUM_ZERO_TILES_U;
   const int kNumPEsVCur = INPUT_SIZE / NUM_TILES_V;
   const int kNumPEsVRec = HIDDEN_SIZE / NUM_TILES_V;
@@ -368,7 +403,6 @@ void SvdModel2LstmSDSoCV2(
   const int kNumProbes = kNumUprobes + kNumVprobes;
   svd::ProbeStream stop_ctrl;
   svd::ProbeStream probe_ctrl[kNumUprobes];
-
   svd::ClockCounter<svd::CounterD, kNumProbes>(probe_ctrl, stop_ctrl, counters_port, clk_count_port);
 #endif
 }

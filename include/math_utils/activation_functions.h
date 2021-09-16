@@ -147,9 +147,9 @@ void NonLinearityUnitSoftware(const int VectLength,
   assert(NumGates >= 4);
   DataW tanh_table[TableSize];
   InitTanhTable<DataW, TableSize>(tanh_table);
-  const int kNumElemsTile = VectLength / NumTiles;
+  const int kTileSize = VectLength / NumTiles;
   for(int i = 0; i < NumTiles; ++i) {
-    for (int j = 0; j < kNumElemsTile; ++j) {
+    for (int j = 0; j < kTileSize; ++j) {
       // =======================================================================
       // Python (Keras) Implementation:
       // i = self.hard_sigm(x_i + K.dot(h_tm1_i, self.recurrent_kernel_i))
@@ -163,10 +163,10 @@ void NonLinearityUnitSoftware(const int VectLength,
       DataA c_gate = 0;
       DataA o_gate = 0;
       if (has_bias) {
-        i_gate = cur_gate_stream[0][i].read() + rec_gate_stream[0][i].read() + bias[0 * VectLength + i * kNumElemsTile + j];
-        f_gate = cur_gate_stream[1][i].read() + rec_gate_stream[1][i].read() + bias[1 * VectLength + i * kNumElemsTile + j];
-        c_gate = cur_gate_stream[2][i].read() + rec_gate_stream[2][i].read() + bias[2 * VectLength + i * kNumElemsTile + j];
-        o_gate = cur_gate_stream[3][i].read() + rec_gate_stream[3][i].read() + bias[3 * VectLength + i * kNumElemsTile + j];
+        i_gate = cur_gate_stream[0][i].read() + rec_gate_stream[0][i].read() + bias[0 * VectLength + i * kTileSize + j];
+        f_gate = cur_gate_stream[1][i].read() + rec_gate_stream[1][i].read() + bias[1 * VectLength + i * kTileSize + j];
+        c_gate = cur_gate_stream[2][i].read() + rec_gate_stream[2][i].read() + bias[2 * VectLength + i * kTileSize + j];
+        o_gate = cur_gate_stream[3][i].read() + rec_gate_stream[3][i].read() + bias[3 * VectLength + i * kTileSize + j];
       } else {
         i_gate = cur_gate_stream[0][i].read() + rec_gate_stream[0][i].read();
         f_gate = cur_gate_stream[1][i].read() + rec_gate_stream[1][i].read();
@@ -177,12 +177,12 @@ void NonLinearityUnitSoftware(const int VectLength,
       const auto sigma_f = HardSigmoid<DataA>(f_gate);
       const auto sigma_o = HardSigmoid<DataA>(o_gate);
       const auto tanh_cell = TanH<DataW, TableSize>(c_gate, tanh_table);
-      const auto c_lhs = sigma_f * c_t_prev[i * kNumElemsTile + j];
+      const auto c_lhs = sigma_f * c_t_prev[i * kTileSize + j];
       const auto c_t_tile = c_lhs + sigma_i * tanh_cell;
-      c_t[i * kNumElemsTile + j] = c_t_tile;
+      c_t[i * kTileSize + j] = c_t_tile;
       const auto c_tanh = TanH<DataW, TableSize>(c_t_tile, tanh_table);
       const auto h_t_tile = sigma_o * c_tanh;
-      h[i * kNumElemsTile + j] = h_t_tile;
+      h[i * kTileSize + j] = h_t_tile;
     }
   }
 }
@@ -461,8 +461,10 @@ void NonLinearityUnitPE(const int size,
 
 /**
  * @brief      Sub module to apply non linearities in parallel.
+ * @deprecated This function has been included in NonLinearityUnit.
  *
- * @param[in]  c_t_prev                 The previous LSTM cell state (internal internal)
+ * @param[in]  c_t_prev_stream          The previous LSTM cell state (internal
+ *                                      internal)
  * @param      current_gate_i_stream    The current gate i stream
  * @param      current_gate_f_stream    The current gate f stream
  * @param      current_gate_c_stream    The current gate c stream
@@ -471,30 +473,42 @@ void NonLinearityUnitPE(const int size,
  * @param      recurrent_gate_f_stream  The recurrent gate f stream
  * @param      recurrent_gate_c_stream  The recurrent gate c stream
  * @param      recurrent_gate_o_stream  The recurrent gate o stream
- * @param      h                        The LSTM output
- * @param      c_t                      The current LSTM cell state t
+ * @param      h_stream                 The h stream
+ * @param      c_t_stream               The c t stream
+ * @param[in]  has_bias                 Indicates if bias
+ * @param      i_bias_stream            I bias stream
+ * @param      f_bias_stream            The f bias stream
+ * @param      c_bias_stream            The c bias stream
+ * @param      o_bias_stream            The o bias stream
+ * @param      h     The LSTM output
+ * @param      c_t   The current LSTM cell state t
  *
- * @tparam     VectLength               The output dimension
- * @tparam     NumTiles                 The number of tiles the output is divided into.
+ * @tparam     NumElemsTile             The number of tiles the output is
+ *                                      divided into.
+ * @tparam     VectLength  The output dimension
  */
 template <int NumElemsTile>
-void NonLinearityUnitTile(const svd::ActivationD *c_t_prev,
-    svd::ActivationStream &current_gate_i_stream,
-    svd::ActivationStream &current_gate_f_stream,
-    svd::ActivationStream &current_gate_c_stream,
-    svd::ActivationStream &current_gate_o_stream,
-    svd::ActivationStream &recurrent_gate_i_stream,
-    svd::ActivationStream &recurrent_gate_f_stream,
-    svd::ActivationStream &recurrent_gate_c_stream,
-    svd::ActivationStream &recurrent_gate_o_stream,
-    svd::ActivationD *h,
-    svd::ActivationD *c_t,
+void NonLinearityUnitTile(svd::ActivationStream& c_t_prev_stream,
+    svd::ActivationStream& current_gate_i_stream,
+    svd::ActivationStream& current_gate_f_stream,
+    svd::ActivationStream& current_gate_c_stream,
+    svd::ActivationStream& current_gate_o_stream,
+    svd::ActivationStream& recurrent_gate_i_stream,
+    svd::ActivationStream& recurrent_gate_f_stream,
+    svd::ActivationStream& recurrent_gate_c_stream,
+    svd::ActivationStream& recurrent_gate_o_stream,
+    svd::ActivationStream& h_stream,
+    svd::ActivationStream& c_t_stream,
     const bool has_bias = false,
     svd::WeightStream *i_bias_stream = nullptr,
     svd::WeightStream *f_bias_stream = nullptr,
     svd::WeightStream *c_bias_stream = nullptr,
     svd::WeightStream *o_bias_stream = nullptr) {
+#ifndef __VITIS_HLS__
 #pragma HLS INLINE off
+#else
+#pragma HLS INLINE
+#endif
   // ===========================================================================
   // Initialize the lookup table
   // ===========================================================================
@@ -517,137 +531,127 @@ void NonLinearityUnitTile(const svd::ActivationD *c_t_prev,
     svd::ActivationD rec_f = recurrent_gate_f_stream.read();
     svd::ActivationD rec_c = recurrent_gate_c_stream.read();
     svd::ActivationD rec_o = recurrent_gate_o_stream.read();
-    WeightD i_bias_reg = 0;
-    WeightD f_bias_reg = 0;
-    WeightD c_bias_reg = 0;
-    WeightD o_bias_reg = 0;
+    WeightD i_bias = 0;
+    WeightD f_bias = 0;
+    WeightD c_bias = 0;
+    WeightD o_bias = 0;
     if (has_bias) {
-      i_bias_reg = i_bias_stream->read();
-      f_bias_reg = f_bias_stream->read();
-      c_bias_reg = c_bias_stream->read();
-      o_bias_reg = o_bias_stream->read();
+      i_bias = i_bias_stream->read();
+      f_bias = f_bias_stream->read();
+      c_bias = c_bias_stream->read();
+      o_bias = o_bias_stream->read();
     }
-    LstmNonLinearFunctions<svd::ActivationD, WeightD, kTableSize>(has_bias,
+    auto c_t_prev = c_t_prev_stream.read();
+    svd::ActivationD c_t;
+    svd::ActivationD h;
+    svd::LstmNonLinearFunctions<svd::ActivationD, WeightD, kTableSize>(has_bias,
       cur_i, cur_f, cur_c, cur_o,
       rec_i, rec_f, rec_c, rec_o,
-      i_bias_reg, f_bias_reg, c_bias_reg, o_bias_reg,
-      c_t_prev[i], c_t[i], h[i]);
+      i_bias, f_bias, c_bias, o_bias,
+      c_t_prev, c_t, h);
+    c_t_stream.write(c_t);
+    h_stream.write(h);
   }
 }
 
 
 template <int VectLength, int NumTiles, int NumGates>
 void NonLinearityUnit(const svd::ActivationD *c_t_prev,
-    svd::ActivationStream (&current_gate_stream)[NumGates][VectLength / NumTiles],
-    svd::ActivationStream (&recurrent_gate_stream)[NumGates][VectLength / NumTiles],
+    svd::ActivationStream (&cur_gate_stream)[NumGates][VectLength / NumTiles],
+    svd::ActivationStream (&rec_gate_stream)[NumGates][VectLength / NumTiles],
     svd::ActivationD *h,
     svd::ActivationD *c_t,
     const bool has_bias = false,
     const WeightD *bias_port = nullptr) {
-// #pragma HLS INLINE
-// #pragma HLS INTERFACE ap_ctrl_none port=return
+#pragma HLS FUNCTION_INSTANTIATE variable=has_bias
+#pragma HLS INLINE
 #pragma HLS DATAFLOW
   assert(VectLength % NumTiles == 0);
-  assert(NumGates >= 4);
-  const int kNumElemsTile = VectLength / NumTiles;
-  // NOTE: There are kNumElemsTile different streams, which are read in round
+  assert(NumGates == 4);
+  const int kTileSize = VectLength / NumTiles;
+  // NOTE: There are kTileSize different streams, which are read in round
   // robin fashion. Their depth is then set as their number plus 50%.
-  const int kOutputStreamDepth = kNumElemsTile + kNumElemsTile / 2;
-
-  svd::ActivationD h_t_curr_internal[kNumElemsTile][NumTiles];
-  svd::ActivationD c_t_curr_internal[kNumElemsTile][NumTiles];
-  svd::ActivationD c_t_prev_internal[kNumElemsTile][NumTiles];
+  const int kOutputStreamDepth = kTileSize + kTileSize / 2;
+  svd::ActivationStream h_t_curr_internal[kTileSize];
+  svd::ActivationStream c_t_curr_internal[kTileSize];
+  svd::ActivationStream c_t_prev_internal[kTileSize];
+  svd::WeightStream bias_streams[NumGates][kTileSize];
 #pragma HLS ARRAY_PARTITION variable=h_t_curr_internal complete dim=1
 #pragma HLS ARRAY_PARTITION variable=c_t_curr_internal complete dim=1
 #pragma HLS ARRAY_PARTITION variable=c_t_prev_internal complete dim=1
 #pragma HLS STREAM variable=h_t_curr_internal depth=NumTiles
 #pragma HLS STREAM variable=c_t_curr_internal depth=kOutputStreamDepth
 #pragma HLS STREAM variable=c_t_prev_internal depth=kOutputStreamDepth
-
-  NonLinearityUnit_Read2_c_prev:
+  C_prev_DMA:
   for (int i = 0; i < NumTiles; ++i) {
-    NonLinearityUnit_Read_c_prev:
-    for (int j = 0; j < kNumElemsTile; ++j) {
+    for (int j = 0; j < kTileSize; ++j) {
 #pragma HLS PIPELINE II=1
-      c_t_prev_internal[j][i] = c_t_prev[i * kNumElemsTile + j];
+      c_t_prev_internal[j].write(c_t_prev[i * kTileSize + j]);
     }
   }
-
-  svd::WeightStream i_bias_streams[kNumElemsTile];
-  svd::WeightStream f_bias_streams[kNumElemsTile];
-  svd::WeightStream c_bias_streams[kNumElemsTile];
-  svd::WeightStream o_bias_streams[kNumElemsTile];
   if (has_bias) {
-#pragma HLS ARRAY_PARTITION variable=i_bias_streams complete dim=1
-#pragma HLS ARRAY_PARTITION variable=f_bias_streams complete dim=1
-#pragma HLS ARRAY_PARTITION variable=c_bias_streams complete dim=1
-#pragma HLS ARRAY_PARTITION variable=o_bias_streams complete dim=1
-#pragma HLS STREAM variable=i_bias_streams depth=NumTiles
-#pragma HLS STREAM variable=f_bias_streams depth=NumTiles
-#pragma HLS STREAM variable=c_bias_streams depth=NumTiles
-#pragma HLS STREAM variable=o_bias_streams depth=NumTiles
-    for (int i = 0; i < NumTiles; ++i) {
-      for (int j = 0; j < kNumElemsTile; ++j) {
+#pragma HLS ARRAY_PARTITION variable=bias_streams complete dim=0
+#pragma HLS STREAM variable=bias_streams depth=NumTiles
+    Bias_DMA:
+    for (int k = 0; k < NumGates; ++k) { // Expected in this order: i->f->c->o
+      for (int i = 0; i < NumTiles; ++i) {
+        for (int j = 0; j < kTileSize; ++j) {
 #pragma HLS PIPELINE II=1
-        i_bias_streams[j].write(bias_port[i * kNumElemsTile + j]);
-      }
-    }
-    for (int i = 0; i < NumTiles; ++i) {
-      for (int j = 0; j < kNumElemsTile; ++j) {
-#pragma HLS PIPELINE II=1
-        f_bias_streams[j].write(bias_port[VectLength + i * kNumElemsTile + j]);
-      }
-    }
-    for (int i = 0; i < NumTiles; ++i) {
-      for (int j = 0; j < kNumElemsTile; ++j) {
-#pragma HLS PIPELINE II=1
-        c_bias_streams[j].write(bias_port[2 * VectLength + i * kNumElemsTile + j]);
-      }
-    }
-    for (int i = 0; i < NumTiles; ++i) {
-      for (int j = 0; j < kNumElemsTile; ++j) {
-#pragma HLS PIPELINE II=1
-        o_bias_streams[j].write(bias_port[3 * VectLength + i * kNumElemsTile + j]);
-      }
+          bias_streams[k][j].write(bias_port[k * VectLength + i * kTileSize + j]);
+        }
+      }      
     }
   }
-
-  NonLinearityUnit_Tile_Loop:
-  for(int i = 0; i < kNumElemsTile; ++i) {
-#pragma HLS UNROLL
-    NonLinearityUnitTile<NumTiles>(c_t_prev_internal[i],
-                                   current_gate_stream[0][i],
-                                   current_gate_stream[1][i],
-                                   current_gate_stream[2][i],
-                                   current_gate_stream[3][i],
-                                   recurrent_gate_stream[0][i],
-                                   recurrent_gate_stream[1][i],
-                                   recurrent_gate_stream[2][i],
-                                   recurrent_gate_stream[3][i],
-                                   h_t_curr_internal[i],
-                                   c_t_curr_internal[i],
-                                   has_bias,
-                                   &i_bias_streams[i],
-                                   &f_bias_streams[i],
-                                   &c_bias_streams[i],
-                                   &o_bias_streams[i]);
+//   NonLinearityUnit_Tile_Loop:
+//   for(int i = 0; i < kTileSize; ++i) {
+// #pragma HLS UNROLL
+//     svd::NonLinearityUnitTile<NumTiles>(c_t_prev_internal[i],
+//       cur_gate_stream[0][i], cur_gate_stream[1][i],
+//       cur_gate_stream[2][i], cur_gate_stream[3][i],
+//       rec_gate_stream[0][i], rec_gate_stream[1][i],
+//       rec_gate_stream[2][i], rec_gate_stream[3][i],
+//       h_t_curr_internal[i], c_t_curr_internal[i],
+//       has_bias, &bias_streams[0][i], &bias_streams[1][i],
+//       &bias_streams[2][i], &bias_streams[3][i]);
+//   }
+  const int kTableSize = (FIX_WIDTH <= 16) ? 512 : 256;
+  // ===========================================================================
+  // Apply non-linearities to each vector element
+  // ===========================================================================
+  NonLinearityUnit_Elem_Loop:
+  for(int i = 0; i < NumTiles; ++i) {
+#pragma HLS PIPELINE II=1
+    for(int j = 0; j < kTileSize; ++j) {
+      auto cur_i = cur_gate_stream[0][j].read();
+      auto cur_f = cur_gate_stream[1][j].read();
+      auto cur_c = cur_gate_stream[2][j].read();
+      auto cur_o = cur_gate_stream[3][j].read();
+      auto rec_i = rec_gate_stream[0][j].read();
+      auto rec_f = rec_gate_stream[1][j].read();
+      auto rec_c = rec_gate_stream[2][j].read();
+      auto rec_o = rec_gate_stream[3][j].read();
+      svd::WeightD i_bias, f_bias, c_bias, o_bias;
+      if (has_bias) {
+        i_bias = bias_streams[0][j].read();
+        f_bias = bias_streams[1][j].read();
+        c_bias = bias_streams[2][j].read();
+        o_bias = bias_streams[3][j].read();
+      }
+      auto c_t_prev = c_t_prev_internal[j].read();
+      svd::ActivationD c_t, h;
+      svd::LstmNonLinearFunctions<svd::ActivationD, svd::WeightD, kTableSize>(
+        has_bias, cur_i, cur_f, cur_c, cur_o, rec_i, rec_f, rec_c, rec_o,
+        i_bias, f_bias, c_bias, o_bias, c_t_prev, c_t, h);
+      c_t_curr_internal[j].write(c_t);
+      h_t_curr_internal[j].write(h);
+    }
   }
-
-  NonLinearityUnit_Writeback2_h:
+  H_t_curr_DMA:
   for (int i = 0; i < NumTiles; ++i) {
-    NonLinearityUnit_Writeback_h:
-    for (int j = 0; j < kNumElemsTile; ++j) {
+    for (int j = 0; j < kTileSize; ++j) {
 #pragma HLS PIPELINE II=1
-      h[i * kNumElemsTile + j] = h_t_curr_internal[j][i];
-    }
-  }
-
-  NonLinearityUnit_Writeback2_c:
-  for (int i = 0; i < NumTiles; ++i) {
-    NonLinearityUnit_Writeback_c:
-    for (int j = 0; j < kNumElemsTile; ++j) {
-#pragma HLS PIPELINE II=1
-      c_t[i * kNumElemsTile + j] = c_t_curr_internal[j][i];
+      h[i * kTileSize + j] = h_t_curr_internal[j].read();
+      c_t[i * kTileSize + j] = c_t_curr_internal[j].read();
     }
   }
 }

@@ -295,9 +295,14 @@ typedef double ActivationD;
 typedef double AccumD;
 typedef double MultD;
 #else // USE_FIX
+
+// typedef short WeightD;
+// typedef short ActivationD;
+// typedef short AccumD;
+// typedef short MultD;
+
 typedef ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH, AP_TRN, AP_SAT_SYM> WeightD;
 typedef ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH, AP_TRN, AP_SAT_SYM> ActivationD;
-
 #if FIX_WIDTH == 8
 typedef ap_fixed<FIX_WIDTH * 2, FIX_FRACT_WIDTH * 2, AP_TRN, AP_SAT_SYM> AccumD;
 typedef ap_fixed<FIX_WIDTH * 2, FIX_FRACT_WIDTH * 2, AP_TRN, AP_SAT_SYM> MultD;

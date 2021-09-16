@@ -108,128 +108,108 @@ void VDotUnit2LstmV2(const bool has_bias,
                    svd::WeightStream &gate_s1_streams,
                    svd::WeightStream &gate_s2_streams,
                    svd::WeightStream (&gate_v_streams)[VectLength / NumTiles],
-                   hls::stream<ap_uint<NumTiles> > &comb_stream_port,
+                   hls::stream<ap_uint<NumTiles> > &nz_port,
                    svd::ActivationStream (&gate_out1_streams)[VectLength / NumTiles],
                    svd::ActivationStream (&gate_out2_streams)[VectLength / NumTiles]) {
 #pragma HLS INLINE
 #pragma HLS DATAFLOW
-
   assert(VectLength % NumTiles == 0);
   assert(NumTiles > NumZeroTiles);
   assert(NumTiles % 2 == 0);
   assert(NumIter % 2 == 0);
-
+  const int kNumInputs = 2;
   const int kFifoResizeFactor = 4;
   const int kNonZeroTiles = NumTiles - NumZeroTiles;
-  const int kNumTileElems = VectLength / NumTiles;
+  const int kTileSize = VectLength / NumTiles;
   // NOTE: By the time the dot products are available at the ports, the weight
   // values s1, s2 and v should be already at the FIFO ports.
   const int kStreamDepth = NumIter / kFifoResizeFactor;
-  hls::stream<svd::MultD> xs1_streams[kNumTileElems];
-  hls::stream<svd::MultD> xs2_streams[kNumTileElems];
-#pragma HLS STREAM variable=xs1_streams depth=kStreamDepth dim=1
-#pragma HLS STREAM variable=xs2_streams depth=kStreamDepth dim=1
-
-  // svd::MultD xs1_val = 0;
-  // svd::MultD xs2_val = 0;
-
-  ScalarMul:
+  hls::stream<svd::MultD> xus_streams[kNumInputs][kTileSize];
+#pragma HLS STREAM variable=xus_streams depth=kStreamDepth dim=0
+  S_Kernel:
   for (int i = 0; i < NumIter; ++i) {
 #pragma HLS INLINE off
 #pragma HLS PIPELINE II=1
-    auto xs1_val = gate_s1_streams.read() * gate_dot1_streams.read();
-    auto xs2_val = gate_s2_streams.read() * gate_dot2_streams.read();
-#pragma HLS RESOURCE variable=xs1_val core=DSP48 latency=3
-#pragma HLS RESOURCE variable=xs2_val core=DSP48 latency=3
-    ScalarMulDispatcher:
-    for (int j = 0; j < kNumTileElems; ++j) {
-      xs1_streams[j].write(xs1_val);
-      xs2_streams[j].write(xs2_val);
-    }
-  }
-
-  svd::WeightStream bias1_streams[kNumTileElems];
-  svd::WeightStream bias2_streams[kNumTileElems];
-  if (has_bias) {
-#pragma HLS STREAM variable=bias1_streams depth=NumTiles dim=1
-#pragma HLS STREAM variable=bias2_streams depth=NumTiles dim=1
-#pragma HLS ARRAY_PARTITION variable=bias1_streams complete dim=1
-#pragma HLS ARRAY_PARTITION variable=bias2_streams complete dim=1
-  }
-
-  if (has_bias) {
-    BiasDispatcher_tiles:
-    for (int i = 0; i < NumTiles; ++i) {
-#pragma HLS INLINE off
-      BiasDispatcher_elems:
-      for (int j = 0; j < kNumTileElems; ++j) {
-#pragma HLS PIPELINE II=1
-        bias1_streams[j].write(bias1->read());
-        bias2_streams[j].write(bias2->read());
+    svd::MultD xus_val[kNumInputs];
+#pragma HLS ARRAY_PARTITION variable=xus_val complete dim=0
+    xus_val[0] = gate_s1_streams.read() * gate_dot1_streams.read();
+    xus_val[1] = gate_s2_streams.read() * gate_dot2_streams.read();
+#pragma HLS RESOURCE variable=xus_val[0] core=DSP48 latency=3
+#pragma HLS RESOURCE variable=xus_val[1] core=DSP48 latency=3
+    for (int j = 0; j < kTileSize; ++j) {
+      for (int k = 0; k < kNumInputs; ++k) {
+        xus_streams[k][j].write(xus_val[k]);
       }
     }
   }
-
+  svd::WeightStream bias_streams[kNumInputs][kTileSize];
+  if (has_bias) {
+#pragma HLS ARRAY_PARTITION variable=bias_streams complete dim=0
+#pragma HLS STREAM variable=bias_streams depth=NumTiles
+    Bias_DMA:
+    for (int i = 0; i < NumTiles; ++i) {
+      for (int j = 0; j < kTileSize; ++j) {
+#pragma HLS PIPELINE II=1
+        bias_streams[0][j].write(bias1->read());
+        bias_streams[1][j].write(bias2->read());
+      }
+    }
+  }
   const int kCombStreamDepth = NumIter * NumZeroTiles / (kFifoResizeFactor * 2);
   const int kNzBitLength = hlsutils::log2<NumTiles>::value;
-  hls::stream<ap_uint<kNzBitLength> > nz_idx_streams[kNumTileElems];
+  hls::stream<ap_uint<kNzBitLength> > nz_idx_streams[kTileSize];
 #pragma HLS STREAM variable=nz_idx_streams depth=kCombStreamDepth dim=1
 #pragma HLS RESOURCE variable=nz_idx_streams core=FIFO_SRL
-
-#if 0 // USE_PRIORITY_ENCODER
+// #define V_UNIT_USE_PRIORITY_ENCODER
+#ifdef V_UNIT_USE_PRIORITY_ENCODER
   // ===========================================================================
   // NOTE: The critical path is HUGE here. So we go for the other solution.
   // ===========================================================================
-  ap_uint<NumTiles> zero_comb = 0;
-
-  Convert_Iter:
+  ap_uint<NumTiles> z_idx = 0;
+  ZIndex_Converter:
   for (int i = 0; i < NumIter; ++i) {
     for (int j = 0; j < NumTiles - NumZeroTiles; ++j) {
 #pragma HLS PIPELINE II=1
       if (j == 0) {
-        zero_comb = comb_stream_port.read();
-        int set_idx = PriorityEncoderLSB<NumTiles>(zero_comb);
+        z_idx = nz_port.read();
+        int set_idx = PriorityEncoderLSB<NumTiles>(z_idx);
         assert(set_idx < NumTiles);
-        for (int k = 0; k < kNumTileElems; ++k) {
+        for (int k = 0; k < kTileSize; ++k) {
           nz_idx_streams[k].write(set_idx);
         }
-        zero_comb[set_idx] = 0;
+        z_idx[set_idx] = 0;
       } else {
-        int set_idx = PriorityEncoderLSB<NumTiles>(zero_comb);
+        int set_idx = PriorityEncoderLSB<NumTiles>(z_idx);
         assert(set_idx < NumTiles);
-        for (int k = 0; k < kNumTileElems; ++k) {
+        for (int k = 0; k < kTileSize; ++k) {
           nz_idx_streams[k].write(set_idx);
         }
-        zero_comb[set_idx] = 0;
+        z_idx[set_idx] = 0;
       }
     }
   }
 #else
-  ap_uint<NumTiles> c;
+  ap_uint<NumTiles> z_idx;
   int nz_cnt = 0;
   assert(nz_cnt < kNonZeroTiles);
-
-  CombConverter_iter:
+  ZIndex_Converter:
   for (int i = 0; i < NumIter; ++i) {
 #pragma HLS INLINE off
-    CombConverter_tiles:
     for (int j = 0; j < NumTiles; ++j) {
 #pragma HLS LOOP_FLATTEN
 #pragma HLS PIPELINE II=1
 #pragma HLS LOOP_TRIPCOUNT min=kNonZeroTiles max=kNonZeroTiles
       if (j == 0) {
-        c = comb_stream_port.read();
-        // std::cout << "nz[" << i << "] = " << c.to_string(2, false) << "\n";
-        if (c[0] == 1) {
-          for (int k = 0; k < kNumTileElems; ++k) {
+        z_idx = nz_port.read();
+        if (z_idx[0] == 1) {
+          for (int k = 0; k < kTileSize; ++k) {
             nz_idx_streams[k].write(0);
           }
           nz_cnt++;
         }
       } else {
-        if (c[j] == 1) {
-          CombConverter_elem:
-          for (int k = 0; k < kNumTileElems; ++k) {
+        if (z_idx[j] == 1) {
+          for (int k = 0; k < kTileSize; ++k) {
             nz_idx_streams[k].write(j);
           }
           if (nz_cnt == kNonZeroTiles - 1) {
@@ -243,273 +223,68 @@ void VDotUnit2LstmV2(const bool has_bias,
     }
   }
 #endif
-
-#if 1
   V_Kernel: {
 #pragma HLS INLINE off
-    svd::AccumD acc_buffer1[kNumTileElems][NumTiles];
-    svd::AccumD acc_buffer2[kNumTileElems][NumTiles];
-#pragma HLS ARRAY_PARTITION variable=acc_buffer1 complete dim=1
-#pragma HLS ARRAY_PARTITION variable=acc_buffer2 complete dim=1
-// #pragma HLS RESOURCE variable=acc_buffer1 core=RAM_T2P_BRAM latency=1
-// #pragma HLS RESOURCE variable=acc_buffer2 core=RAM_T2P_BRAM latency=1
-// #pragma HLS RESOURCE variable=acc_buffer1 core=RAM_T2P_URAM
-// #pragma HLS RESOURCE variable=acc_buffer2 core=RAM_T2P_URAM
-
-// #pragma HLS RESOURCE variable=acc_buffer1 core=XPM_MEMORY uram
-// #pragma HLS RESOURCE variable=acc_buffer2 core=XPM_MEMORY uram
-
-
+    svd::AccumD acc_buffer[kNumInputs][kTileSize][NumTiles];
+#pragma HLS ARRAY_PARTITION variable=acc_buffer complete dim=1
+#pragma HLS ARRAY_PARTITION variable=acc_buffer complete dim=2
     Init_buffer:
     for (int i = 0; i < NumTiles; ++i) {
 #pragma HLS PIPELINE II=1
-      for (int j = 0; j < kNumTileElems; ++j) {
-        acc_buffer1[j][i] = 0;
-        acc_buffer2[j][i] = 0;
+      for (int j = 0; j < kTileSize; ++j) {
+        for (int k = 0; k < kNumInputs; ++k) {
+          acc_buffer[k][j][i] = 0;
+        }
       }
     }
-
-    ap_uint<kNzBitLength> nz_idx[kNumTileElems];
-    svd::AccumD xs1[kNumTileElems];
-    svd::AccumD xs2[kNumTileElems];
+    ap_uint<kNzBitLength> nz_idx[kTileSize];
+    svd::AccumD xus[kNumInputs][kTileSize];
+    svd::AccumD mac[kNumInputs][kTileSize];
+    svd::AccumD acc[kNumInputs][kTileSize];
+    svd::WeightD v[kTileSize];
 #pragma HLS ARRAY_PARTITION variable=nz_idx complete
-#pragma HLS ARRAY_PARTITION variable=xs1 complete
-#pragma HLS ARRAY_PARTITION variable=xs2 complete
-    svd::AccumD mac_1[kNumTileElems];
-    svd::AccumD mac_2[kNumTileElems];
-#pragma HLS ARRAY_PARTITION variable=mac_1 complete
-#pragma HLS ARRAY_PARTITION variable=mac_2 complete
-    svd::AccumD acc_1[kNumTileElems];
-    svd::AccumD acc_2[kNumTileElems];
-#pragma HLS ARRAY_PARTITION variable=acc_1 complete
-#pragma HLS ARRAY_PARTITION variable=acc_2 complete
-
-    svd::WeightD v[kNumTileElems];
+#pragma HLS ARRAY_PARTITION variable=xus complete dim=0
+#pragma HLS ARRAY_PARTITION variable=mac complete dim=0
+#pragma HLS ARRAY_PARTITION variable=acc complete dim=0
 #pragma HLS ARRAY_PARTITION variable=v complete
-
-#ifndef __SYNTHESIS__
-    int nz_idx_buf[kNumTileElems][NumIter * kNonZeroTiles] = {-1};
-    const int kPipelineDepth = 8;
-    const bool printout = false;
-#endif
-
     for (int i = 0; i < NumIter; ++i) {
       for (int k = 0; k < kNonZeroTiles; ++k) {
 #pragma HLS LOOP_FLATTEN
 #pragma HLS PIPELINE II=1
-        for (int j = 0; j < kNumTileElems; ++j) {
+        for (int j = 0; j < kTileSize; ++j) {
           if (k == 0) {
-            xs1[j] = xs1_streams[j].read();
-            xs2[j] = xs2_streams[j].read();
+            for (int ii = 0; ii < kNumInputs; ++ii) {
+              xus[ii][j] = xus_streams[ii][j].read();
+            }
           }
           nz_idx[j] = nz_idx_streams[j].read();
-
-#ifndef __SYNTHESIS__
-          // ===================================================================
-          // Naive dependency detection mechanism:
-          // ===================================================================
-          // std::cout << "\tPE n." << j << " accessing acc_buffer[" << j << "][" << nz_idx[j] << "]\n";
-          const int idx = i * kNonZeroTiles + k;
-          nz_idx_buf[j][idx] = nz_idx[j];
-
-          if (idx > 0) {
-            int dependency_idx = -1;
-            if (j == 0 && printout) {
-              std::cout << "curr_idx: " << nz_idx[j] << "\nprev_idx: ";
-            }
-            for (int q = idx - 1; q > 0; --q) {
-              if (nz_idx_buf[j][idx] == nz_idx_buf[j][q]) {
-                dependency_idx = q;
-                break;
-              }
-            }
-            if (j == 0 && printout) {
-              for (int q = idx; q > 0; --q) {
-                if (q - 1 == dependency_idx && idx - dependency_idx < kPipelineDepth) {
-                  std::cout << "<((";
-                }
-                std::cout << nz_idx_buf[j][q - 1];
-                if (q - 1 == dependency_idx && idx - dependency_idx < kPipelineDepth) {
-                  std::cout << "))>";
-                }
-                std::cout << " ";
-                if ((q - 1) % kNonZeroTiles == 0) {
-                  std::cout << "| ";
-                }
-              }
-              std::cout << "\ndistance: " << idx - dependency_idx << "\n";
-            }
-            // NOTE: The dependency will be the same for all PEs, i.e. j indexes.
-            if (j == 0 && dependency_idx != -1 && idx - dependency_idx < kPipelineDepth) { 
-              //num_raw_hazards++;
-              if (printout) {
-                std::cout << "[WARNING] Possible dependecy detected: nz[" << idx << "] = " << nz_idx_buf[j][idx]
-                          << " -> nz[" << dependency_idx << "] = " << nz_idx_buf[j][dependency_idx]
-                          << ", distance: " << idx - dependency_idx << "\n";
-              }
-            }
-            if (j == 0 && printout) {
-              std::cout << "\n";
-            }
-          }
-#endif
           v[j] = gate_v_streams[j].read();
-
-          mac_1[j] = (xs1[j] * v[j]) + acc_buffer1[j][nz_idx[j]];
-          mac_2[j] = (xs2[j] * v[j]) + acc_buffer2[j][nz_idx[j]];
-#pragma HLS RESOURCE variable=mac_1[j] core=DSP48 latency=3
-#pragma HLS RESOURCE variable=mac_2[j] core=DSP48 latency=3
-#pragma HLS DEPENDENCE variable=acc_buffer1 RAW false inter
-#pragma HLS DEPENDENCE variable=acc_buffer2 RAW false inter
-
-          acc_buffer1[j][nz_idx[j]] = mac_1[j];
-          acc_buffer2[j][nz_idx[j]] = mac_2[j];
-        } // end kNumTileElems
-      } // end kNonZeroTiles
-    } // end NumIter
-
-    WriteBack_tiles:
+          for (int ii = 0; ii < kNumInputs; ++ii) {
+            mac[ii][j] = (xus[ii][j] * v[j]) + acc_buffer[ii][j][nz_idx[j]];
+#pragma HLS RESOURCE variable=mac[ii][j] core=DSP48 latency=3
+#pragma HLS DEPENDENCE variable=acc_buffer RAW false inter distance=kNonZeroTiles
+            acc_buffer[ii][j][nz_idx[j]] = mac[ii][j];  
+          }
+        }
+      }
+    }
+    V_DMA:
     for (int i = 0; i < NumTiles; ++i) {
 #pragma HLS PIPELINE II=1
-      WriteBack_elems:
-      for (int j = 0; j < kNumTileElems; ++j) {
+      for (int j = 0; j < kTileSize; ++j) {
         if (has_bias) {
-          auto acc_1 = acc_buffer1[j][i] + bias1_streams[j].read();
-          auto acc_2 = acc_buffer2[j][i] + bias2_streams[j].read();
+          auto acc_1 = acc_buffer[0][j][i] + bias_streams[0][j].read();
+          auto acc_2 = acc_buffer[1][j][i] + bias_streams[1][j].read();
 #pragma HLS RESOURCE variable=acc_1 core=AddSub_DSP
 #pragma HLS RESOURCE variable=acc_2 core=AddSub_DSP
           gate_out1_streams[j].write(acc_1);
           gate_out2_streams[j].write(acc_2);
         } else {
-          gate_out1_streams[j].write(acc_buffer1[j][i]);
-          gate_out2_streams[j].write(acc_buffer2[j][i]);
+          gate_out1_streams[j].write(acc_buffer[0][j][i]);
+          gate_out2_streams[j].write(acc_buffer[1][j][i]);
         }
       }
     }
-#else
-
-  svd::AccumD acc_buffer1[kNumTileElems][NumTiles];
-  svd::AccumD acc_buffer2[kNumTileElems][NumTiles];
-#pragma HLS ARRAY_PARTITION variable=acc_buffer1 complete dim=1
-#pragma HLS ARRAY_PARTITION variable=acc_buffer2 complete dim=1
-#pragma HLS RESOURCE variable=acc_buffer1 core=RAM_T2P_BRAM latency=1
-#pragma HLS RESOURCE variable=acc_buffer2 core=RAM_T2P_BRAM latency=1
-// #pragma HLS STREAM variable=acc_buffer1 depth=1
-// #pragma HLS STREAM variable=acc_buffer2 depth=1
-
-  ap_uint<kNzBitLength> nz_idx[kNumTileElems];
-  svd::AccumD xs1[kNumTileElems];
-  svd::AccumD xs2[kNumTileElems];
-#pragma HLS ARRAY_PARTITION variable=nz_idx complete
-#pragma HLS ARRAY_PARTITION variable=xs1 complete
-#pragma HLS ARRAY_PARTITION variable=xs2 complete
-  svd::AccumD mac_1[kNumTileElems];
-  svd::AccumD mac_2[kNumTileElems];
-#pragma HLS ARRAY_PARTITION variable=mac_1 complete
-#pragma HLS ARRAY_PARTITION variable=mac_2 complete
-  svd::AccumD acc_1[kNumTileElems];
-  svd::AccumD acc_2[kNumTileElems];
-#pragma HLS ARRAY_PARTITION variable=acc_1 complete
-#pragma HLS ARRAY_PARTITION variable=acc_2 complete
-
-  svd::WeightD v[kNumTileElems];
-#pragma HLS ARRAY_PARTITION variable=v complete
-
-  hls::stream<svd::AccumD> xsv1_streams[kNumTileElems];
-  hls::stream<svd::AccumD> xsv2_streams[kNumTileElems];
-#pragma HLS ARRAY_PARTITION variable=xsv1_streams complete
-#pragma HLS ARRAY_PARTITION variable=xsv2_streams complete
-#pragma HLS STREAM variable=xsv1_streams depth=kNonZeroTiles
-#pragma HLS STREAM variable=xsv2_streams depth=kNonZeroTiles
-  hls::stream<svd::AccumD> acc1_streams[kNumTileElems];
-  hls::stream<svd::AccumD> acc2_streams[kNumTileElems];
-#pragma HLS ARRAY_PARTITION variable=acc1_streams complete
-#pragma HLS ARRAY_PARTITION variable=acc2_streams complete
-  const int kStreamDepthAcc = NumTiles;
-#pragma HLS STREAM variable=acc1_streams depth=kStreamDepthAcc
-#pragma HLS STREAM variable=acc2_streams depth=kStreamDepthAcc
-
-  for (int n = 0; n < NumIter; ++n) {
-    for (int nz = 0; nz < kNonZeroTiles; ++nz) {
-#pragma HLS LOOP_FLATTEN
-#pragma HLS PIPELINE II=1
-      for (int i = 0; i < kNumTileElems; ++i) {
-        if (nz == 0) {
-          xs1[i] = xs1_streams[i].read();
-          xs2[i] = xs2_streams[i].read();
-        }
-        svd::WeightD v_val = gate_v_streams[i].read();
-        svd::AccumD xvs1_val = xs1[i] * v_val;
-        svd::AccumD xvs2_val = xs2[i] * v_val;
-#pragma HLS RESOURCE variable=xvs1_val core=DSP48 latency=3
-#pragma HLS RESOURCE variable=xvs2_val core=DSP48 latency=3
-        xsv1_streams[i].write(xvs1_val);
-        xsv2_streams[i].write(xvs2_val);
-      }
-    }
-  }
-  V_Kernel: {
-#pragma HLS INLINE off
-
-    Init_buffer:
-    for (int i = 0; i < NumTiles; ++i) {
-  #pragma HLS PIPELINE II=1
-      for (int j = 0; j < kNumTileElems; ++j) {
-        acc_buffer1[j][i] = 0;
-        acc_buffer2[j][i] = 0;
-      }
-    }
-    for (int n = 0; n < NumIter; ++n) {
-      for (int t = 0; t < kNonZeroTiles; ++t) {
-#pragma HLS LOOP_FLATTEN
-#pragma HLS PIPELINE II=1
-        for (int i = 0; i < kNumTileElems; ++i) {
-          ActivationD operand_prev1 = 0;
-          ActivationD operand_curr1 = 0;
-          ActivationD operand_prev2 = 0;
-          ActivationD operand_curr2 = 0;
-          // ===================================================================
-          // Setup the internal stream
-          // ===================================================================
-          nz_idx[i] = nz_idx_streams[i].read();
-          operand_prev1 = acc_buffer1[i][nz_idx[i]];
-          operand_prev2 = acc_buffer2[i][nz_idx[i]];
-          operand_curr1 = xsv1_streams[i].read();
-          operand_curr2 = xsv2_streams[i].read();
-          // ===================================================================
-          // Accumulate the incoming streams
-          // ===================================================================
-          svd::AccumD sum1 = operand_prev1 + operand_curr1;
-          svd::AccumD sum2 = operand_prev2 + operand_curr2;
-#pragma HLS RESOURCE variable=sum1 core=AddSub_DSP
-#pragma HLS RESOURCE variable=sum2 core=AddSub_DSP
-          acc_buffer1[i][nz_idx[i]] = sum1;
-          acc_buffer2[i][nz_idx[i]] = sum2;
-        }
-      }
-    }
-    // ===================================================================
-    // Write the results to the output streams
-    // ===================================================================
-    WriteBack_tiles:
-    for (int i = 0; i < NumTiles; ++i) {
-#pragma HLS PIPELINE II=1
-      WriteBack_elems:
-      for (int j = 0; j < kNumTileElems; ++j) {
-        if (has_bias) {
-          auto acc_1 = acc_buffer1[j][i] + bias1_streams[j].read();
-          auto acc_2 = acc_buffer2[j][i] + bias2_streams[j].read();
-#pragma HLS RESOURCE variable=acc_1 core=AddSub_DSP
-#pragma HLS RESOURCE variable=acc_2 core=AddSub_DSP
-          gate_out1_streams[j].write(acc_1);
-          gate_out2_streams[j].write(acc_2);
-        } else {
-          gate_out1_streams[j].write(acc_buffer1[j][i]);
-          gate_out2_streams[j].write(acc_buffer2[j][i]);
-        }
-      }
-    }
-#endif
   } // end V_Function
 }
 
@@ -530,9 +305,11 @@ void KernelV(const int num_active_inputs,
 #pragma HLS TOP name=KernelV
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
+#ifndef __VITIS_HLS__
 #pragma HLS STABLE variable=xus_port
 #pragma HLS STABLE variable=v_port
 #pragma HLS STABLE variable=y_port
+#endif
   assert(num_active_inputs <= params::N);
   assert(num_active_inputs > 0);
   assert(params::H % params::Tv == 0);

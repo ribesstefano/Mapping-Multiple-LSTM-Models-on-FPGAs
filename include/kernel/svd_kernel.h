@@ -29,7 +29,6 @@ void SvdKernel(const int num_active_inputs,
     const int input_size,
     const int output_size,
     const int num_refinements[params::N],
-    // const hls::vector<int, params::N> num_refinements,
     hls::stream<typename params::VectTuAxiPacketType>& x_port,
     hls::stream<typename params::VectTuAxiPacketType>& u_port,
     hls::stream<typename params::VectG_AxiPacketType>& s_port,
@@ -38,11 +37,13 @@ void SvdKernel(const int num_active_inputs,
 #pragma HLS TOP name=SvdKernel
 #pragma HLS INLINE
 #pragma HLS DATAFLOW
+#ifndef __VITIS_HLS__
 #pragma HLS STABLE variable=x_port
 #pragma HLS STABLE variable=u_port
 #pragma HLS STABLE variable=s_port
 #pragma HLS STABLE variable=v_port
 #pragma HLS STABLE variable=y_port
+#endif
 #pragma HLS ARRAY_PARTITION variable=num_refinements complete
   const bool pad_output = false;
   typedef svd::AxiStreamFifo<params::VectG_AxiWidth> WrapperFifoG;

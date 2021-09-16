@@ -211,51 +211,51 @@ void SvdOutDMA(
 }
 
 template <int NumIter, int NumTiles, int NumGates>
-void ZeroTileCombination2LstmDMA(const ap_uint<NumTiles> *comb_port,
-    hls::stream<ap_uint<NumTiles> > (&comb_stream1_current)[NumGates / 2],
-    hls::stream<ap_uint<NumTiles> > (&comb_stream1_recurrent)[NumGates / 2],
-    hls::stream<ap_uint<NumTiles> > (&comb_stream2_current)[NumGates / 2],
-    hls::stream<ap_uint<NumTiles> > (&comb_stream2_recurrent)[NumGates / 2]) {
+void NZIndex2LstmDMA(const ap_uint<NumTiles> *nz_port,
+    hls::stream<ap_uint<NumTiles> > (&nz_stream1_cur)[NumGates / 2],
+    hls::stream<ap_uint<NumTiles> > (&nz_stream1_rec)[NumGates / 2],
+    hls::stream<ap_uint<NumTiles> > (&nz_stream2_cur)[NumGates / 2],
+    hls::stream<ap_uint<NumTiles> > (&nz_stream2_rec)[NumGates / 2]) {
+#pragma HLS INLINE
   assert(NumGates % 2 == 0);
   assert(NumTiles % 2 == 0);
-  assert(NumTiles >= 8);
-  
-  ZeroTileCombination_Dma_Iter_Loop:
+  // assert(NumTiles >= 8); // Minimum port size requirement.
+  NZIndex_Dma_Iter_Loop:
   for (int i = 0; i < NumIter; ++i) {
 #pragma HLS PIPELINE II=1
-    ZeroTileCombination_Dma_Current_Loop:
+    NZIndex_Dma_Current_Loop:
     for (int g = 0; g < NumGates / 2; ++g) {
-      ap_uint<NumTiles> comb = comb_port[i * NumGates + g];
-      comb_stream1_current[g].write(comb);
-      comb_stream2_current[g].write(comb);
+      ap_uint<NumTiles> nz_idx = nz_port[i * NumGates + g];
+      nz_stream1_cur[g].write(nz_idx);
+      nz_stream2_cur[g].write(nz_idx);
     }
-    ZeroTileCombination_Dma_Recurrent_Loop:
+    NZIndex_Dma_Recur_Loop:
     for (int g = 0; g < NumGates / 2; ++g) {
-      ap_uint<NumTiles> comb = comb_port[i * NumGates + NumGates / 2 + g];
-      comb_stream1_recurrent[g].write(comb);
-      comb_stream2_recurrent[g].write(comb);
+      ap_uint<NumTiles> nz_idx = nz_port[i * NumGates + NumGates / 2 + g];
+      nz_stream1_rec[g].write(nz_idx);
+      nz_stream2_rec[g].write(nz_idx);
     }
   }
 }
 
 template <int NumIter, int NumTiles, int NumGates>
-void ZeroTileCombinationDMA(const ap_uint<NumTiles> *comb_port,
-    hls::stream<ap_uint<NumTiles> > (&current_comb_stream)[NumGates / 2],
-    hls::stream<ap_uint<NumTiles> > (&recurrent_comb_stream)[NumGates / 2]) {
+void NZIndexDMA(const ap_uint<NumTiles> *nz_port,
+    hls::stream<ap_uint<NumTiles> > (&cur_nz_stream)[NumGates / 2],
+    hls::stream<ap_uint<NumTiles> > (&rec_nz_stream)[NumGates / 2]) {
+#pragma HLS INLINE
   assert(NumGates % 2 == 0);
   assert(NumTiles % 2 == 0);
-  assert(NumTiles >= 8);
-
-  ZeroTileCombination_Dma_Iter_Loop:
+  // assert(NumTiles >= 8); // Minimum port size requirement.
+  NZIndex_Dma_Iter_Loop:
   for (int i = 0; i < NumIter; ++i) {
 #pragma HLS PIPELINE II=1
-    ZeroTileCombination_Dma_Current_Loop:
+    NZIndex_Dma_Current_Loop:
     for (int g = 0; g < NumGates / 2; ++g) {
-      current_comb_stream[g].write(comb_port[i * NumGates + g]);
+      cur_nz_stream[g].write(nz_port[i * NumGates + g]);
     }
-    ZeroTileCombination_Dma_Recurrent_Loop:
+    NZIndex_Dma_Recur_Loop:
     for (int g = 0; g < NumGates / 2; ++g) {
-      recurrent_comb_stream[g].write(comb_port[i * NumGates + NumGates / 2 + g]);
+      rec_nz_stream[g].write(nz_port[i * NumGates + NumGates / 2 + g]);
     }
   }
 }
@@ -283,16 +283,19 @@ void InputDMA(const svd::ActivationD *x_dmem,
   // Store the input onto an on-chip buffer for data reuse. The buffer is shared
   // by the LSTM gates and their U-units (which contain T - ZT MAC units each).
   // ===========================================================================
+#ifdef __VITIS_HLS__
+#pragma HLS INLINE
+#endif
 #pragma HLS DATAFLOW
-  const int kNumElemsTile = VectLength / NumTiles;
+  const int kTileSize = VectLength / NumTiles;
   const int kNumPEs = NumTiles - NumZeroTiles;
-  svd::ActivationD x_buffer[NumTiles][kNumElemsTile];
+  svd::ActivationD x_buffer[NumTiles][kTileSize];
 #pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=1
   Write_Buffer:
   for (int i = 0; i < NumTiles; ++i) {
-    for (int j = 0; j < kNumElemsTile; ++j) {
+    for (int j = 0; j < kTileSize; ++j) {
 #pragma HLS PIPELINE II=1
-      x_buffer[i][j] = x_dmem[i * kNumElemsTile + j];
+      x_buffer[i][j] = x_dmem[i * kTileSize + j];
     }
   }
   hls::stream<ap_uint<hlsutils::log2<NumTiles>::value> > tile_idx_stream[NumGates][kNumPEs];
@@ -316,7 +319,7 @@ void InputDMA(const svd::ActivationD *x_dmem,
   }
   Stream_Tiles:
   for (int i = 0; i < NumIter; ++i) {
-    for (int k = 0; k < kNumElemsTile; ++k) {
+    for (int k = 0; k < kTileSize; ++k) {
 #pragma HLS PIPELINE II=1
       ap_uint<hlsutils::log2<NumTiles>::value> tile_idx[NumGates][kNumPEs];
 #pragma HLS ARRAY_PARTITION variable=tile_idx complete dim=0
@@ -336,7 +339,9 @@ template <typename Din, typename Dout, int InWidth, int OutWidth, int OutputSize
 void ArraySplitter(const Din *x,
     Dout (&y)[InWidth / OutWidth][OutputSize / (InWidth / OutWidth)]) {
 #pragma HLS INLINE
+#ifndef __VITIS_HLS__
 #pragma HLS ARRAY_PARTITION variable=y complete dim=1
+#endif
   const int kDivider = InWidth / OutWidth;
   const int kInputSize = OutputSize / kDivider;
   assert(InWidth % OutWidth == 0);
@@ -360,7 +365,9 @@ void StreamSplitter(const int output_size,
     const Din *x,
     hls::stream<Dout> (&y)[InWidth / OutWidth]) {
 #pragma HLS INLINE
+#ifndef __VITIS_HLS__
 #pragma HLS ARRAY_PARTITION variable=y complete dim=1
+#endif
   const int kDivider = InWidth / OutWidth;
   const int kInputSize = output_size / kDivider;
   assert(InWidth % OutWidth == 0);
@@ -394,9 +401,9 @@ void StreamSplitter(const int output_size,
  * @tparam     num_elems_per_tile  Number of elements per tile.
  */
 template <typename T>
-void GateDispatcher(const bool use_nz_dim, const int num_iter,
+void DispatchGateFromArray(const bool use_nz_dim, const int num_iter,
     const int num_non_zero_tiles, const int num_elems_per_tile,
-    const T *gate_port, hls::stream<T> *gate_streams) {
+    const T* gate_port, hls::stream<T>* gate_streams) {
 #pragma HLS INLINE
 #pragma HLS FUNCTION_INSTANTIATE variable=num_iter
 #pragma HLS FUNCTION_INSTANTIATE variable=num_non_zero_tiles
@@ -413,6 +420,31 @@ void GateDispatcher(const bool use_nz_dim, const int num_iter,
           gate_streams[z].write(gate_port[g_idx]); // for U weights
         } else {
           gate_streams[e].write(gate_port[g_idx]); // for V weights
+        }
+      }
+    }
+  }
+}
+
+template <typename T>
+void DispatchGateFromStream(const bool use_nz_dim, const int num_iter,
+    const int num_non_zero_tiles, const int num_elems_per_tile,
+    hls::stream<T>& gate_port, hls::stream<T>* gate_streams) {
+#pragma HLS INLINE
+#pragma HLS FUNCTION_INSTANTIATE variable=num_iter
+#pragma HLS FUNCTION_INSTANTIATE variable=num_non_zero_tiles
+#pragma HLS FUNCTION_INSTANTIATE variable=num_elems_per_tile
+  const int kI = num_iter;
+  const int kNZ = num_non_zero_tiles;
+  const int kE = num_elems_per_tile;
+  I : for (int i = 0; i < kI; ++i) {
+    Z : for (int z = 0; z < kNZ; ++z) {
+      E : for (int e = 0; e < kE; ++e) {
+#pragma HLS PIPELINE II=1
+        if (use_nz_dim) {
+          gate_streams[z].write(gate_port.read()); // for U weights
+        } else {
+          gate_streams[e].write(gate_port.read()); // for V weights
         }
       }
     }
