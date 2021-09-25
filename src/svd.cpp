@@ -15,6 +15,7 @@ int main(int argc, char const *argv[]) {
 
   const bool kTestSoftwareAccelerator = false;
   const int kN = 2;
+  const int kNumActiveInputs = 1;
   const int kR = svd::lstm_params::R;
   const int kI = svd::lstm_params::I;
   const int kH = svd::lstm_params::H;
@@ -178,6 +179,36 @@ int main(int argc, char const *argv[]) {
         storage.get_h(j));
     }
   }
+
+  // int num_refinements[kN] = {kR};
+  // C_WrapperLstmSvd(
+  //   NUM_TIMESTEPS,
+  //   kNumActiveInputs,
+  //   kI,
+  //   kH,
+  //   num_refinements,
+  //   kZTu,
+  //   kZTv,
+  //   // Current Gates
+  //   x_in,
+  //   u_cur_in,
+  //   s_cur_in,
+  //   v_cur_in,
+  //   uz_idx_cur_in,
+  //   vz_idx_cur_in,
+  //   // Recurrent Gates
+  //   h_in,
+  //   u_rec_in,
+  //   s_rec_in,
+  //   v_rec_in,
+  //   uz_idx_rec_in,
+  //   vz_idx_rec_in,
+  //   // Non-Linearities
+  //   bias_in,
+  //   c_prev_in,
+  //   h_curr_in,
+  //   c_curr_in);
+
   storage.ResetLstmOutputs();
   std::cout << "Cleaning up." << std::endl;
   delete[] h_prev_hls;

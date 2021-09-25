@@ -407,4 +407,32 @@ void HlsWrapperLstmSvd(
     typename svd::lstm_params::ActivationD* h_curr,
     typename svd::lstm_params::ActivationD* c_curr);
 
+extern "C" void C_WrapperLstmSvd(
+    const int num_timesteps,
+    const int num_active_inputs,
+    const int input_size,
+    const int output_size,
+    const int num_refinements[svd::lstm_params::N],
+    const int num_zero_tiles_u,
+    const int num_zero_tiles_v,
+    // Current Gates
+    const float* x_in,
+    const float* u_cur_in,
+    const float* s_cur_in,
+    const float* v_cur_in,
+    const int* uz_idx_cur_in,
+    const int* vz_idx_cur_in,
+    // Recurrent Gates
+    const float* h_in,
+    const float* u_rec_in,
+    const float* s_rec_in,
+    const float* v_rec_in,
+    const int* uz_idx_rec_in,
+    const int* vz_idx_rec_in,
+    // Non-Linearities
+    const float* bias_in,
+    const float* c_prev_in,
+    float* h_curr_in,
+    float* c_curr_in);
+
 #endif // end LSTM_HLS_LSTM_SVD_H_

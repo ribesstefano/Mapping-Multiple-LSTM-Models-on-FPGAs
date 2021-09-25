@@ -37,6 +37,11 @@ template <int Ni, int Ii, int Hi, int Ri, int Tui, int Tvi, int ZTui = 0,
   typename WeightD_tp = ap_fixed<8, 3>,
   typename AccumulationD_tp = ap_fixed<16, 3> >
 struct SvdParameters {
+  static_assert(Ni > 0, "ERROR. Found negative value: N <= 0");
+  static_assert(Ii > 0, "ERROR. Found negative value: I <= 0");
+  static_assert(Hi > 0, "ERROR. Found negative value: H <= 0");
+  static_assert(Tui > 0, "ERROR. Found negative value: Tu <= 0");
+  static_assert(Tvi > 0, "ERROR. Found negative value: Tv <= 0");
   static const int N = Ni;
   static const int I = Ii;
   static const int H = Hi;
@@ -51,24 +56,28 @@ struct SvdParameters {
   static const int PeU = MaxNumTu - ZTu;
   static const int PeV = H / MaxNumTv;
 private:
-  static const int TuBits_tmp = hlsutils::log2<MaxNumTu>::value;
-  static const int TvBits_tmp = hlsutils::log2<MaxNumTv>::value;
+  static const int NumTuBits_tmp = hlsutils::log2<MaxNumTu>::value;
+  static const int NumTvBits_tmp = hlsutils::log2<MaxNumTv>::value;
 public:
-  static const int TuBits = TuBits_tmp > 0 ? TuBits_tmp : 1;
-  static const int TvBits = TvBits_tmp > 0 ? TvBits_tmp : 1;
-  typedef ap_uint<MaxNumTu> IndexU_Type;
-  typedef ap_uint<MaxNumTv> IndexV_Type;
+  static const int NumTuBits = NumTuBits_tmp > 0 ? NumTuBits_tmp : 1;
+  static const int NumTvBits = NumTvBits_tmp > 0 ? NumTvBits_tmp : 1;
+  static const int NumTuBitsAligned = (NumTuBits + 7) & (-8); // align to 8bit
+  static const int NumTvBitsAligned = (NumTvBits + 7) & (-8); // align to 8bit
+  static const int NumGTuBitsAligned = (NumTuBits * G + 7) & (-8); // align to 8bit
+  static const int NumGTvBitsAligned = (NumTvBits * G + 7) & (-8); // align to 8bit
+  typedef ap_uint<NumTuBits> IndexU_Type; // deprecated
+  typedef ap_uint<NumTvBits> IndexV_Type; // deprecated
   typedef ap_uint<MaxNumTu> UnzD;
   typedef ap_uint<MaxNumTv> VnzD;
-  typedef ap_uint<TuBits> UnzIdxD;
-  typedef ap_uint<TvBits> VnzIdxD;
+  typedef ap_uint<NumTuBits> UnzIdxD;
+  typedef ap_uint<NumTvBits> VnzIdxD;
   typedef ActivationD_tp ActivationD;
   typedef WeightD_tp WeightD;
   typedef AccumulationD_tp AccumulationD;
   typedef hls::stream<UnzD> UnzS;
   typedef hls::stream<VnzD> VnzS;
-  typedef hls::stream<ap_uint<TuBits> > UnzIdxS;
-  typedef hls::stream<ap_uint<TvBits> > VnzIdxS;
+  typedef hls::stream<ap_uint<NumTuBits> > UnzIdxS;
+  typedef hls::stream<ap_uint<NumTvBits> > VnzIdxS;
   typedef hls::stream<ActivationD> ActivationS;
   typedef hls::stream<WeightD> WeightS;
   typedef hls::stream<AccumulationD> AccumulationS;
@@ -87,6 +96,10 @@ public:
   static const int VectG_AxiWidth = ActivationWidth * G;
   static const int VectGN_AxiWidth = ActivationWidth * G * N;
   static const int VectGTvAxiWidth = ActivationWidth * G * Tv;
+
+  typedef typename svd::AxiStreamPort<NumGTuBitsAligned>::PacketType VectGZTuAxiPacketType;
+  typedef typename svd::AxiStreamPort<NumGTvBitsAligned>::PacketType VectGZTvAxiPacketType;
+
   typedef typename svd::AxiStreamPort<VectTuAxiWidth>::PacketType VectTuAxiPacketType;
   typedef typename svd::AxiStreamPort<VectTvAxiWidth>::PacketType VectTvAxiPacketType;
   typedef typename svd::AxiStreamPort<VectN_AxiWidth>::PacketType VectN_AxiPacketType;
