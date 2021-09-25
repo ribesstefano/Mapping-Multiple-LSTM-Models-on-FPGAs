@@ -13,29 +13,30 @@
 #include "assert.h"
 
 #include <string>
+#include <vector>
 
 namespace svd {
 
 void SvdModel2LstmSDSoCV2(
-    const svd::ActivationD x1_port[INPUT_SIZE],
-    const svd::ActivationD x2_port[INPUT_SIZE],
-    const svd::ActivationD h_t1_prev_port[HIDDEN_SIZE],
-    const svd::ActivationD h_t2_prev_port[HIDDEN_SIZE],
-    const svd::ActivationD c_t1_prev_port[HIDDEN_SIZE],
-    const svd::ActivationD c_t2_prev_port[HIDDEN_SIZE],
-    const ap_uint<FIX_WIDTH * 4> *u_cur_port, // [NUM_ITERATIONS*4*INPUT_SIZE / NUM_TILES_U * (NUM_TILES_U - NUM_ZERO_TILES_U)],
-    const ap_uint<FIX_WIDTH * 4> *u_rec_port, // [NUM_ITERATIONS*4*HIDDEN_SIZE / NUM_TILES_U * (NUM_TILES_U - NUM_ZERO_TILES_U)],
-    const ap_uint<FIX_WIDTH * 8> *v_port, // [NUM_ITERATIONS*4*2*HIDDEN_SIZE / NUM_TILES_V * (NUM_TILES_V - NUM_ZERO_TILES_V)],
-    const ap_uint<FIX_WIDTH * 8> *s1_port, // [NUM_ITERATIONS*8],
-    const ap_uint<FIX_WIDTH * 8> *s2_port, // [NUM_ITERATIONS*8],
-    const svd::WeightD bias1_port[4 * HIDDEN_SIZE],
-    const svd::WeightD bias2_port[4 * HIDDEN_SIZE],
-    const ap_uint<NUM_TILES_V> nz_v_port[NUM_ITERATIONS * 8],
-    const ap_uint<NUM_TILES_U> nz_u_port[NUM_ITERATIONS * 8],
-    svd::ActivationD h_t1_curr_port[HIDDEN_SIZE],
-    svd::ActivationD h_t2_curr_port[HIDDEN_SIZE],
-    svd::ActivationD c_t1_curr_port[HIDDEN_SIZE],
-    svd::ActivationD c_t2_curr_port[HIDDEN_SIZE]
+    const svd::ActivationD x1_port[svd::lstm_params::I],
+    const svd::ActivationD x2_port[svd::lstm_params::I],
+    const svd::ActivationD h_t1_prev_port[svd::lstm_params::H],
+    const svd::ActivationD h_t2_prev_port[svd::lstm_params::H],
+    const svd::ActivationD c_t1_prev_port[svd::lstm_params::H],
+    const svd::ActivationD c_t2_prev_port[svd::lstm_params::H],
+    const ap_uint<FIX_WIDTH * svd::lstm_params::G> *u_cur_port, // [svd::lstm_params::R*4*svd::lstm_params::I / svd::lstm_params::MaxNumTu * (svd::lstm_params::MaxNumTu - NUM_ZERO_TILES_U)],
+    const ap_uint<FIX_WIDTH * svd::lstm_params::G> *u_rec_port, // [svd::lstm_params::R*4*svd::lstm_params::H / svd::lstm_params::MaxNumTu * (svd::lstm_params::MaxNumTu - NUM_ZERO_TILES_U)],
+    const ap_uint<FIX_WIDTH * svd::lstm_params::G * 2> *v_port, // [svd::lstm_params::R*4*2*svd::lstm_params::H / svd::lstm_params::MaxNumTv * (svd::lstm_params::MaxNumTv - NUM_ZERO_TILES_V)],
+    const ap_uint<FIX_WIDTH * svd::lstm_params::G * 2> *s1_port, // [svd::lstm_params::R*8],
+    const ap_uint<FIX_WIDTH * svd::lstm_params::G * 2> *s2_port, // [svd::lstm_params::R*8],
+    const svd::WeightD bias1_port[svd::lstm_params::G * svd::lstm_params::H],
+    const svd::WeightD bias2_port[svd::lstm_params::G * svd::lstm_params::H],
+    const ap_uint<svd::lstm_params::MaxNumTv> nz_v_port[svd::lstm_params::R * svd::lstm_params::G * 2],
+    const ap_uint<svd::lstm_params::MaxNumTu> nz_u_port[svd::lstm_params::R * svd::lstm_params::G * 2],
+    svd::ActivationD h_t1_curr_port[svd::lstm_params::H],
+    svd::ActivationD h_t2_curr_port[svd::lstm_params::H],
+    svd::ActivationD c_t1_curr_port[svd::lstm_params::H],
+    svd::ActivationD c_t2_curr_port[svd::lstm_params::H]
 #ifdef DEBUG_FIFOS
     ,
     svd::CounterD *counters_port,
@@ -43,16 +44,16 @@ void SvdModel2LstmSDSoCV2(
 #endif
     ) {
   hlsutils::Log(0, "[INFO] Running SvdModel2LstmSDSoCV2.");
-  const int kNumGates = 8;
-  const int kNumCurGates = 4;
-  const int kNumRecGates = 4;
-  const int kInputLength = INPUT_SIZE;
-  const int kOutputLength = HIDDEN_SIZE;
-  const int kNumTilesU = NUM_TILES_U;
-  const int kNumTilesV = NUM_TILES_V;
-  const int kNumZeroTilesU = NUM_ZERO_TILES_U;
-  const int kNumZeroTilesV = NUM_ZERO_TILES_V;
-  const int kNumIter = NUM_ITERATIONS;
+  const int kNumGates = svd::lstm_params::G * 2;
+  const int kNumCurGates = svd::lstm_params::G;
+  const int kNumRecGates = svd::lstm_params::G;
+  const int kInputLength = svd::lstm_params::I;
+  const int kOutputLength = svd::lstm_params::H;
+  const int kNumTilesU = svd::lstm_params::MaxNumTu; // svd::lstm_params::MaxNumTu
+  const int kNumTilesV = svd::lstm_params::MaxNumTv; // svd::lstm_params::MaxNumTv
+  const int kNumZeroTilesU = svd::lstm_params::ZTu;
+  const int kNumZeroTilesV = svd::lstm_params::ZTv;
+  const int kNumIter = svd::lstm_params::R;
   const int kNumTimesteps = NUM_TIMESTEPS;
   const int kNumNonZeroTilesU = kNumTilesU - kNumZeroTilesU;
   const int kNumNonZeroTilesV = kNumTilesV - kNumZeroTilesV;
@@ -395,9 +396,9 @@ void SvdModel2LstmSDSoCV2(
     bias2_port);
 
 #ifdef DEBUG_FIFOS
-  const int kNumPEsU = NUM_TILES_U - NUM_ZERO_TILES_U;
-  const int kNumPEsVCur = INPUT_SIZE / NUM_TILES_V;
-  const int kNumPEsVRec = HIDDEN_SIZE / NUM_TILES_V;
+  const int kNumPEsU = svd::lstm_params::MaxNumTu - svd::lstm_params::ZTu;
+  const int kNumPEsVCur = svd::lstm_params::I / svd::lstm_params::MaxNumTv;
+  const int kNumPEsVRec = svd::lstm_params::H / svd::lstm_params::MaxNumTv;
   const int kNumUprobes = kNumGates * kNumPEsU * 3; // one for each: x1, x2, u streams
   const int kNumVprobes = kNumGates / 2 * (kNumPEsVCur + kNumPEsVRec); // one for v streams
   const int kNumProbes = kNumUprobes + kNumVprobes;
@@ -465,11 +466,17 @@ void HlsLstmSvd(const int num_active_inputs,
  * @param[in]  output_size        The output size
  * @param[in]  num_refinements    The number of refinements
  * @param[in]  x                  The input array. Shape: (N, I)
- * @param[in]  u                  The u array. Shape: (R, I, G)
- * @param[in]  s                  The s array. Shape: (R, N, G)
- * @param[in]  v                  The v array. Shape: (R, H, G)
+ * @param[in]  u_cur              The u current. Shape: (R_max, I, G)
+ * @param[in]  s_cur              The s current. Shape: (R_max, N, G)
+ * @param[in]  v_cur              The v current. Shape: (R_max, H, G)
+ * @param[in]  h                  The recurrent input array. Shape: (N, H)
+ * @param[in]  u_rec              The u recurrent. Shape: (R_max, H, G)
+ * @param[in]  s_rec              The s recurrent. Shape: (R_max, N, G)
+ * @param[in]  v_rec              The v recurrent. Shape: (R_max, H, G)
  * @param[in]  bias               The bias array. Shape: (N, G, H)
- * @param      y                  The y array. Shape: (H / Tv, N, Tv)
+ * @param[in]  c_prev             The c previous. Shape: (N, H)
+ * @param      h_curr             The h curr. Shape: (H / Tv, N, Tv)
+ * @param      c_curr             The c curr. Shape: (H / Tv, N, Tv)
  */
 void HlsWrapperLstmSvd(
     const int num_active_inputs,
@@ -518,5 +525,127 @@ void HlsWrapperLstmSvd(
     bias_port, c_prev_port, h_curr_port, c_curr_port);
   svd::GetLstmSvdOutputs<svd::lstm_params>(num_active_inputs,
     output_size, h_curr, c_curr, h_curr_port, c_curr_port);
+#endif // __VITIS_HLS__
+}
+
+/**
+ * @brief      HLS Wrapper that calls a DenseSvd accelerator.
+ *
+ *             Useful in Cosimulation.
+ *
+ * @param[in]  num_timesteps      The number of timesteps
+ * @param[in]  num_active_inputs  The number of active inputs
+ * @param[in]  input_size         The input size
+ * @param[in]  output_size        The output size
+ * @param[in]  num_refinements    The number of refinements
+ * @param[in]  x_in               The x in. Shape: (T, N, I)
+ * @param[in]  u_cur_in           The u current. Shape: (R_max, I, G)
+ * @param[in]  s_cur_in           The s current. Shape: (R_max, N, G)
+ * @param[in]  v_cur_in           The v current. Shape: (R_max, H, G)
+ * @param[in]  h_in               The h in. Shape: (N, H)
+ * @param[in]  u_rec_in           The u recurrent. Shape: (R_max, H, G)
+ * @param[in]  s_rec_in           The s recurrent. Shape: (R_max, N, G)
+ * @param[in]  v_rec_in           The v recurrent. Shape: (R_max, H, G)
+ * @param[in]  bias_in            The bias array. Shape: (N, G, H)
+ * @param[in]  c_prev_in          The c previous. Shape: (N, H)
+ * @param      h_curr_in          The h curr. Shape: (H / Tv, N, Tv)
+ * @param      c_curr_in          The c curr. Shape: (H / Tv, N, Tv)
+ */
+extern "C" void C_WrapperLstmSvd(
+    const int num_timesteps,
+    const int num_active_inputs,
+    const int input_size,
+    const int output_size,
+    const int num_refinements[svd::lstm_params::N],
+    // Current Gates
+    const float* x_in,
+    const float* u_cur_in,
+    const float* s_cur_in,
+    const float* v_cur_in,
+    // Recurrent Gates
+    const float* h_in,
+    const float* u_rec_in,
+    const float* s_rec_in,
+    const float* v_rec_in,
+    // Non-Linearities
+    const float* bias_in,
+    const float* c_prev_in,
+    float* h_curr_in,
+    float* c_curr_in) {
+#ifdef __VITIS_HLS__
+  typedef typename svd::lstm_params::ActivationD FixType;
+  const int kT = num_timesteps;
+  const int kN = num_active_inputs;
+  const int kI = input_size;
+  const int kH = output_size;
+  const int kG = svd::lstm_params::G;
+  int R_max = 0;
+  for (int i = 0; i < svd::lstm_params::N; ++i) {
+    if (num_refinements[i] > R_max) {
+      R_max = num_refinements[i];
+    }
+  }
+  // Current Gates
+  std::vector<FixType> x(kT * kI * kN);
+  std::vector<FixType> u_cur(R_max * kI * kG);
+  std::vector<FixType> s_cur(R_max * kN * kG);
+  std::vector<FixType> v_cur(R_max * kH * kG);
+  // Recurrent Gates
+  std::vector<FixType> h(kH * kN, FixType(0));
+  std::vector<FixType> u_rec(R_max * kH * kG);
+  std::vector<FixType> s_rec(R_max * kN * kG);
+  std::vector<FixType> v_rec(R_max * kH * kG);
+  // Non-Linearities
+  std::vector<FixType> bias(kH * kN * kG);
+  std::vector<FixType> c_prev(kH * kN, FixType(0));
+  std::vector<FixType> h_curr(kH * kN, FixType(0));
+  std::vector<FixType> c_curr(kH * kN, FixType(0));
+  auto float2fix = [](const float* x, std::vector<FixType>& y) {
+    for (int i = 0; i < y.size(); ++i) {
+      y[i] = FixType(x[i]);
+    }
+  };
+  auto fix2float = [](std::vector<FixType>& x, float* y) {
+    for (int i = 0; i < x.size(); ++i) {
+      y[i] = x[i].to_float();
+    }
+  };
+  auto curr2prev = [&](std::vector<FixType>& x_curr, std::vector<FixType>& x_prev) {
+    // Shape: (H / Tv, N, Tv) -> (N, H)
+    const int kTv = svd::lstm_params::Tv;
+    for (int i = 0; i < kH / kTv; ++i) {
+      for (int j = 0; j < kN; ++j) {
+        for (int k = 0; k < kTv; ++k) {
+          x_prev[j * kH + i * kTv + k] = x_curr[i * kN * kTv + j * kTv + k];
+        }
+      }
+    }
+  };
+  float2fix(x_in, x);
+  float2fix(u_cur_in, u_cur);
+  float2fix(s_cur_in, s_cur);
+  float2fix(v_cur_in, v_cur);
+  float2fix(u_rec_in, u_rec);
+  float2fix(s_rec_in, s_rec);
+  float2fix(v_rec_in, v_rec);
+  float2fix(bias_in, bias);
+  if (num_timesteps == 1) {
+    float2fix(h_in, h);
+    float2fix(c_prev_in, c_prev);
+    HlsWrapperLstmSvd(kN, kI, kH, num_refinements, x.data(), u_cur.data(),
+      s_cur.data(), v_cur.data(), h.data(), u_rec.data(), s_rec.data(),
+      v_rec.data(), bias.data(), c_prev.data(), h_curr.data(), c_curr.data());
+  } else {
+    for (int i = 0; i < kT; ++i) {
+      auto x_ptr = &(x.data()[i * kI * kN]);
+      HlsWrapperLstmSvd(kN, kI, kH, num_refinements, x_ptr, u_cur.data(),
+        s_cur.data(), v_cur.data(), h.data(), u_rec.data(), s_rec.data(),
+        v_rec.data(), bias.data(), c_prev.data(), h_curr.data(), c_curr.data());
+      curr2prev(h_curr, h);
+      curr2prev(c_curr, c_prev);
+    }
+  }
+  fix2float(h_curr, h_curr_in);
+  fix2float(c_curr, c_curr_in);
 #endif // __VITIS_HLS__
 }

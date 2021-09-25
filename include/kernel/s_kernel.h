@@ -31,12 +31,12 @@ template<int Ni, int Gi = 1, typename ActivationD_tp = ap_fixed<16, 3> >
 struct KernelS_Params {
   static const int N = Ni;
   static const int G = Gi;
-  static const int ActivationWidth = hlsutils::Bitwidth<ActivationD>::value;
+  typedef ActivationD_tp ActivationType;
+  static const int ActivationWidth = hlsutils::Bitwidth<ActivationType>::value;
   static const int VectG_AxiWidth = ActivationWidth * G;
-  typedef ActivationD_tp ActivationD;
   typedef typename svd::AxiStreamPort<VectG_AxiWidth>::AxiuPacketType VectG_AxiPacketType;
 #ifdef __VITIS_HLS__
-  typedef hls::vector<ActivationD, G> VectG_Type;
+  typedef hls::vector<ActivationType, G> VectG_Type;
 #endif
 };
 

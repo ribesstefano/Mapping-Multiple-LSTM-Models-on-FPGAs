@@ -15,50 +15,22 @@
 
 namespace svd {
 
-template<typename Type, int Ni, int Ii, int Tui, int ZTui = 0, int Gi = 1>
-struct ParamsU {
-  static const int N = Ni;
-  static const int I = Ii;
-  static const int Tu = Tui;
-  static const int ZTu = ZTui;
-  static const int G = Gi;
-  static const int TuElems = I / Tu;
-  static const int TuBits = hlsutils::log2<Tu>::value > 0 ? hlsutils::log2<Tu>::value : 1;
-  typedef ap_uint<Tu> UnzD;
-  typedef ap_uint<TuBits> UnzIdxD;
-  typedef Type ActivationD;
-  typedef Type WeightD;
-  typedef Type AccumulationD;
-  typedef hls::stream<UnzD> UnzS;
-  typedef hls::stream<ap_uint<TuBits> > UnzIdxS;
-  typedef hls::stream<ActivationD> ActivationS;
-  typedef hls::stream<WeightD> WeightS;
-  typedef hls::stream<AccumulationD> AccumulationS;
-  typedef ap_uint<hlsutils::Bitwidth<WeightD>::value * G> UPortD;
-  static const int PrunedSizeU = I / Tu * (Tu - ZTu);
-  static const int ActivationWidth = hlsutils::Bitwidth<ActivationD>::value;
-  static const int WeightWidth = hlsutils::Bitwidth<WeightD>::value;
-  static const int AccumulationWidth = hlsutils::Bitwidth<AccumulationD>::value;
-  static const int VectTuAxiWidth = ActivationWidth * Tu;
-  static const int VectN_AxiWidth = ActivationWidth * N;
-  static const int VectG_AxiWidth = ActivationWidth * G;
-  static const int VectGN_AxiWidth = ActivationWidth * G * N;
-  typedef typename svd::AxiStreamPort<VectTuAxiWidth>::AxiuPacketType VectTuAxiPacketType;
-  typedef typename svd::AxiStreamPort<VectN_AxiWidth>::AxiuPacketType VectN_AxiPacketType;
-  typedef typename svd::AxiStreamPort<VectG_AxiWidth>::AxiuPacketType VectG_AxiPacketType;
-  typedef typename svd::AxiStreamPort<VectGN_AxiWidth>::AxiuPacketType VectGN_AxiPacketType;
-  typedef typename svd::AxiStreamFifo<VectTuAxiWidth>::AxiuType VectTuAxiuType;
-  typedef typename svd::AxiStreamFifo<VectN_AxiWidth>::AxiuType VectN_AxiuType;
-  typedef typename svd::AxiStreamFifo<VectG_AxiWidth>::AxiuType VectG_AxiuType;
-  typedef typename svd::AxiStreamFifo<VectGN_AxiWidth>::AxiuType VectGN_AxiuType;
-#ifdef __VITIS_HLS__
-  typedef hls::vector<ActivationD, Tu> VectTuType;
-  typedef hls::vector<ActivationD, N> VectN_Type;
-  typedef hls::vector<ActivationD, G> VectG_Type;
-  typedef hls::vector<ActivationD, G * N> VectGN_Type;
-#endif
-};
-
+/**
+ * @brief      SVD parameters wrapped in a single class
+ *
+ * @tparam     Ni                Number of inputs
+ * @tparam     Ii                Input size
+ * @tparam     Hi                Output (also called hidden) size
+ * @tparam     Ri                Number of refinements
+ * @tparam     Tui               Tile U size
+ * @tparam     Tvi               Tile V size
+ * @tparam     ZTui              Number of zero tiles U. Default: 0
+ * @tparam     ZTvi              Number of zero tiles V. Default: 0
+ * @tparam     Gi                Number of gates. Default: 1
+ * @tparam     ActivationD_tp    Activation type
+ * @tparam     WeightD_tp        Weight type (deprecated)
+ * @tparam     AccumulationD_tp  Accumulation type (deprecated)
+ */
 template <int Ni, int Ii, int Hi, int Ri, int Tui, int Tvi, int ZTui = 0,
   int ZTvi = 0, int Gi = 1,
   typename ActivationD_tp = ap_fixed<16, 3>,
@@ -74,14 +46,18 @@ struct SvdParameters {
   static const int Tv = Tvi;
   static const int ZTv = ZTvi;
   static const int G = Gi;
-  static const int PeU = Tu - ZTu;
-  static const int PeV = H / Tv;
-  static const int TuElems = I / Tu;
-  static const int TvElems = H / Tv;
-  static const int TuBits = hlsutils::log2<Tu>::value > 0 ? hlsutils::log2<Tu>::value : 1;
-  static const int TvBits = hlsutils::log2<Tv>::value > 0 ? hlsutils::log2<Tv>::value : 1;
-  typedef ap_uint<Tu> UnzD;
-  typedef ap_uint<Tv> VnzD;
+  static const int MaxNumTu = I / Tu;
+  static const int MaxNumTv = H / Tv;
+  static const int PeU = MaxNumTu - ZTu;
+  static const int PeV = H / MaxNumTv;
+private:
+  static const int TuBits_tmp = hlsutils::log2<MaxNumTu>::value;
+  static const int TvBits_tmp = hlsutils::log2<MaxNumTv>::value;
+public:
+  static const int TuBits = TuBits_tmp > 0 ? TuBits_tmp : 1;
+  static const int TvBits = TvBits_tmp > 0 ? TvBits_tmp : 1;
+  typedef ap_uint<MaxNumTu> UnzD;
+  typedef ap_uint<MaxNumTv> VnzD;
   typedef ap_uint<TuBits> UnzIdxD;
   typedef ap_uint<TvBits> VnzIdxD;
   typedef ActivationD_tp ActivationD;
@@ -97,8 +73,8 @@ struct SvdParameters {
   typedef ap_uint<hlsutils::Bitwidth<WeightD>::value * G> SPortD;
   typedef ap_uint<hlsutils::Bitwidth<WeightD>::value * G> UPortD;
   typedef ap_uint<hlsutils::Bitwidth<WeightD>::value * G> VPortD;
-  static const int PrunedSizeU = I / Tu * (Tu - ZTu);
-  static const int PrunedSizeV = H / Tv * (Tv - ZTv);
+  static const int PrunedSizeU = Tu * (MaxNumTu - ZTu);
+  static const int PrunedSizeV = Tv * (MaxNumTv - ZTv);
   static const int SizeS = R * G;
   static const int ActivationWidth = hlsutils::Bitwidth<ActivationD>::value;
   static const int WeightWidth = hlsutils::Bitwidth<WeightD>::value;
@@ -136,7 +112,6 @@ public:
   typename params::WeightS u_dma[params::G];
   typename params::WeightS v_dma[params::G];
   typename params::WeightS s[params::N][params::G];
-  // typename params::AccumulationD xu[params::N][params::G][params::R][params::PeU]; // defined as array, but a stream
   typename params::AccumulationS xu[params::N][params::G][params::PeU];
   typename params::AccumulationS xus[params::N][params::G][params::PeV];
   typename params::ActivationS xusv[params::N][params::G][params::PeV];

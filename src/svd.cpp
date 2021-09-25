@@ -15,16 +15,16 @@ int main(int argc, char const *argv[]) {
 
   const bool kTestSoftwareAccelerator = false;
   const int kNumInputs = 2;
-  const int kRefinementSteps = NUM_ITERATIONS;
-  const int kLstmInputSize = INPUT_SIZE;
-  const int kLstmOutputSize = HIDDEN_SIZE;
+  const int kRefinementSteps = svd::lstm_params::R;
+  const int kLstmInputSize = svd::lstm_params::I;
+  const int kLstmOutputSize = svd::lstm_params::H;
   const int kUCurSize = kLstmInputSize;
   const int kURecSize = kLstmOutputSize;
   const int kVSize = kLstmOutputSize;
-  const int kNumTilesU = NUM_TILES_U;
-  const int kNumZeroTilesU = NUM_ZERO_TILES_U;
-  const int kNumTilesV = NUM_TILES_V;
-  const int kNumZeroTilesV = NUM_ZERO_TILES_V;
+  const int kNumTilesU = svd::lstm_params::MaxNumTu;
+  const int kNumZeroTilesU = svd::lstm_params::ZTu;
+  const int kNumTilesV = svd::lstm_params::MaxNumTv;
+  const int kNumZeroTilesV = svd::lstm_params::ZTv;
   const int kLutSize = (FIX_WIDTH == 16) ? 512 : 256;
 
   std::cout << "Setting AcceleratorBlob." << std::endl;
@@ -33,13 +33,13 @@ int main(int argc, char const *argv[]) {
     kURecSize, kVSize, kNumTilesU, kNumZeroTilesU, kNumTilesV, kNumZeroTilesV);
 
   std::cout << "Running SvdIp2Inputs." << std::endl;
-  typename svd::svd_params::ActivationD x_port[svd::svd_params::N][svd::svd_params::I] = {rand()};
-  typename svd::svd_params::UPortD u_port[svd::svd_params::R * svd::svd_params::PrunedSizeU] = {rand()};
-  typename svd::svd_params::SPortD s_port[svd::svd_params::N][svd::svd_params::R] = {rand()};
-  typename svd::svd_params::VPortD v_port[svd::svd_params::R * svd::svd_params::PrunedSizeV] = {rand()};
-  ap_uint<svd::svd_params::Tu> nz_u_port[svd::svd_params::G * svd::svd_params::R] = {rand()};
-  ap_uint<svd::svd_params::Tv> nz_v_port[svd::svd_params::G * svd::svd_params::R] = {rand()};
-  typename svd::svd_params::ActivationD y_port[svd::svd_params::N][svd::svd_params::G][svd::svd_params::H] = {rand()};
+  typename svd::lstm_params::ActivationD x_port[svd::lstm_params::N][svd::lstm_params::I] = {rand()};
+  typename svd::lstm_params::UPortD u_port[svd::lstm_params::R * svd::lstm_params::PrunedSizeU] = {rand()};
+  typename svd::lstm_params::SPortD s_port[svd::lstm_params::N][svd::lstm_params::R] = {rand()};
+  typename svd::lstm_params::VPortD v_port[svd::lstm_params::R * svd::lstm_params::PrunedSizeV] = {rand()};
+  ap_uint<svd::lstm_params::MaxNumTu> nz_u_port[svd::lstm_params::G * svd::lstm_params::R] = {rand()};
+  ap_uint<svd::lstm_params::MaxNumTv> nz_v_port[svd::lstm_params::G * svd::lstm_params::R] = {rand()};
+  typename svd::lstm_params::ActivationD y_port[svd::lstm_params::N][svd::lstm_params::G][svd::lstm_params::H] = {rand()};
   // SvdIp2Inputs(x_port, u_port, s_port, v_port, nz_u_port, nz_v_port, y_port);
 
   std::cout << "reinterpret_cast." << std::endl;
@@ -50,10 +50,10 @@ int main(int argc, char const *argv[]) {
   ap_uint<128>* s1_uint = reinterpret_cast<ap_uint<128>*>(storage.get_fix_s(0));
   ap_uint<128>* s2_uint = reinterpret_cast<ap_uint<128>*>(storage.get_fix_s(1));
 
-  assert(storage.get_u_cur_size() == NUM_ITERATIONS*4*INPUT_SIZE / NUM_TILES_U * (NUM_TILES_U - NUM_ZERO_TILES_U));
-  assert(storage.get_u_rec_size() == NUM_ITERATIONS*4*HIDDEN_SIZE / NUM_TILES_U * (NUM_TILES_U - NUM_ZERO_TILES_U));
-  assert(storage.get_v_size() == NUM_ITERATIONS*4*2*HIDDEN_SIZE / NUM_TILES_V * (NUM_TILES_V - NUM_ZERO_TILES_V));
-  assert(storage.get_s_size() == NUM_ITERATIONS*8);
+  assert(storage.get_u_cur_size() == svd::lstm_params::R*4*svd::lstm_params::I / svd::lstm_params::MaxNumTu * (svd::lstm_params::MaxNumTu - svd::lstm_params::ZTu));
+  assert(storage.get_u_rec_size() == svd::lstm_params::R*4*svd::lstm_params::H / svd::lstm_params::MaxNumTu * (svd::lstm_params::MaxNumTu - svd::lstm_params::ZTu));
+  assert(storage.get_v_size() == svd::lstm_params::R*4*2*svd::lstm_params::H / svd::lstm_params::MaxNumTv * (svd::lstm_params::MaxNumTv - svd::lstm_params::ZTv));
+  assert(storage.get_s_size() == svd::lstm_params::R*8);
 
   svd::ActivationD** h_prev_hls = new svd::ActivationD*[kNumInputs];
   svd::ActivationD** h_curr_hls = new svd::ActivationD*[kNumInputs];
@@ -153,8 +153,8 @@ int main(int argc, char const *argv[]) {
       const int kNumSamples = 1;
       std::cout << "Starting BLAS." << std::endl;
       svd::SvdModelLstmSoftware(kVerbose, kUseBlas, kUsaFloat,
-        storage.get_x(j), kNumSamples, NUM_TIMESTEPS, NUM_ITERATIONS,
-        INPUT_SIZE, HIDDEN_SIZE,
+        storage.get_x(j), kNumSamples, NUM_TIMESTEPS, svd::lstm_params::R,
+        svd::lstm_params::I, svd::lstm_params::H,
         storage.get_cur_gates("i")->get_u()->data(),
         storage.get_cur_gates("i")->get_s(j).data(),
         storage.get_cur_gates("i")->get_v()->data(),

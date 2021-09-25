@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 # Set the project name
 project(Svd VERSION 1.0)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
 # To locate "custom", i.e. manually added, libraries
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
@@ -27,6 +31,10 @@ endif()
 
 message(${HLS_INCLUDE_DIRS})
 
+# set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 # Add all definitions
 # The following definitions is required for compiling half-precision numbers.
 add_compile_definitions(HLS_NO_XIL_FPO_LIB)
@@ -37,9 +45,9 @@ add_compile_definitions(INPUT_SIZE=1024)
 add_compile_definitions(HIDDEN_SIZE=512)
 add_compile_definitions(NUM_GATES=4)
 add_compile_definitions(NUM_SAMPLES=2)
-add_compile_definitions(NUM_TILES_U=4)
+add_compile_definitions(NUM_TILES_U=8)
 add_compile_definitions(NUM_ZERO_TILES_U=1)
-add_compile_definitions(NUM_TILES_V=4)
+add_compile_definitions(NUM_TILES_V=8)
 add_compile_definitions(NUM_ZERO_TILES_V=1)
 add_compile_definitions(NUM_TIMESTEPS=28)
 add_compile_definitions(FIX_WIDTH=16)
@@ -56,4 +64,6 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
 add_executable(Svd ${CMAKE_CURRENT_SOURCE_DIR}/src/svd.cpp)
 target_link_libraries(Svd SVD)
-set_target_properties(Svd PROPERTIES LINK_FLAGS -Wl,--stack,10485760)
+if (WIN32)
+	set_target_properties(Svd PROPERTIES LINK_FLAGS -Wl,--stack,10485760)
+endif()	

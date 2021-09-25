@@ -14,7 +14,7 @@ int main(int argc, char const *argv[]) {
 #ifndef __VITIS_HLS__
   return 0;
 #else
-  std::cout << "[INFO] Starting HlsDenseSvd test." << std::endl;
+  std::cout << "[INFO] Starting HlsLstmSvd test." << std::endl;
   typedef typename svd::lstm_params::ActivationD ActivationType;
   const int kG = svd::lstm_params::G;
   int num_active_inputs = svd::lstm_params::N;

@@ -97,52 +97,6 @@ int main(int argc, char const *argv[]) {
   int num_errors = 0;
   
   for (int t = 0; t < num_tests; ++t) {
-
-// #define TEST_OLD_KERNEL_U
-#ifdef TEST_OLD_KERNEL_U
-    for (int i = 0; i < testu::params::N; ++i) {
-      for (int j = 0; j < kNumTilesU; ++j) {
-        VectTuAct_Type x_val;
-        for (int k = 0; k < testu::params::Tu; ++k) {
-          x_val[k] = x[i][j * testu::params::Tu + k];
-        }
-        x_port << x_val;
-        x_axis_interface.PushVector<ActivationType, testu::params::Tu>(x_val);
-      }
-    }
-    for (int i = 0; i < num_refinements; ++i) {
-      for (int j = 0; j < kNumTilesU; ++j) {
-        for (int k = 0; k < testu::params::G; ++k) {
-          VectTuAct_Type u_val;
-          for (int ii = 0; ii < testu::params::Tu; ++ii) {
-            u_val[ii] = u[i][j * testu::params::Tu + ii][k];
-          }
-          u_port << u_val;
-          u_axis_interface.PushVector<ActivationType, testu::params::Tu>(u_val);
-        }
-      }
-    }
-
-    std::cout << "[INFO] Starting HlsVectorKernelU." << std::endl;
-    HlsVectorKernelU(num_refinements, x_port, u_port, xu_port);
-    std::cout << "[INFO] Starting HlsAxisKernelU." << std::endl;
-    HlsAxisKernelU(num_refinements, x_axis, u_axis, xu_gn_axis);
-
-    for (int i = 0; i < num_refinements; ++i) {
-      auto xu_gn_val = xu_gn_axis_interface.PopVector<ActivationType, testu::params::G * testu::params::N>();
-      for (int j = 0; j < testu::params::G; ++j) {
-        auto tmp = xu_port.read();
-        for (int k = 0; k < testu::params::N; ++k) {
-          std::cout << i << ") test/gold: " << xu_gn_val[j * testu::params::N + k] << " / "
-                    << xu_gold[i * testu::params::G + j][k] << std::endl;
-          if (xu_gn_val[j * testu::params::N + k] != xu_gold[i * testu::params::G + j][k]) {
-            ++num_errors;
-          }
-        }
-      }
-    }
-    std::cout << "[INFO] Number of mismatches: " << num_errors << std::endl;
-#endif
     // NOTE: The streaming order differs from before! kNumTilesU is swapped with
     // testu::params::N.
     for (int j = 0; j < kNumTilesU; ++j) {

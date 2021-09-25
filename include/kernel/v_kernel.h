@@ -380,7 +380,7 @@ void KernelV(const int num_active_inputs,
                 y_val = y_buffer[ii][k][jj][j] + v_val[jj] * xus_val[k][ii];
               }
               y_buffer[ii][k][jj][j] = y_val;
-// #pragma HLS DEPENDENCE inter variable=y_buffer false
+// #pragma HLS DEPENDENCE raw inter variable=y_buffer false distance=kNumTilesV
             }
           }
         }
@@ -428,7 +428,6 @@ void KernelV(const int num_active_inputs,
 //       y_axis.template PushVector<ActivationType, kGTv>(y_out, kIsLast);
 //     }
 //   }
-
 }
 #endif // end __VITIS_HLS__
 

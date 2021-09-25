@@ -363,13 +363,13 @@ void gemm_kernel(const bool execute,
             systolic3:
             for (int j = 0; j < N; j++) {
               // Get previous sum
-              ActivationD last = (k == 0) ? ActivationD(0) : c[i][j];
+              DataType last = (k == 0) ? DataType(0) : c[i][j];
 
               // Update current sum
               // Handle boundary conditions
-              ActivationD a_val = (i < M && k < K) ? a[i][k] : ActivationD(0);
-              ActivationD b_val = (k < K && j < N) ? b[k][j] : ActivationD(0);
-              ActivationD result = last + a_val * b_val;
+              DataType a_val = (i < M && k < K) ? a[i][k] : DataType(0);
+              DataType b_val = (k < K && j < N) ? b[k][j] : DataType(0);
+              DataType result = last + a_val * b_val;
 
               // Write back results
               if (accumulate) {

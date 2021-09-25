@@ -12,6 +12,15 @@
 #endif
 
 #ifndef __VITIS_HLS__
+/**
+ * @brief      Synthesizeable Kernel-U.
+ * @deprecated Compile time parametrization only.
+ *
+ * @param[in]  num_refinements  The number refinements
+ * @param[in]  x_port           The x port
+ * @param[in]  u_port           The u port
+ * @param      xu_port          The xu port
+ */
 void HlsKernelU(const int num_refinements,
   const typename testu::params::ActivationD x_port[testu::params::N][testu::params::I],
   const typename testu::params::UPortD u_port[testu::params::R * testu::params::PrunedSizeU],
@@ -50,225 +59,23 @@ void HlsKernelU(const int num_refinements,
   }
 }
 #else
-void HlsVectorKernelU(const int num_refinements,
-  hls::stream<hls::vector<typename testu::params::ActivationD, testu::params::Tu> > &x_port,
-  hls::stream<hls::vector<typename testu::params::ActivationD, testu::params::Tu> > &u_port,
-  hls::stream<hls::vector<typename testu::params::ActivationD, testu::params::N> > &xu_port) {
-  const int R_test = num_refinements;
-  const int kNumTilesU = testu::params::I / testu::params::Tu;
-  const int kDepth_X = testu::params::N * kNumTilesU;
-  const int kDepth_U = num_refinements * kNumTilesU * testu::params::G;
-  const int kDepth_XU = num_refinements * testu::params::G;
-
-// #pragma HLS INTERFACE m_axi port=x_port bundle=x offset=slave
-// #pragma HLS INTERFACE m_axi port=u_port bundle=u offset=slave
-// #pragma HLS INTERFACE m_axi port=xu_port bundle=xu offset=slave
-// #pragma HLS INTERFACE s_axilite port=x_port
-// #pragma HLS INTERFACE s_axilite port=u_port
-// #pragma HLS INTERFACE s_axilite port=xu_port
-
-#pragma HLS INTERFACE axis port=x_port bundle=x_dmem
-#pragma HLS INTERFACE axis port=u_port bundle=u_dmem
-#pragma HLS INTERFACE axis port=xu_port bundle=xu_dmem
-
-#pragma HLS INTERFACE s_axilite port=return
-#pragma HLS INTERFACE s_axilite port=num_refinements
-#pragma HLS DATAFLOW
-  typedef typename testu::params::ActivationD ActivationType;
-  typedef hls::vector<ActivationType, testu::params::N> VectN_Type;
-
-  hls::stream<testu::params::VectTuType> x_streams[testu::params::N];
-  hls::stream<testu::params::VectTuType> u_streams[testu::params::G];
-  hls::stream<testu::params::VectTuType> xu_streams[testu::params::N][testu::params::G];
-  testu::params::VectTuType x_buffer[testu::params::N][kNumTilesU];
-  testu::params::VectTuType xu[testu::params::N][testu::params::G];
-#pragma HLS STREAM variable=x_streams depth=2
-#pragma HLS STREAM variable=u_streams depth=2
-#pragma HLS STREAM variable=xu_streams depth=2
-#pragma HLS ARRAY_PARTITION variable=x_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=u_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=xu_streams complete dim=0
-#pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=1
-#pragma HLS ARRAY_PARTITION variable=xu complete dim=0
-  
-  Store_X_Buffer:
-  for (int i = 0; i < testu::params::N; ++i) {
-    for (int j = 0; j < kNumTilesU; ++j) {
-#pragma HLS PIPELINE II=1
-#pragma HLS LOOP_FLATTEN
-      x_buffer[i][j] = x_port.read(); // [i * kNumTilesU + j];
-    }
-  }
-  Stream_X_Tiles:
-  for (int i = 0; i < R_test; ++i) {
-#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
-    for (int j = 0; j < kNumTilesU; ++j) {
-#pragma HLS PIPELINE II=1
-      for (int k = 0; k < testu::params::N; ++k) {
-        x_streams[k] << x_buffer[k][j];
-      }
-    }
-  }
-  U_DMA:
-  for (int i = 0; i < R_test; ++i) {
-#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
-    for (int j = 0; j < kNumTilesU; ++j) {
-      for (int k = 0; k < testu::params::G; ++k) {
-#pragma HLS PIPELINE II=1
-        int u_idx = i * kNumTilesU * testu::params::G + j * testu::params::G + k;
-        u_streams[k] << u_port.read(); // [u_idx];
-      }
-    }
-  }
-  U_Kernel:
-  for (int i = 0; i < R_test; ++i) {
-#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
-    for (int j = 0; j < kNumTilesU; ++j) {
-#pragma HLS PIPELINE II=1
-      testu::params::VectTuType x[testu::params::N];
-#pragma HLS ARRAY_PARTITION variable=x complete dim=0
-      for (int ii = 0; ii < testu::params::N; ++ii) {
-        x[ii] = x_streams[ii].read();
-      }
-      for (int k = 0; k < testu::params::G; ++k) {
-        testu::params::VectTuType u = u_streams[k].read();
-        for (int ii = 0; ii < testu::params::N; ++ii) {
-          if (j == 0) {
-            xu[ii][k] = testu::params::VectTuType(0);
-          }
-          xu[ii][k] += u * x[ii];
-          if (j == kNumTilesU - 1) {
-            xu_streams[ii][k] << xu[ii][k];
-          }
-        }
-      }
-    }
-  }
-  XU_DMA:
-  for (int i = 0; i < R_test; ++i) {
-#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
-#pragma HLS PIPELINE II=1
-    for (int j = 0; j < testu::params::G; ++j) {
-      VectN_Type xu_out;
-      for (int k = 0; k < testu::params::N; ++k) {
-        xu_out[k] = xu_streams[k][j].read().reduce_add();
-      }
-      // xu_port[i * testu::params::G + j] = xu_out;
-      xu_port << xu_out;
-    }
-  }
-}
-
-void HlsAxisKernelU(const int num_refinements,
-  hls::stream<typename testu::VectTuAxiPacketType>& x_port,
-  hls::stream<typename testu::VectTuAxiPacketType>& u_port,
-  hls::stream<typename testu::VectGN_AxiPacketType>& xu_port) {
-  const int R_test = num_refinements;
-  const int kNumTilesU = testu::params::I / testu::params::Tu;
-  const int kStreamDepth_X = 2 + kNumTilesU * testu::params::N;
-  const int kStreamDepth_U = 8 + kNumTilesU * testu::params::N;
-  const int kStreamDepth_XU = 2 + testu::params::G;
-#pragma HLS INTERFACE axis port=x_port
-#pragma HLS INTERFACE axis port=u_port
-#pragma HLS INTERFACE axis port=xu_port
-#pragma HLS INTERFACE s_axilite port=return
-#pragma HLS INTERFACE s_axilite port=num_refinements
-#pragma HLS DATAFLOW
-  typedef typename testu::params::ActivationD ActivationType;
-
-  auto x_axis = svd::AxiStreamPort<testu::VectTuAxiBitwidth>(x_port);
-  auto u_axis = svd::AxiStreamPort<testu::VectTuAxiBitwidth>(u_port);
-  auto xu_axis = svd::AxiStreamPort<testu::VectGN_AxiBitwidth>(xu_port);
-
-  hls::stream<testu::params::VectTuType> x_streams[testu::params::N];
-  hls::stream<testu::params::VectTuType> u_streams[testu::params::G];
-  hls::stream<testu::params::VectTuType> xu_streams[testu::params::N][testu::params::G];
-  testu::params::VectTuType x_buffer[testu::params::N][kNumTilesU];
-#pragma HLS STREAM variable=x_streams depth=kStreamDepth_X
-#pragma HLS STREAM variable=u_streams depth=kStreamDepth_U
-#pragma HLS STREAM variable=xu_streams depth=kStreamDepth_XU
-#pragma HLS ARRAY_PARTITION variable=x_streams complete dim=1
-#pragma HLS ARRAY_PARTITION variable=u_streams complete dim=1
-#pragma HLS ARRAY_PARTITION variable=xu_streams complete dim=1
-#pragma HLS ARRAY_PARTITION variable=xu_streams complete dim=2
-#pragma HLS ARRAY_PARTITION variable=x_buffer complete dim=1
-  
-  Store_X_Buffer:
-  for (int i = 0; i < testu::params::N; ++i) {
-    for (int j = 0; j < kNumTilesU; ++j) {
-#pragma HLS PIPELINE II=1
-#pragma HLS LOOP_FLATTEN
-      x_buffer[i][j] = x_axis.PopVector<ActivationType, testu::params::Tu>();
-    }
-  }
-  Stream_X_Tiles:
-  for (int i = 0; i < R_test; ++i) {
-#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
-    for (int j = 0; j < kNumTilesU; ++j) {
-#pragma HLS PIPELINE II=1
-      for (int k = 0; k < testu::params::N; ++k) {
-        x_streams[k] << x_buffer[k][j];
-      }
-    }
-  }
-
-  U_DMA:
-  for (int i = 0; i < R_test; ++i) {
-#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
-    for (int j = 0; j < kNumTilesU; ++j) {
-      for (int k = 0; k < testu::params::G; ++k) {
-#pragma HLS PIPELINE II=1
-        u_streams[k] << u_axis.PopVector<ActivationType, testu::params::Tu>();
-      }
-    }
-  }
-
-  U_Kernel:
-  for (int i = 0; i < R_test; ++i) {
-#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
-    for (int j = 0; j < kNumTilesU; ++j) {
-#pragma HLS PIPELINE II=1
-      testu::params::VectTuType x[testu::params::N];
-      testu::params::VectTuType xu[testu::params::N][testu::params::G];
-#pragma HLS ARRAY_PARTITION variable=x complete dim=0
-#pragma HLS ARRAY_PARTITION variable=xu complete dim=0
-      for (int ii = 0; ii < testu::params::N; ++ii) {
-        x[ii] = x_streams[ii].read();
-      }
-      for (int k = 0; k < testu::params::G; ++k) {
-        testu::params::VectTuType u = u_streams[k].read();
-        for (int ii = 0; ii < testu::params::N; ++ii) {
-          if (j == 0) {
-            xu[ii][k] = testu::params::VectTuType(0);
-          }
-          xu[ii][k] += u * x[ii];
-          if (j == kNumTilesU - 1) {
-            xu_streams[ii][k] << xu[ii][k];
-          }
-        }
-      }
-    }
-  }
-  XU_DMA:
-  for (int i = 0; i < R_test; ++i) {
-#pragma HLS LOOP_TRIPCOUNT min=testu::params::R max=testu::params::R
-#pragma HLS PIPELINE II=1
-    testu::params::VectGN_Type xu_out;
-    for (int j = 0; j < testu::params::G; ++j) {
-      for (int k = 0; k < testu::params::N; ++k) {
-        xu_out[j * testu::params::N + k] = xu_streams[k][j].read().reduce_add();
-      }
-    }
-    const bool kIsLast = (i == R_test - 1) ? true : false;
-    xu_axis.PushVector<ActivationType, testu::params::G * testu::params::N>(xu_out, kIsLast);
-  }
-}
-
-
+/**
+ * @brief      Synthesizeable flexible Kernel-U.
+ *
+ * @param[in]  num_active_inputs  The number of active inputs
+ * @param[in]  input_size         The input size
+ * @param[in]  num_refinements    The number of refinements steps (R) per input:
+ *                                the Rs must be positive, greater than zero and
+ *                                in ASCENDING ORDER. Their amount must be less
+ *                                or equal to num_active_inputs.
+ * @param[in]  pad_output         Wether to pad output with zeroes
+ * @param      x_port             The input x port
+ * @param      u_port             The input u port
+ * @param      xu_port            The output xu port
+ */
 void HlsKernelU(const int num_active_inputs,
     const int input_size,
     const int num_refinements[testu::params::N],
-    // const hls::vector<int, testu::params::N> num_refinements,
     const bool pad_output,
     hls::stream<typename testu::params::VectTuAxiPacketType>& x_port,
     hls::stream<typename testu::params::VectTuAxiPacketType>& u_port,
@@ -285,7 +92,7 @@ void HlsKernelU(const int num_active_inputs,
     pad_output, x_port, u_port, xu_port);
 }
 
-#endif
+#endif // __VITIS_HLS__
 
 namespace svd {
 

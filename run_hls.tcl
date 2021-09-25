@@ -7,7 +7,7 @@ exec mkdir -p -- ./hls_prj
 exec mkdir -p -- ./hls_prj/reports
 cd hls_prj
 
-set USE_VITIS 0
+set USE_VITIS 1
 # ==============================================================================
 # Setups
 # ==============================================================================
@@ -26,13 +26,13 @@ set set_max_fifo_depth 0
 set scheduler_effort "high" ;# medium
 set relax_ii 0
 set use_hlslib 0
-set use_zedboard 1
-set use_zcu104_pynq 0
+set use_zedboard 0
+set use_zcu104 1
 set use_zcu102_vassilis 0
 
 if {${use_zedboard}} {
     set board_name "ZedBoard"
-} elseif {${use_zcu104_pynq}} {
+} elseif {${use_zcu104}} {
     set board_name "ZCU104"
 } else {
     set board_name "ZCU102"
@@ -43,14 +43,14 @@ if {${use_zedboard}} {
 # NOTE: The namespace must also be included.
 set TB "test_lstm_svd"
 set ARGV "2 4 64 32 2"
-set TOP "SvdModel2LstmSDSoCV2" ;# "HlsLstmSvd" ;# "HlsSvdKernel" ;# "HlsDenseSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
+set TOP "HlsKernelS" ;# "SvdModel2LstmSDSoCV2" ;# "HlsLstmSvd" ;# "HlsSvdKernel" ;# "HlsDenseSvd" ; #"HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
 # ==============================================================================
 # Project name
 # ==============================================================================
 set prefix ":"
-set TOP_NO_NAMESPACE "SvdModel2LstmSDSoCV2" ;# "HlsLstmSvd" ;# "HlsSvdKernel" ;# "HlsDenseSvd" ; #"HlsKernelS" ;# "HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
+set TOP_NO_NAMESPACE "HlsKernelS" ;# "SvdModel2LstmSDSoCV2" ;# "HlsLstmSvd" ;# "HlsSvdKernel" ;# "HlsDenseSvd" ; #"HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
 puts ${TOP_NO_NAMESPACE}
 
 if {${USE_VITIS}} {
@@ -65,7 +65,7 @@ if {${USE_VITIS}} {
 set DEFINES "-DHLS_NO_XIL_FPO_LIB"
 append DEFINES ""
 
-if {${use_zcu104_pynq}} {
+if {${use_zcu104}} {
     # Change the AXI port width from default 64bit to 128bit
     append DEFINES " -DAXI_PORT_WIDTH=128"
 } else {
@@ -175,7 +175,7 @@ if {${reset_project}} {
         # ZedBoard
         set_part {xc7z020clg484-1} ;#-tool vivado
     } else {
-        if {${use_zcu104_pynq}} {
+        if {${use_zcu104}} {
             # Pynq ZCU104 Board
             set_part {xczu7ev-ffvc1156-2-e}
             # 100 MHz --> 10 ns

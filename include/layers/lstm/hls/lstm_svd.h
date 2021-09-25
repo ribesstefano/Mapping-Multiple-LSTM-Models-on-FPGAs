@@ -12,6 +12,12 @@
 
 namespace svd {
 
+typedef svd::SvdParameters<NUM_INPUTS, INPUT_SIZE, HIDDEN_SIZE, NUM_ITERATIONS,
+    NUM_TILES_U, NUM_TILES_V, NUM_ZERO_TILES_U, NUM_ZERO_TILES_V, NUM_GATES,
+    ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>,
+    ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>,
+    ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH> > lstm_params;
+
 #ifdef SDS_DESIGN
 // =============================================================================
 // Ports using DMAs
@@ -129,31 +135,25 @@ namespace svd {
 #pragma SDS data access_pattern(c_t2_curr_port:SEQUENTIAL)
 #endif // end SDS_DESIGN
 void SvdModel2LstmSDSoCV2(
-    const svd::ActivationD x1_port[INPUT_SIZE],
-    const svd::ActivationD x2_port[INPUT_SIZE],
-    const svd::ActivationD h_t1_prev_port[HIDDEN_SIZE],
-    const svd::ActivationD h_t2_prev_port[HIDDEN_SIZE],
-    const svd::ActivationD c_t1_prev_port[HIDDEN_SIZE],
-    const svd::ActivationD c_t2_prev_port[HIDDEN_SIZE],
-    const ap_uint<FIX_WIDTH * 4> *u_cur_port, // [NUM_ITERATIONS*4*INPUT_SIZE / NUM_TILES_U * (NUM_TILES_U - NUM_ZERO_TILES_U)],
-    const ap_uint<FIX_WIDTH * 4> *u_rec_port, // [NUM_ITERATIONS*4*HIDDEN_SIZE / NUM_TILES_U * (NUM_TILES_U - NUM_ZERO_TILES_U)],
-    const ap_uint<FIX_WIDTH * 8> *v_port, // [NUM_ITERATIONS*4*2*HIDDEN_SIZE / NUM_TILES_V * (NUM_TILES_V - NUM_ZERO_TILES_V)],
-    const ap_uint<FIX_WIDTH * 8> *s1_port, // [NUM_ITERATIONS*8],
-    const ap_uint<FIX_WIDTH * 8> *s2_port, // [NUM_ITERATIONS*8],
-    const svd::WeightD bias1_port[4 * HIDDEN_SIZE],
-    const svd::WeightD bias2_port[4 * HIDDEN_SIZE],
-    const ap_uint<NUM_TILES_V> nz_v_port[NUM_ITERATIONS * 8],
-    const ap_uint<NUM_TILES_U> nz_u_port[NUM_ITERATIONS * 8],
-    svd::ActivationD h_t1_curr_port[HIDDEN_SIZE],
-    svd::ActivationD h_t2_curr_port[HIDDEN_SIZE],
-    svd::ActivationD c_t1_curr_port[HIDDEN_SIZE],
-    svd::ActivationD c_t2_curr_port[HIDDEN_SIZE]);
-
-typedef svd::SvdParameters<NUM_INPUTS, INPUT_SIZE, HIDDEN_SIZE, NUM_ITERATIONS,
-    NUM_TILES_U, NUM_TILES_V, NUM_ZERO_TILES_U, NUM_ZERO_TILES_V, NUM_GATES,
-    ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>,
-    ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH>,
-    ap_fixed<FIX_WIDTH, FIX_FRACT_WIDTH> > lstm_params;
+    const svd::ActivationD x1_port[svd::lstm_params::I],
+    const svd::ActivationD x2_port[svd::lstm_params::I],
+    const svd::ActivationD h_t1_prev_port[svd::lstm_params::H],
+    const svd::ActivationD h_t2_prev_port[svd::lstm_params::H],
+    const svd::ActivationD c_t1_prev_port[svd::lstm_params::H],
+    const svd::ActivationD c_t2_prev_port[svd::lstm_params::H],
+    const ap_uint<FIX_WIDTH * svd::lstm_params::G> *u_cur_port, // [svd::lstm_params::R*4*svd::lstm_params::I / svd::lstm_params::MaxNumTu * (svd::lstm_params::MaxNumTu - NUM_ZERO_TILES_U)],
+    const ap_uint<FIX_WIDTH * svd::lstm_params::G> *u_rec_port, // [svd::lstm_params::R*4*svd::lstm_params::H / svd::lstm_params::MaxNumTu * (svd::lstm_params::MaxNumTu - NUM_ZERO_TILES_U)],
+    const ap_uint<FIX_WIDTH * svd::lstm_params::G * 2> *v_port, // [svd::lstm_params::R*4*2*svd::lstm_params::H / svd::lstm_params::MaxNumTv * (svd::lstm_params::MaxNumTv - NUM_ZERO_TILES_V)],
+    const ap_uint<FIX_WIDTH * svd::lstm_params::G * 2> *s1_port, // [svd::lstm_params::R*8],
+    const ap_uint<FIX_WIDTH * svd::lstm_params::G * 2> *s2_port, // [svd::lstm_params::R*8],
+    const svd::WeightD bias1_port[svd::lstm_params::G * svd::lstm_params::H],
+    const svd::WeightD bias2_port[svd::lstm_params::G * svd::lstm_params::H],
+    const ap_uint<svd::lstm_params::MaxNumTv> nz_v_port[svd::lstm_params::R * svd::lstm_params::G * 2],
+    const ap_uint<svd::lstm_params::MaxNumTu> nz_u_port[svd::lstm_params::R * svd::lstm_params::G * 2],
+    svd::ActivationD h_t1_curr_port[svd::lstm_params::H],
+    svd::ActivationD h_t2_curr_port[svd::lstm_params::H],
+    svd::ActivationD c_t1_curr_port[svd::lstm_params::H],
+    svd::ActivationD c_t2_curr_port[svd::lstm_params::H]);
 
 #ifndef __VITIS_HLS__
 #else

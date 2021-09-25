@@ -18,12 +18,14 @@ namespace svd {
 
 /**
  * @brief      Kernel performing x @ U.
+ * @deprecated Compile time parametrization only.
  *
- * @param      streams  The streams group
+ * @param[in]  num_refinements  The number refinements
+ * @param      streams          The streams group
  * @param[in]  size  The size, ideally: params::R * params::PrunedSizeU / params::R
  *                   / params::PeU
  *
- * @tparam     params   The algorithm characteristics
+ * @tparam     params           The algorithm characteristics
  */
 template <typename params>
 void KernelU(const int num_refinements, svd::SvdStreams<params> &streams) {
@@ -420,23 +422,21 @@ void KernelU(const int num_active_inputs,
 #pragma HLS TOP name=KernelU
 #pragma HLS DATAFLOW
 #pragma HLS INLINE
-#ifndef __VITIS_HLS__
 #pragma HLS STABLE variable=x_port
 #pragma HLS STABLE variable=u_port
 #pragma HLS STABLE variable=xu_port
-#endif
-  assert(num_active_inputs <= params::N);
-  assert(num_active_inputs > 0);
-  assert(params::I % params::Tu == 0);
-  assert(input_size % params::Tu == 0);
-  assert(input_size <= params::I);
+  typedef typename params::ActivationD ActivationType;
   const int kNumTilesU = input_size / params::Tu;
   const int kMaxNumTilesU = params::I / params::Tu;
   const int kStreamDepth_X = 2 + kMaxNumTilesU * params::N;
   const int kStreamDepth_U = 8 + kMaxNumTilesU * params::N;
   const int kStreamDepth_XU = 2 + params::G;
+  assert(num_active_inputs <= params::N);
+  assert(num_active_inputs > 0);
+  assert(params::I % params::Tu == 0);
+  assert(input_size % params::Tu == 0);
+  assert(input_size <= params::I);
   assert(kNumTilesU <= kMaxNumTilesU);
-  typedef typename params::ActivationD ActivationType;
   auto x_axis = svd::AxiStreamPort<params::VectTuAxiWidth>(x_port);
   auto u_axis = svd::AxiStreamPort<params::VectTuAxiWidth>(u_port);
   auto xu_axis = svd::AxiStreamInterface<WrapperAxisG>(xu_port);
@@ -582,36 +582,25 @@ typedef svd::SvdParameters<testu::kNumInputs, testu::kInputSize,
     testu::G,
     // svd::ActivationD, svd::WeightD, svd::AccumD> params;
     short, short, short> params;
-
-static const int VectTuAxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::Tu;
-static const int VectN_AxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::N;
-static const int VectGN_AxiBitwidth = hlsutils::Bitwidth<typename params::ActivationD>::value * params::G * params::N;
-#ifdef __VITIS_HLS__
-typedef hls::vector<typename params::ActivationD, params::Tu> VectTuType;
-typedef hls::vector<typename params::ActivationD, params::N> VectN_Type;
-typedef hls::vector<typename params::ActivationD, params::G * params::N> VectGN_Type;
-#endif
-typedef svd::AxiStreamPort<VectTuAxiBitwidth>::PacketType VectTuAxiPacketType;
-typedef svd::AxiStreamPort<VectN_AxiBitwidth>::PacketType VectN_AxiPacketType;
-typedef svd::AxiStreamPort<VectGN_AxiBitwidth>::PacketType VectGN_AxiPacketType;
-
 } // testu
 
 #ifndef __VITIS_HLS__
+
+/**
+ * @brief      Synthesizeable Kernel-U.
+ * @deprecated Compile time parametrization only.
+ *
+ * @param[in]  num_refinements  The number refinements
+ * @param[in]  x_port           The x port
+ * @param[in]  u_port           The u port
+ * @param      xu_port          The xu port
+ */
 void HlsKernelU(const int num_refinements,
   const typename testu::params::ActivationD x_port[testu::params::N][testu::params::I],
   const typename testu::params::UPortD u_port[testu::params::R * testu::params::PrunedSizeU],
   typename testu::params::ActivationD xu_port[testu::params::N][testu::params::G * testu::params::R]);
-#else
-void HlsVectorKernelU(const int num_refinements,
-  hls::stream<hls::vector<typename testu::params::ActivationD, testu::params::Tu> >& x_port,
-  hls::stream<hls::vector<typename testu::params::ActivationD, testu::params::Tu> >& u_port,
-  hls::stream<hls::vector<typename testu::params::ActivationD, testu::params::N> >& xu_port);
 
-void HlsAxisKernelU(const int num_refinements,
-  hls::stream<typename testu::VectTuAxiPacketType>& x_port,
-  hls::stream<typename testu::VectTuAxiPacketType>& u_port,
-  hls::stream<typename testu::VectGN_AxiPacketType>& xu_port);
+#else
 
 /**
  * @brief      Synthesizeable flexible Kernel-U.
@@ -630,7 +619,6 @@ void HlsAxisKernelU(const int num_refinements,
 void HlsKernelU(const int num_active_inputs,
   const int input_size,
   const int num_refinements[testu::params::N],
-  // const hls::vector<int, testu::params::N> num_refinements,
   const bool pad_output,
   hls::stream<typename testu::params::VectTuAxiPacketType>& x_port,
   hls::stream<typename testu::params::VectTuAxiPacketType>& u_port,
