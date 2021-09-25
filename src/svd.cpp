@@ -14,23 +14,18 @@ int main(int argc, char const *argv[]) {
   std::cout << "Hello SVD!" << std::endl;
 
   const bool kTestSoftwareAccelerator = false;
-  const int kNumInputs = 2;
-  const int kRefinementSteps = svd::lstm_params::R;
-  const int kLstmInputSize = svd::lstm_params::I;
-  const int kLstmOutputSize = svd::lstm_params::H;
-  const int kUCurSize = kLstmInputSize;
-  const int kURecSize = kLstmOutputSize;
-  const int kVSize = kLstmOutputSize;
-  const int kNumTilesU = svd::lstm_params::MaxNumTu;
-  const int kNumZeroTilesU = svd::lstm_params::ZTu;
-  const int kNumTilesV = svd::lstm_params::MaxNumTv;
-  const int kNumZeroTilesV = svd::lstm_params::ZTv;
+  const int kN = 2;
+  const int kR = svd::lstm_params::R;
+  const int kI = svd::lstm_params::I;
+  const int kH = svd::lstm_params::H;
+  const int kNTu = svd::lstm_params::MaxNumTu;
+  const int kZTu = svd::lstm_params::ZTu;
+  const int kNTv = svd::lstm_params::MaxNumTv;
+  const int kZTv = svd::lstm_params::ZTv;
   const int kLutSize = (FIX_WIDTH == 16) ? 512 : 256;
-
   std::cout << "Setting AcceleratorBlob." << std::endl;
-  typedef svd::AcceleratorBlob<float, svd::ActivationD, kNumTilesU, kNumTilesV> AcceleratorStorage;
-  AcceleratorStorage storage = AcceleratorStorage(kNumInputs, kRefinementSteps, kUCurSize,
-    kURecSize, kVSize, kNumTilesU, kNumZeroTilesU, kNumTilesV, kNumZeroTilesV);
+  auto storage = svd::AcceleratorBlob<float, svd::ActivationD, kNTu, kNTv>(kN,
+    kR, kI, kH, kH, kNTu, kZTu, kNTv, kZTv);
 
   std::cout << "Running SvdIp2Inputs." << std::endl;
   typename svd::lstm_params::ActivationD x_port[svd::lstm_params::N][svd::lstm_params::I] = {rand()};
@@ -40,7 +35,6 @@ int main(int argc, char const *argv[]) {
   ap_uint<svd::lstm_params::MaxNumTu> nz_u_port[svd::lstm_params::G * svd::lstm_params::R] = {rand()};
   ap_uint<svd::lstm_params::MaxNumTv> nz_v_port[svd::lstm_params::G * svd::lstm_params::R] = {rand()};
   typename svd::lstm_params::ActivationD y_port[svd::lstm_params::N][svd::lstm_params::G][svd::lstm_params::H] = {rand()};
-  // SvdIp2Inputs(x_port, u_port, s_port, v_port, nz_u_port, nz_v_port, y_port);
 
   std::cout << "reinterpret_cast." << std::endl;
 
@@ -55,30 +49,30 @@ int main(int argc, char const *argv[]) {
   assert(storage.get_v_size() == svd::lstm_params::R*4*2*svd::lstm_params::H / svd::lstm_params::MaxNumTv * (svd::lstm_params::MaxNumTv - svd::lstm_params::ZTv));
   assert(storage.get_s_size() == svd::lstm_params::R*8);
 
-  svd::ActivationD** h_prev_hls = new svd::ActivationD*[kNumInputs];
-  svd::ActivationD** h_curr_hls = new svd::ActivationD*[kNumInputs];
-  svd::ActivationD** c_prev_hls = new svd::ActivationD*[kNumInputs];
-  svd::ActivationD** c_curr_hls = new svd::ActivationD*[kNumInputs];
-  svd::ActivationD** h_prev_emulator = new svd::ActivationD*[kNumInputs];
-  svd::ActivationD** h_curr_emulator = new svd::ActivationD*[kNumInputs];
-  svd::ActivationD** c_prev_emulator = new svd::ActivationD*[kNumInputs];
-  svd::ActivationD** c_curr_emulator = new svd::ActivationD*[kNumInputs];
-  svd::ActivationD** h_prev_sw = new svd::ActivationD*[kNumInputs];
-  svd::ActivationD** h_curr_sw = new svd::ActivationD*[kNumInputs];
-  svd::ActivationD** c_prev_sw = new svd::ActivationD*[kNumInputs];
-  svd::ActivationD** c_curr_sw = new svd::ActivationD*[kNumInputs];
-  for (int i = 0; i < kNumInputs; ++i) {
-    h_prev_emulator[i] = new svd::ActivationD[kLstmOutputSize];
-    h_curr_emulator[i] = new svd::ActivationD[kLstmOutputSize];
-    c_prev_emulator[i] = new svd::ActivationD[kLstmOutputSize];
-    c_curr_emulator[i] = new svd::ActivationD[kLstmOutputSize];
+  svd::ActivationD** h_prev_hls = new svd::ActivationD*[kN];
+  svd::ActivationD** h_curr_hls = new svd::ActivationD*[kN];
+  svd::ActivationD** c_prev_hls = new svd::ActivationD*[kN];
+  svd::ActivationD** c_curr_hls = new svd::ActivationD*[kN];
+  svd::ActivationD** h_prev_emulator = new svd::ActivationD*[kN];
+  svd::ActivationD** h_curr_emulator = new svd::ActivationD*[kN];
+  svd::ActivationD** c_prev_emulator = new svd::ActivationD*[kN];
+  svd::ActivationD** c_curr_emulator = new svd::ActivationD*[kN];
+  svd::ActivationD** h_prev_sw = new svd::ActivationD*[kN];
+  svd::ActivationD** h_curr_sw = new svd::ActivationD*[kN];
+  svd::ActivationD** c_prev_sw = new svd::ActivationD*[kN];
+  svd::ActivationD** c_curr_sw = new svd::ActivationD*[kN];
+  for (int i = 0; i < kN; ++i) {
+    h_prev_emulator[i] = new svd::ActivationD[kH];
+    h_curr_emulator[i] = new svd::ActivationD[kH];
+    c_prev_emulator[i] = new svd::ActivationD[kH];
+    c_curr_emulator[i] = new svd::ActivationD[kH];
     h_prev_hls[i] = reinterpret_cast<svd::ActivationD*>(storage.get_fix_h_prev(i));
     h_curr_hls[i] = reinterpret_cast<svd::ActivationD*>(storage.get_fix_h_curr(i));
     c_prev_hls[i] = reinterpret_cast<svd::ActivationD*>(storage.get_fix_c_prev(i));
     c_curr_hls[i] = reinterpret_cast<svd::ActivationD*>(storage.get_fix_c_curr(i));
   }
   for (int i = 0; i < NUM_TIMESTEPS; ++i) {
-    for (int j = 0; j < kNumInputs; ++j) {
+    for (int j = 0; j < kN; ++j) {
       std::swap(h_prev_hls[j], h_curr_hls[j]);
       std::swap(c_prev_hls[j], c_curr_hls[j]);
     }
@@ -89,12 +83,10 @@ int main(int argc, char const *argv[]) {
       storage.get_fix_bias(0), storage.get_fix_bias(1),
       storage.get_fix_nz_v(), storage.get_fix_nz_u(),
       h_curr_hls[0], h_curr_hls[1], c_curr_hls[0], c_curr_hls[1]);
-    for (int j = 0; j < kNumInputs; ++j) {
+    for (int j = 0; j < kN; ++j) {
       std::cout << "Starting Emulator: " << j << std::endl;
       svd::LstmSvdSoftEmulator<svd::ActivationD, svd::WeightD, svd::AccumD, svd::MultD, kLutSize>(
-        kLstmInputSize, kLstmOutputSize, kRefinementSteps,
-        kNumTilesU, kNumZeroTilesU,
-        kNumTilesV, kNumZeroTilesV, 1, storage.get_fix_x(j),
+        kI, kH, kR, kNTu, kZTu, kNTv, kZTv, 1, storage.get_fix_x(j),
         storage.get_cur_gates("i")->get_u()->fix_pruned_data(),
         storage.get_cur_gates("i")->get_s(j).fix_pruned_data(),
         storage.get_cur_gates("i")->get_v()->fix_pruned_data(),
@@ -146,7 +138,7 @@ int main(int argc, char const *argv[]) {
   const int num_errors = storage.CountMismatches(h_prev_emulator);
   std::cout << "Number of mismatches: " << num_errors << std::endl;
   if (kTestSoftwareAccelerator) {
-    for (int j = 0; j < kNumInputs; ++j) {
+    for (int j = 0; j < kN; ++j) {
       const bool kVerbose = true;
       const bool kUseBlas = false;
       const int kUsaFloat = 0;
@@ -196,7 +188,7 @@ int main(int argc, char const *argv[]) {
   delete[] h_curr_sw;
   delete[] c_prev_sw;
   delete[] c_curr_sw;
-  for (int i = 0; i < kNumInputs; ++i) {
+  for (int i = 0; i < kN; ++i) {
     delete[] h_prev_emulator[i];
     delete[] h_curr_emulator[i];
     delete[] c_prev_emulator[i];

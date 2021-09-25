@@ -56,6 +56,8 @@ private:
 public:
   static const int TuBits = TuBits_tmp > 0 ? TuBits_tmp : 1;
   static const int TvBits = TvBits_tmp > 0 ? TvBits_tmp : 1;
+  typedef ap_uint<MaxNumTu> IndexU_Type;
+  typedef ap_uint<MaxNumTv> IndexV_Type;
   typedef ap_uint<MaxNumTu> UnzD;
   typedef ap_uint<MaxNumTv> VnzD;
   typedef ap_uint<TuBits> UnzIdxD;
