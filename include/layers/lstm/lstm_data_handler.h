@@ -114,18 +114,21 @@ void ArrangeWeights(const int arrange_type,
 }
 
 template <typename Tin, typename Tout>
-void ArrangeWeights(const int arrange_type, const int n_steps,
+void ArrangeWeights(const int arrange_type, const int r_steps,
                     const int input_size, const int output_size, 
                     const Tin* cur_i, const Tin* cur_f, const Tin* cur_c,
                     const Tin* cur_o, const Tin* rec_i, const Tin* rec_f,
                     const Tin* rec_c, const Tin* rec_o, Tout* y) {
+  std::cout << "ArrangeWeights for NZ." << std::endl;
   int idx = 0;
   switch (arrange_type) {
     case 0:
-      // NOTE: the following arrangement is: (N, G, E)
-      for (int i = 0; i < n_steps; ++i) {
+      std::cout << "RGE" << std::endl;
+      // NOTE: the following arrangement is: (R, G, E)
+      for (int i = 0; i < r_steps; ++i) {
         for (int j = 0; j < input_size; ++j) {
           y[idx] = cur_i[i * input_size + j];
+          std::cout << idx << " ";
           idx++;
         }
         for (int j = 0; j < input_size; ++j) {
@@ -157,52 +160,53 @@ void ArrangeWeights(const int arrange_type, const int n_steps,
           idx++;
         }
       }
+      std::cout << std::endl;
     break;
     case 1:
-      // NOTE: the following arrangement is: (G, N, E)
-      for (int i = 0; i < n_steps; ++i) {
+      // NOTE: the following arrangement is: (G, R, E)
+      for (int i = 0; i < r_steps; ++i) {
         for (int j = 0; j < input_size; ++j) {
           y[idx] = cur_i[i * input_size + j];
           idx++;
         }
       }
-      for (int i = 0; i < n_steps; ++i) {
+      for (int i = 0; i < r_steps; ++i) {
         for (int j = 0; j < input_size; ++j) {
           y[idx] = cur_f[i * input_size + j];
           idx++;
         }
       }
-      for (int i = 0; i < n_steps; ++i) {
+      for (int i = 0; i < r_steps; ++i) {
         for (int j = 0; j < input_size; ++j) {
           y[idx] = cur_c[i * input_size + j];
           idx++;
         }
       }
-      for (int i = 0; i < n_steps; ++i) {
+      for (int i = 0; i < r_steps; ++i) {
         for (int j = 0; j < input_size; ++j) {
           y[idx] = cur_o[i * input_size + j];
           idx++;
         }
       }
-      for (int i = 0; i < n_steps; ++i) {
+      for (int i = 0; i < r_steps; ++i) {
         for (int j = 0; j < output_size; ++j) {
           y[idx] = rec_i[i * output_size + j];
           idx++;
         }
       }
-      for (int i = 0; i < n_steps; ++i) {
+      for (int i = 0; i < r_steps; ++i) {
         for (int j = 0; j < output_size; ++j) {
           y[idx] = rec_f[i * output_size + j];
           idx++;
         }
       }
-      for (int i = 0; i < n_steps; ++i) {
+      for (int i = 0; i < r_steps; ++i) {
         for (int j = 0; j < output_size; ++j) {
           y[idx] = rec_c[i * output_size + j];
           idx++;
         }
       }
-      for (int i = 0; i < n_steps; ++i) {
+      for (int i = 0; i < r_steps; ++i) {
         for (int j = 0; j < output_size; ++j) {
           y[idx] = rec_o[i * output_size + j];
           idx++;
@@ -211,8 +215,8 @@ void ArrangeWeights(const int arrange_type, const int n_steps,
     break;
     case 2:
       assert(input_size == output_size);
-      // NOTE: the following arrangement is: (N, E, G)
-      for (int i = 0; i < n_steps; ++i) {
+      // NOTE: the following arrangement is: (R, E, G)
+      for (int i = 0; i < r_steps; ++i) {
         for (int j = 0; j < input_size; ++j) {
           y[idx] = cur_i[i * input_size + j];
           idx++;
@@ -234,8 +238,8 @@ void ArrangeWeights(const int arrange_type, const int n_steps,
       }
     break;
     default:
-      // NOTE: the following arrangement is: (N, G, E)
-      for (int i = 0; i < n_steps; ++i) {
+      // NOTE: the following arrangement is: (R, G, E)
+      for (int i = 0; i < r_steps; ++i) {
         for (int j = 0; j < input_size; ++j) {
           y[idx] = cur_i[i * input_size + j];
           idx++;
@@ -396,6 +400,7 @@ public:
     const int kU_RecTotalSize = kNumGates / 2 * this->rec_gates_["i"]->get_u()->get_pruned_total_size();
     const int kV_TotalSize = kNumGates * this->cur_gates_["i"]->get_v()->get_pruned_total_size();
     const int kS_TotalSize = kNumGates * refinement_steps;
+    std::cout << "setting fix_u_cur_" << std::endl;
     this->fix_u_cur_ = svd::AllocateContiguously<FixType>(kU_CurTotalSize);
     this->fix_u_rec_ = svd::AllocateContiguously<FixType>(kU_RecTotalSize);
     this->fix_v_ = svd::AllocateContiguously<FixType>(kV_TotalSize);
@@ -405,24 +410,29 @@ public:
     this->s_size_ = kS_TotalSize;
     this->fix_nz_u_ = svd::AllocateContiguously<ap_uint<NumTilesU> >(kS_TotalSize);
     this->fix_nz_v_ = svd::AllocateContiguously<ap_uint<NumTilesV> >(kS_TotalSize);
+    std::cout << "kS_TotalSize: " << kS_TotalSize << std::endl;
+    std::cout << "kS_TotalSize / 8: " << kS_TotalSize / 8 << std::endl;
     // NOTE: the following arrangement is: (R, E, G)
     const int kArrangementTypeREG = 2;
     const int kArrangementTypeRGE = 0;
     const int kU_CurLengthPruned = this->cur_gates_["i"]->get_u()->get_pruned_size();
     const int kU_RecLengthPruned = this->rec_gates_["i"]->get_u()->get_pruned_size();
     const int kV_LengthPruned = this->cur_gates_["i"]->get_v()->get_pruned_size();
+    std::cout << "setting ArrangeWeights" << std::endl;
     svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kU_CurLengthPruned,
       this->cur_gates_["i"]->get_u()->fix_pruned_data(),
       this->cur_gates_["f"]->get_u()->fix_pruned_data(),
       this->cur_gates_["c"]->get_u()->fix_pruned_data(),
       this->cur_gates_["o"]->get_u()->fix_pruned_data(),
       this->fix_u_cur_);
+    std::cout << "setting ArrangeWeights" << std::endl;
     svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kU_RecLengthPruned,
       this->rec_gates_["i"]->get_u()->fix_pruned_data(),
       this->rec_gates_["f"]->get_u()->fix_pruned_data(),
       this->rec_gates_["c"]->get_u()->fix_pruned_data(),
       this->rec_gates_["o"]->get_u()->fix_pruned_data(),
       this->fix_u_rec_);
+    std::cout << "setting ArrangeWeights S" << std::endl;
     svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kV_LengthPruned,
       kV_LengthPruned,
       this->cur_gates_["i"]->get_v()->fix_pruned_data(),
@@ -434,6 +444,7 @@ public:
       this->rec_gates_["c"]->get_v()->fix_pruned_data(),
       this->rec_gates_["o"]->get_v()->fix_pruned_data(),
       this->fix_v_);
+    std::cout << "setting ArrangeWeights NZu" << std::endl;
     svd::ArrangeWeights(kArrangementTypeRGE, refinement_steps, 1, 1,
       this->cur_gates_["i"]->get_u()->get_fix_nz_idx(),
       this->cur_gates_["f"]->get_u()->get_fix_nz_idx(),
@@ -444,6 +455,7 @@ public:
       this->rec_gates_["c"]->get_u()->get_fix_nz_idx(),
       this->rec_gates_["o"]->get_u()->get_fix_nz_idx(),
       this->fix_nz_u_);
+    std::cout << "setting ArrangeWeights NZv" << std::endl;
     svd::ArrangeWeights(kArrangementTypeRGE, refinement_steps, 1, 1,
       this->cur_gates_["i"]->get_v()->get_fix_nz_idx(),
       this->cur_gates_["f"]->get_v()->get_fix_nz_idx(),
@@ -495,6 +507,7 @@ public:
         }
       }
     }
+    std::cout << "allocation done." << std::endl;
   }
 
   ~AcceleratorBlob() {

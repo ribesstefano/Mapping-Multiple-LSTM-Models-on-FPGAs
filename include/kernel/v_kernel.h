@@ -250,7 +250,7 @@ void VDotUnit2LstmV2(const bool has_bias,
     for (int i = 0; i < NumIter; ++i) {
       for (int k = 0; k < kNonZeroTiles; ++k) {
 #pragma HLS LOOP_FLATTEN
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
         for (int j = 0; j < kTileSize; ++j) {
           if (k == 0) {
             for (int ii = 0; ii < kNumInputs; ++ii) {
@@ -270,7 +270,7 @@ void VDotUnit2LstmV2(const bool has_bias,
     }
     V_DMA:
     for (int i = 0; i < NumTiles; ++i) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
       for (int j = 0; j < kTileSize; ++j) {
         if (has_bias) {
           auto acc_1 = acc_buffer[0][j][i] + bias_streams[0][j].read();
@@ -337,7 +337,7 @@ void KernelV(const int num_active_inputs,
   int R_max = num_refinements[0];
   Get_Max_R:
   for (int i = 1; i < num_active_inputs; ++i) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
     if (num_refinements[i] > R_max) {
       R_max = num_refinements[i];
     }
@@ -347,7 +347,7 @@ void KernelV(const int num_active_inputs,
     for (int j = 0; j < kNumTilesV; ++j) {
       for (int k = 0; k < params::G; ++k) {
         for (int ii = 0; ii < num_active_inputs; ++ii) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
           if (ii == 0) {
             v_val = v_axis.template PopVector<ActivationType, params::Tv>();
           }
@@ -362,7 +362,7 @@ void KernelV(const int num_active_inputs,
   for (int i = 0; i < R_max; ++i) {
     for (int j = 0; j < kNumTilesV; ++j) {
       for (int k = 0; k < num_active_inputs; ++k) {
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1 style=frp
         for (int ii = 0; ii < params::G; ++ii) {
           assert(j < kMaxNumTilesV);
           assert(k < params::N);
@@ -429,6 +429,139 @@ void KernelV(const int num_active_inputs,
 //     }
 //   }
 }
+
+template <
+  typename params,
+  typename WrapperAxisG = svd::AxiStreamPort<params::VectG_AxiWidth>,
+  typename WrapperAxisGTv = svd::AxiStreamPort<params::VectGTvAxiWidth>
+>
+void KernelV_Pruned(const int num_active_inputs,
+    const int output_size,
+    const int num_refinements[params::N],
+    const int num_zero_tiles_v,
+    hls::stream<typename params::VectGZTvAxiPacketType>& vnz_idx_port,
+    hls::stream<typename WrapperAxisG::PacketType>& xus_port,
+    hls::stream<typename params::VectTvAxiPacketType>& v_port,
+    hls::stream<typename WrapperAxisGTv::PacketType>& y_port) {
+#pragma HLS TOP name=KernelV
+#pragma HLS DATAFLOW
+// #pragma HLS INLINE
+#ifndef __VITIS_HLS__
+#pragma HLS STABLE variable=vnz_idx_port
+#pragma HLS STABLE variable=xus_port
+#pragma HLS STABLE variable=v_port
+#pragma HLS STABLE variable=y_port
+#endif
+  assert(num_active_inputs <= params::N);
+  assert(num_active_inputs > 0);
+  assert(params::H % params::Tv == 0);
+  assert(output_size % params::Tv == 0);
+  assert(output_size <= params::H);
+  typedef typename params::ActivationD ActivationType;
+  const int kMaxNumTilesV = params::H / params::Tv;
+  const int kNumTilesV = output_size / params::Tv;
+  const int kStreamDepth_V = 32 + kMaxNumTilesV * params::G;
+  assert(kNumTilesV <= kMaxNumTilesV);
+  auto vz_axis = svd::AxiStreamPort<params::NumGTvBitsAligned>(vnz_idx_port);
+  auto xus_axis = svd::AxiStreamInterface<WrapperAxisG>(xus_port);
+  auto v_axis = svd::AxiStreamPort<params::VectTvAxiWidth>(v_port);
+  auto y_axis = svd::AxiStreamInterface<WrapperAxisGTv>(y_port);
+  hls::stream<typename params::VectTvType, kStreamDepth_V> v_streams[params::G];
+  // NOTE: Having y_buffer as static made cosim work in one-process configuration.
+  static ActivationType y_buffer[params::G][params::N][params::Tv][kMaxNumTilesV] = {0};
+  typename params::VectTvType v_val;
+  typename params::VectG_Type xus_val[params::N];
+  typename params::VectGTvType y_out;
+// NOTE: I'm not accessing dimension N of y_buffer in parallel.
+#pragma HLS ARRAY_PARTITION variable=v_streams complete
+#pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=1
+#pragma HLS ARRAY_PARTITION variable=y_buffer complete dim=3
+#pragma HLS BIND_STORAGE variable=y_buffer type=ram_t2p impl=bram latency=1
+  int R_max = num_refinements[0];
+  Get_Max_R:
+  for (int i = 1; i < num_active_inputs; ++i) {
+#pragma HLS PIPELINE II=1 style=frp
+    if (num_refinements[i] > R_max) {
+      R_max = num_refinements[i];
+    }
+  }
+  // ===========================================================================
+  // TODO: Same as non-pruned version -> wrap into a function (be careful to NTv-ZTv)
+  // ===========================================================================
+  V_DMA:
+  for (int i = 0; i < R_max; ++i) {
+    for (int j = 0; j < kNumTilesV - num_zero_tiles_v; ++j) {
+      for (int k = 0; k < params::G; ++k) {
+        for (int ii = 0; ii < num_active_inputs; ++ii) {
+#pragma HLS PIPELINE II=1 style=frp
+          if (ii == 0) {
+            v_val = v_axis.template PopVector<ActivationType, params::Tv>();
+          }
+          if (i < num_refinements[ii]) {
+            v_streams[k] << v_val;
+          }
+        }
+      }
+    }
+  }
+  typedef ap_uint<params::NumGTvBitsAligned> ZIndexType;
+  auto get_idx = [](const ZIndexType nz_idx, const int i) {
+    const int kHi = (i + 1) * params::NumTvBits - 1;
+    const int kLo = i * params::NumTvBits;
+    return nz_idx.range(kHi, kLo).to_int();
+  };
+  auto set_nz_idx = [](const int x) {
+#pragma HLS PIPELINE II=1 style=frp
+    ZIndexType nz_idx;
+    const auto tmp = ap_uint<params::NumTvBits>(x);
+    for (int i = 0; i < params::G; ++i) {
+      const int kHi = (i + 1) * params::NumTvBits - 1;
+      const int kLo = i * params::NumTvBits;
+      nz_idx.range(kHi, kLo) = tmp.range();
+    }
+    return nz_idx;
+  };
+  V_Kernel:
+  for (int i = 0; i < R_max; ++i) {
+    for (int j = 0; j < kNumTilesV - num_zero_tiles_v; ++j) {
+      auto nz_idx = num_zero_tiles_v > 0 ? vz_axis.template Pop<ZIndexType>() : set_nz_idx(j);
+      for (int k = 0; k < num_active_inputs; ++k) {
+#pragma HLS PIPELINE II=1 style=frp
+        for (int ii = 0; ii < params::G; ++ii) {
+          assert(j < kMaxNumTilesV);
+          assert(k < params::N);
+          if (i < num_refinements[k]) {
+            assert(i < 512);
+            if (j == 0 && ii == 0) {
+              xus_val[k] = xus_axis.template PopVector<ActivationType, params::G>();
+            }
+            auto v_val = v_streams[ii].read();
+            for (int jj = 0; jj < params::Tv; ++jj) {
+              ActivationType y_val;
+              if (i == 0) {
+                y_val = v_val[jj] * xus_val[k][ii];
+              } else {
+                y_val = y_buffer[ii][k][jj][get_idx(nz_idx, ii)] + v_val[jj] * xus_val[k][ii];
+              }
+              y_buffer[ii][k][jj][get_idx(nz_idx, ii)] = y_val;
+// #pragma HLS DEPENDENCE raw inter variable=y_buffer false distance=kNumTilesV
+            }
+          }
+        }
+        if (i == R_max - 1) {
+          for (int jj = 0; jj < params::G; ++jj) {
+            for (int ii = 0; ii < params::Tv; ++ii) {
+              y_out[ii * params::G + jj] = y_buffer[jj][k][ii][j];
+            }
+          }
+          const bool kIsLast = j == kNumTilesV-1 && k == num_active_inputs-1;
+          const int kGTv = params::G * params::Tv;
+          y_axis.template PushVector<ActivationType, kGTv>(y_out, kIsLast);
+        }
+      }
+    }
+  }
+}
 #endif // end __VITIS_HLS__
 
 } // svd
@@ -462,6 +595,15 @@ void HlsKernelV(const int num_active_inputs,
     const int output_size,
     const int num_refinements[testv::params::N],
     // const hls::vector<int, testv::params::N> num_refinements,
+    hls::stream<typename testv::params::VectG_AxiPacketType>& xus_port,
+    hls::stream<typename testv::params::VectTvAxiPacketType>& v_port,
+    hls::stream<typename testv::params::VectGTvAxiPacketType>& y_port);
+
+void HlsKernelV_Pruned(const int num_active_inputs,
+    const int output_size,
+    const int num_refinements[testv::params::N],
+    const int num_zero_tiles_v,
+    hls::stream<typename testv::params::VectGZTvAxiPacketType>& vnz_idx_port,
     hls::stream<typename testv::params::VectG_AxiPacketType>& xus_port,
     hls::stream<typename testv::params::VectTvAxiPacketType>& v_port,
     hls::stream<typename testv::params::VectGTvAxiPacketType>& y_port);

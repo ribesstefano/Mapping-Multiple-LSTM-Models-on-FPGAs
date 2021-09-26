@@ -21,11 +21,11 @@ int main(int argc, char const *argv[]) {
 #else
   const int num_refinements = testu::params::R;
   hls::vector<int, testu::params::N> num_refinements_vect = hls::vector<int, testu::params::N>(num_refinements);
-  for (int i = testu::params::N; i >= 0; --i) {
+  for (int i = testu::params::N - 1; i >= 0; --i) {
     int R_tmp = testu::params::R - 2 * (testu::params::N - i - 1);
     num_refinements_vect[i] = R_tmp > 0 ? R_tmp : 1;
   }
-  const int kNumActiveInputs = testu::params::N - 2;
+  const int kNumActiveInputs = (testu::params::N / 2 > 0) ? testu::params::N / 2 : 1;
   const int kInputSize_tmp = testu::params::I / 1;
   const int kInputSize = (kInputSize_tmp > testu::params::I) ? testu::params::I : kInputSize_tmp;
   const int kNumTilesU = kInputSize / testu::params::Tu;
@@ -42,6 +42,8 @@ int main(int argc, char const *argv[]) {
   hls::stream<VectTuAct_Type> x_port; //[testu::params::N * kNumTilesU];
   hls::stream<VectTuAct_Type> u_port; //[num_refinements * kNumTilesU * testu::params::G];
   hls::stream<VectN_Type> xu_port; //[num_refinements * testu::params::G];
+
+  hls::stream<typename testu::params::VectGZTuAxiPacketType> unz_idx_axis("unz_idx_axis");
   hls::stream<typename testu::params::VectTuAxiPacketType> x_axis("x_axis");
   hls::stream<typename testu::params::VectTuAxiPacketType> u_axis("u_axis");
   hls::stream<typename testu::params::VectGN_AxiPacketType> xu_gn_axis("xu_gn_axis");
@@ -127,7 +129,12 @@ int main(int argc, char const *argv[]) {
     for (int i = 0; i < testu::params::N; ++i) {
       refinements_tmp[i] = num_refinements_vect[i];
     }
-    HlsKernelU(kNumActiveInputs, kInputSize, refinements_tmp, false, x_axis, u_axis, xu_g_axis);
+    // HlsKernelU(kNumActiveInputs, kInputSize, refinements_tmp, false, x_axis, u_axis, xu_g_axis);
+    
+    const int num_zero_tiles_u = 0;
+    HlsKernelU_Pruned(kNumActiveInputs, kInputSize, refinements_tmp,
+      num_zero_tiles_u, unz_idx_axis, x_axis, u_axis, xu_g_axis);
+
 
     testu::params::VectG_Type xu_g_val;
     int total_cnt = 0;

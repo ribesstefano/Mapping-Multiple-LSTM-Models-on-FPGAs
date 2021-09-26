@@ -82,6 +82,7 @@ int main(int argc, char const *argv[]) {
     }
   }
 
+  hls::stream<typename testv::params::VectGZTvAxiPacketType> vnz_idx_port("vnz_idx_port");
   hls::stream<typename testv::params::VectG_AxiPacketType> xus_port("xus_port");
   hls::stream<typename testv::params::VectTvAxiPacketType> v_port("v_port");
   hls::stream<typename testv::params::VectGTvAxiPacketType> y_port("y_port");
@@ -121,11 +122,16 @@ int main(int argc, char const *argv[]) {
   std::cout << "[INFO] Starting HlsKernelV." << std::endl;
   std::cout << "[INFO] v_port.size(): " << v_port.size() << std::endl;
   for (int t = 0; t < kNumTests; ++t) {
-    int tmp[testv::params::N];
+    int R_tmp[testv::params::N];
     for (int i = 0; i < testv::params::N; ++i) {
-      tmp[i] = num_refinements_vect[i];
+      R_tmp[i] = num_refinements_vect[i];
     }
-    HlsKernelV(kNumActiveInputs, kOutputSize, tmp, xus_port, v_port, y_port);
+    // HlsKernelV(kNumActiveInputs, kOutputSize, R_tmp, xus_port, v_port, y_port);
+
+    const int num_zero_tiles_v = 0;
+    HlsKernelV_Pruned(kNumActiveInputs, kOutputSize, R_tmp, num_zero_tiles_v, vnz_idx_port, xus_port, v_port, y_port);
+
+
     std::cout << "[INFO] v_port.size(): " << v_port.size() << std::endl;
   }
   int num_elems = 0;

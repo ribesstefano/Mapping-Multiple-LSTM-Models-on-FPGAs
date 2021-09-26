@@ -1,4 +1,5 @@
-#include "testbenches/test_u_kernel.h"
+#include "testbenches/test_u_kernel_pruned.h"
+#include "layers/lstm/lstm_data_handler.h"
 #include "dma/axis_lib.h"
 
 #ifdef __VITIS_HLS__
@@ -15,20 +16,59 @@ int main(int argc, char const *argv[]) {
 #else
   srand(time(NULL));
 #endif
-  std::cout << "[INFO] Starting HlsKernelU test." << std::endl;
+  std::cout << "[INFO] Starting HlsKernelU_Pruned test." << std::endl;
 #ifndef __VITIS_HLS__
   return 0;
 #else
   const int num_refinements = testu::params::R;
   hls::vector<int, testu::params::N> num_refinements_vect = hls::vector<int, testu::params::N>(num_refinements);
-  for (int i = testu::params::N; i >= 0; --i) {
+  for (int i = testu::params::N - 1; i >= 0; --i) {
     int R_tmp = testu::params::R - 2 * (testu::params::N - i - 1);
     num_refinements_vect[i] = R_tmp > 0 ? R_tmp : 1;
   }
-  const int kNumActiveInputs = testu::params::N - 2;
+  const int kNumActiveInputs = 1; // testu::params::N;
   const int kInputSize_tmp = testu::params::I / 1;
   const int kInputSize = (kInputSize_tmp > testu::params::I) ? testu::params::I : kInputSize_tmp;
   const int kNumTilesU = kInputSize / testu::params::Tu;
+
+  const int kN = testu::params::N;
+  const int kR = testu::params::R;
+  const int kI = testu::params::I;
+  const int kH = testu::params::H;
+  const int kNTu = testu::params::MaxNumTu;
+  const int kZTu = testu::params::ZTu;
+  const int kNTv = testu::params::MaxNumTv;
+  const int kZTv = testu::params::ZTv;
+
+
+  std::cout << "kN: " << kN << std::endl;
+  std::cout << "kR: " << kR << std::endl;
+  std::cout << "kI: " << kI << std::endl;
+  std::cout << "kH: " << kH << std::endl;
+  std::cout << "kNTu: " << kNTu << std::endl;
+  std::cout << "kZTu: " << kZTu << std::endl;
+  std::cout << "kNTv: " << kNTv << std::endl;
+  std::cout << "kZTv: " << kZTv << std::endl;
+
+  std::cout << "Setting AcceleratorBlob." << std::endl;
+  auto storage = svd::AcceleratorBlob<float, testu::params::ActivationD, 1, 1>(
+    kN, kR, kInputSize, kInputSize, kH, kNumTilesU, kZTu, kNTv, kZTv);
+
+  // const int kPrunedSize = storage.get_cur_gates("i")->get_pruned_total_size();
+  auto i_gate = storage.get_cur_gates("i")->get_u();
+  auto f_gate = storage.get_cur_gates("f")->get_u();
+  auto c_gate = storage.get_cur_gates("c")->get_u();
+  auto o_gate = storage.get_cur_gates("o")->get_u();
+
+
+
+  int* nz_i_idx = i_gate->get_nz_idx();
+  int* nz_f_idx = f_gate->get_nz_idx();
+  int* nz_c_idx = c_gate->get_nz_idx();
+  int* nz_o_idx = o_gate->get_nz_idx();
+
+  int tmp = i_gate->get_nz_idx(0, 0);
+
   typedef typename testu::params::ActivationD ActivationType;
   typedef hls::vector<ActivationType, testu::params::N> VectN_Type;
   typedef hls::vector<ActivationType, testu::params::G> VectG_Type;
@@ -39,31 +79,25 @@ int main(int argc, char const *argv[]) {
   ActivationType u[num_refinements][testu::params::PrunedSizeU][testu::params::G];
   ActivationType xu[num_refinements][testu::params::N][testu::params::G];
 
-  hls::stream<VectTuAct_Type> x_port; //[testu::params::N * kNumTilesU];
-  hls::stream<VectTuAct_Type> u_port; //[num_refinements * kNumTilesU * testu::params::G];
-  hls::stream<VectN_Type> xu_port; //[num_refinements * testu::params::G];
+
+  hls::stream<typename testu::params::VectGZTuAxiPacketType> unz_idx_axis("unz_idx_axis");
   hls::stream<typename testu::params::VectTuAxiPacketType> x_axis("x_axis");
   hls::stream<typename testu::params::VectTuAxiPacketType> u_axis("u_axis");
-  hls::stream<typename testu::params::VectGN_AxiPacketType> xu_gn_axis("xu_gn_axis");
-  hls::stream<typename testu::params::VectN_AxiPacketType> xu_n_axis("xu_n_axis");
-  hls::stream<typename testu::params::VectG_AxiPacketType> xu_g_axis("xu_g_axis");
+  hls::stream<typename testu::params::VectG_AxiPacketType> xu_axis("xu_axis");
+
   VectN_Type xu_gold[num_refinements * testu::params::G];
 
-  auto x_axis_interface = svd::AxiStreamPort<testu::params::VectTuAxiWidth>(x_axis);
-  auto u_axis_interface = svd::AxiStreamPort<testu::params::VectTuAxiWidth>(u_axis);
-  auto xu_gn_axis_interface = svd::AxiStreamPort<testu::params::VectGN_AxiWidth>(xu_gn_axis);
-  auto xu_n_axis_interface = svd::AxiStreamPort<testu::params::VectN_AxiWidth>(xu_n_axis);
-  auto xu_g_axis_interface = svd::AxiStreamPort<testu::params::VectG_AxiWidth>(xu_g_axis);
+  auto unz_idx_interface = svd::AxiStreamPort<testu::params::NumGTuBitsAligned>(unz_idx_axis);
+  auto x_interface = svd::AxiStreamPort<testu::params::VectTuAxiWidth>(x_axis);
+  auto u_interface = svd::AxiStreamPort<testu::params::VectTuAxiWidth>(u_axis);
+  auto xu_interface = svd::AxiStreamPort<testu::params::VectG_AxiWidth>(xu_axis);
 
   for (int i = 0; i < testu::params::N; ++i) {
     for (int j = 0; j < testu::params::I; ++j) {
-      x[i][j] = rand(); // * 0.00001;
-    }
-  }
-  for (int i = 0; i < num_refinements; ++i) {
-    for (int j = 0; j < testu::params::PrunedSizeU; ++j) {
-      for (int k = 0; k < testu::params::G; ++k) {
-        u[i][j][k] = rand(); // * 0.00001;
+      if (std::is_same<short, ActivationType>::value) {
+        x[i][j] = ActivationType(rand());
+      } else {
+        x[i][j] = ActivationType(rand() * 0.00001);
       }
     }
   }
@@ -74,17 +108,23 @@ int main(int argc, char const *argv[]) {
       }
     }
   }
+
+  std::cout << "[INFO] Generating gold results." << std::endl;
+  auto i_weight = i_gate->fix_data();
+  auto f_weight = f_gate->fix_data();
+  auto c_weight = c_gate->fix_data();
+  auto o_weight = o_gate->fix_data();
   for (int i = 0; i < num_refinements; ++i) {
     for (int j = 0; j < kInputSize; ++j) {
-      for (int k = 0; k < testu::params::G; ++k) {
-        for (int ii = 0; ii < testu::params::N; ++ii) {
-          xu[i][ii][k] += u[i][j][k] * x[ii][j];
-        }
+      for (int ii = 0; ii < testu::params::N; ++ii) {
+        xu[i][ii][0] += i_weight[i * kInputSize + j] * x[ii][j];
+        xu[i][ii][1] += f_weight[i * kInputSize + j] * x[ii][j];
+        xu[i][ii][2] += c_weight[i * kInputSize + j] * x[ii][j];
+        xu[i][ii][3] += o_weight[i * kInputSize + j] * x[ii][j];
       }
     }
   }
-
-
+  std::cout << "[INFO] Generating gold results." << std::endl;
   for (int i = 0; i < num_refinements; ++i) {
     for (int j = 0; j < testu::params::N; ++j) {
       for (int k = 0; k < testu::params::G; ++k) {
@@ -96,16 +136,17 @@ int main(int argc, char const *argv[]) {
   const int num_tests = 2;
   int num_errors = 0;
   
+  std::cout << "[INFO] Starting tests." << std::endl;
   for (int t = 0; t < num_tests; ++t) {
     // NOTE: The streaming order differs from before! kNumTilesU is swapped with
     // testu::params::N.
-    for (int j = 0; j < kNumTilesU; ++j) {
-      for (int i = 0; i < kNumActiveInputs; ++i) {
+      for (int j = 0; j < kNumTilesU; ++j) {
+    for (int i = 0; i < kNumActiveInputs; ++i) {
         VectTuAct_Type x_val;
         for (int k = 0; k < testu::params::Tu; ++k) {
           x_val[k] = x[i][j * testu::params::Tu + k];
         }
-        x_axis_interface.PushVector<ActivationType, testu::params::Tu>(x_val);
+        x_interface.PushVector<ActivationType, testu::params::Tu>(x_val);
       }
     }
     // NOTE: The streaming order differs from before! kNumTilesU is swapped with
@@ -117,7 +158,7 @@ int main(int argc, char const *argv[]) {
           for (int ii = 0; ii < testu::params::Tu; ++ii) {
             u_val[ii] = u[i][j * testu::params::Tu + ii][k];
           }
-          u_axis_interface.PushVector<ActivationType, testu::params::Tu>(u_val);
+          u_interface.PushVector<ActivationType, testu::params::Tu>(u_val);
         }
       }
     }
@@ -127,7 +168,7 @@ int main(int argc, char const *argv[]) {
     for (int i = 0; i < testu::params::N; ++i) {
       refinements_tmp[i] = num_refinements_vect[i];
     }
-    HlsKernelU(kNumActiveInputs, kInputSize, refinements_tmp, false, x_axis, u_axis, xu_g_axis);
+    HlsKernelU(kNumActiveInputs, kInputSize, refinements_tmp, false, x_axis, u_axis, xu_axis);
 
     testu::params::VectG_Type xu_g_val;
     int total_cnt = 0;
@@ -135,7 +176,7 @@ int main(int argc, char const *argv[]) {
     for (int i = 0; i < num_refinements_vect[kNumActiveInputs - 1]; ++i) { // R_max
       for (int j = 0; j < kNumActiveInputs; ++j) {
         if (i < num_refinements_vect[j]) {
-          bool is_last = xu_g_axis_interface.isLastPopVector<ActivationType, testu::params::G>(xu_g_val);
+          bool is_last = xu_interface.isLastPopVector<ActivationType, testu::params::G>(xu_g_val);
           if (is_last) {
             last_at = total_cnt;
             std::cout << "[INFO] Last index arrived at iteration: " << last_at << std::endl;
@@ -156,10 +197,6 @@ int main(int argc, char const *argv[]) {
     std::cout << "[INFO] Last index arrived at iteration: " << last_at << std::endl;
     std::cout << "[INFO] Total iterations: " << total_cnt << std::endl;
     std::cout << "[INFO] Number of mismatches: " << num_errors << std::endl;
-
-    while(!xu_n_axis.empty()) {
-      auto xu_n_val = xu_n_axis_interface.PopVector<ActivationType, testu::params::N>();
-    }
   }
   std::cout << "[INFO] Number of mismatches: " << num_errors << std::endl;
   return 0; // num_errors;

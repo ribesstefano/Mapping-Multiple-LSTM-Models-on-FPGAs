@@ -92,10 +92,10 @@ private:
 public:
   VectorBlob(const int refinement_steps, const int vector_size,
       const int num_tiles, const int num_zero_tiles) {
-    assert(num_tiles >= 1);
     assert(refinement_steps > 0);
     assert(vector_size > 0);
     assert(num_tiles > 0);
+    assert(vector_size % num_tiles == 0);
     this->num_tile_elems_ = vector_size / num_tiles;
     this->size_ = vector_size;
     this->pruned_size_ = this->num_tile_elems_ * (num_tiles - num_zero_tiles);
@@ -104,13 +104,9 @@ public:
     this->refinement_steps_ = refinement_steps;
     this->num_tiles_ = num_tiles;
     this->num_zero_tiles_ = num_zero_tiles;
-    // NOTE: If num_tiles matches the number of tiles specified in the template,
-    // then populate the fix vectors.
-    if (num_tiles == NumTiles && num_zero_tiles > 0) {
-      for (int i = 0; i < refinement_steps; ++i) {
-        this->fix_nz_idx_.push_back(~IdxType(0));
-        this->fix_z_idx_.push_back(~IdxType(0));
-      }
+    for (int i = 0; i < refinement_steps; ++i) {
+      this->fix_nz_idx_.push_back(~IdxType(0));
+      this->fix_z_idx_.push_back(~IdxType(0));
     }
     if (num_zero_tiles > 0) {
       for (int i = 0; i < refinement_steps; ++i) {
@@ -129,12 +125,14 @@ public:
             this->fix_z_idx_[i][j] = rand_idx[j] == 0 ? 1 : 0;
           }
           if (rand_idx[j] == 0) {
+            // Pruned tile
             for (int k = 0; k < this->num_tile_elems_; ++k) {
               this->data_.push_back(0);
               this->fix_data_.push_back(0);
             }
             this->z_idx_.push_back(j);
           } else {
+            // Non-pruned tile
             for (int k = 0; k < this->num_tile_elems_; ++k) {
               FloatType tmp = 0.00001 * rand();
               this->data_.push_back(tmp);
@@ -156,6 +154,7 @@ public:
       }
     }
   }
+
   ~VectorBlob() {};
 
   FloatType* data() {
@@ -199,12 +198,22 @@ public:
     return this->z_idx_[i];
   }
 
+
+  /**
+   * @brief      Gets the nz index.
+   *
+   * @return     The nz index. Shape: (R, NZ-Tiles)
+   */
   int* get_nz_idx() {
     return this->nz_idx_.data();
   }
 
   int get_nz_idx(const int i) {
     return this->nz_idx_[i];
+  }
+
+  int get_nz_idx(const int r, const int t) {
+    return this->nz_idx_[r * this->num_tiles_ + t];
   }
 
   IdxType* get_fix_z_idx() {
@@ -243,8 +252,10 @@ public:
       const int num_zero_tiles_v) {
     assert(num_inputs > 0);
     this->num_inputs_ = num_inputs;
-    this->u_ = new VectorBlob<FloatType, FixType, NumTilesU>(refinement_steps, u_size, num_tiles_u, num_zero_tiles_u);
-    this->v_ = new VectorBlob<FloatType, FixType, NumTilesV>(refinement_steps, v_size, num_tiles_v, num_zero_tiles_v);
+    this->u_ = new VectorBlob<FloatType, FixType, NumTilesU>(refinement_steps,
+      u_size, num_tiles_u, num_zero_tiles_u);
+    this->v_ = new VectorBlob<FloatType, FixType, NumTilesV>(refinement_steps,
+      v_size, num_tiles_v, num_zero_tiles_v);
     for (int i = 0; i < num_inputs; ++i) {
       this->s_.push_back(VectorBlob<FloatType, FixType, 1>(refinement_steps, 1, 1, 0));
     }

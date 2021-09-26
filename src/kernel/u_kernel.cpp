@@ -88,8 +88,31 @@ void HlsKernelU(const int num_active_inputs,
 #pragma HLS INTERFACE axis port=x_port
 #pragma HLS INTERFACE axis port=u_port
 #pragma HLS INTERFACE axis port=xu_port
+#pragma HLS ARRAY_PARTITION variable=num_refinements complete dim=1  
   svd::KernelU<testu::params>(num_active_inputs, input_size, num_refinements,
     pad_output, x_port, u_port, xu_port);
+}
+
+void HlsKernelU_Pruned(const int num_active_inputs,
+    const int input_size,
+    const int num_refinements[testu::params::N],
+    const int num_zero_tiles_u,
+    hls::stream<typename testu::params::VectGZTuAxiPacketType>& unz_idx_port,
+    hls::stream<typename testu::params::VectTuAxiPacketType>& x_port,
+    hls::stream<typename testu::params::VectTuAxiPacketType>& u_port,
+    hls::stream<typename testu::params::VectG_AxiPacketType>& xu_port) {
+#pragma HLS INTERFACE s_axilite port=return
+#pragma HLS INTERFACE s_axilite port=num_active_inputs
+#pragma HLS INTERFACE s_axilite port=input_size
+#pragma HLS INTERFACE s_axilite port=num_refinements
+#pragma HLS INTERFACE s_axilite port=num_zero_tiles_u
+#pragma HLS INTERFACE axis port=unz_idx_port
+#pragma HLS INTERFACE axis port=x_port
+#pragma HLS INTERFACE axis port=u_port
+#pragma HLS INTERFACE axis port=xu_port
+#pragma HLS ARRAY_PARTITION variable=num_refinements complete dim=1  
+  svd::KernelU_Pruned<testu::params>(num_active_inputs, input_size,
+    num_refinements, num_zero_tiles_u, unz_idx_port, x_port, u_port, xu_port);
 }
 
 #endif // __VITIS_HLS__

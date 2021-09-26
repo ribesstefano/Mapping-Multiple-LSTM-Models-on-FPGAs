@@ -354,13 +354,14 @@ void KernelU_Pruned(const int num_active_inputs,
     const int input_size,
     const int num_refinements[params::N],
     const int num_zero_tiles_u,
-    hls::stream<typename params::VectGZTuAxiPacketType>& uz_idx_port,
+    hls::stream<typename params::VectGZTuAxiPacketType>& unz_idx_port,
     hls::stream<typename params::VectTuAxiPacketType>& x_port,
     hls::stream<typename params::VectTuAxiPacketType>& u_port,
     hls::stream<typename WrapperAxisG::PacketType>& xu_port) {
 #pragma HLS TOP name=KernelU
 #pragma HLS DATAFLOW
-#pragma HLS INLINE
+// #pragma HLS INLINE
+#pragma HLS STABLE variable=unz_idx_port
 #pragma HLS STABLE variable=x_port
 #pragma HLS STABLE variable=u_port
 #pragma HLS STABLE variable=xu_port
@@ -377,7 +378,7 @@ void KernelU_Pruned(const int num_active_inputs,
   assert(input_size % params::Tu == 0);
   assert(input_size <= params::I);
   assert(kNumTilesU <= kMaxNumTilesU);
-  auto uz_axis = svd::AxiStreamPort<params::NumGTuBitsAligned>(uz_idx_port);
+  auto uz_axis = svd::AxiStreamPort<params::NumGTuBitsAligned>(unz_idx_port);
   auto x_axis = svd::AxiStreamPort<params::VectTuAxiWidth>(x_port);
   auto u_axis = svd::AxiStreamPort<params::VectTuAxiWidth>(u_port);
   auto xu_axis = svd::AxiStreamInterface<WrapperAxisG>(xu_port);
@@ -407,19 +408,35 @@ void KernelU_Pruned(const int num_active_inputs,
    *
    * R_total = 2 * 3 + (3-2) * (3-1) + (6-3) * (3-2)
    */
+  int num_refinements_init[params::N];
+  int num_refinements_x_dma[params::N];
+  int num_refinements_u_dma[params::N];
+  int num_refinements_xu_dma[params::N];
+#pragma HLS ARRAY_PARTITION variable=num_refinements_init complete
+#pragma HLS ARRAY_PARTITION variable=num_refinements_x_dma complete
+#pragma HLS ARRAY_PARTITION variable=num_refinements_u_dma complete
+#pragma HLS ARRAY_PARTITION variable=num_refinements_xu_dma complete
+  for (int i = 0; i < params::N; ++i) {
+#pragma HLS UNROLL
+    num_refinements_init[i] = num_refinements[i];
+    num_refinements_x_dma[i] = num_refinements[i];
+    num_refinements_u_dma[i] = num_refinements[i];
+    num_refinements_xu_dma[i] = num_refinements[i];
+  }
+
   // ===========================================================================
-  // TODO: Same as non-pruned version -> wrap into a function
+  // TODO: Same as non-pruned version -> wrap into a function (be careful to NTu-ZTu)
   // ===========================================================================
-  int R_max = num_refinements[0];
-  int R_total = num_refinements[0] * num_active_inputs; // Total elements.
+  int R_max = num_refinements_init[0];
+  int R_total = num_refinements_init[0] * num_active_inputs; // Total elements.
   Get_Total_R:
   for (int i = 1; i < num_active_inputs; ++i) {
 #pragma HLS PIPELINE II=1 style=frp
-    if (num_refinements[i] > R_max) {
-      R_max = num_refinements[i];
+    if (num_refinements_init[i] > R_max) {
+      R_max = num_refinements_init[i];
     }
-    assert(num_refinements[i] >= num_refinements[i - 1]);
-    R_total += (num_refinements[i] - num_refinements[i - 1]) * (num_active_inputs - i);
+    assert(num_refinements_init[i] >= num_refinements_init[i - 1]);
+    R_total += (num_refinements_init[i] - num_refinements_init[i - 1]) * (num_active_inputs - i);
   }
 
   // Added
@@ -435,44 +452,61 @@ void KernelU_Pruned(const int num_active_inputs,
     }
   }
 
+  typedef ap_uint<params::NumGTuBitsAligned> ZIndexType;
+  auto get_idx = [](const ZIndexType nz_idx, const int i) {
+    const int kHi = (i + 1) * params::NumTuBits - 1;
+    const int kLo = i * params::NumTuBits;
+    return nz_idx.range(kHi, kLo).to_int();
+  };
+  auto set_nz_idx = [](const int x) {
+#pragma HLS PIPELINE II=1 style=frp
+    ZIndexType nz_idx;
+    const auto tmp = ap_uint<params::NumTuBits>(x);
+    for (int i = 0; i < params::G; ++i) {
+      const int kHi = (i + 1) * params::NumTuBits - 1;
+      const int kLo = i * params::NumTuBits;
+      nz_idx.range(kHi, kLo) = tmp.range();
+    }
+    return nz_idx;
+  };
   // Changed
   int R_prev = 0;
-  X_DMA_dispatcher:
+  X_DMA_Dispatcher:
   for (int ii = 0; ii < num_active_inputs; ++ii) {
-    for (int i = 0; i < num_refinements[ii] - R_prev; ++i) {
-      assert(num_refinements[ii] - R_prev >= 1);
-      for (int j = 0; j < kNumTilesU; ++j) {
-        // Read z_idx
-        auto z_idx = uz_axis.template PopVector<ActivationType, params::G>();
+    for (int i = 0; i < num_refinements_x_dma[ii] - R_prev; ++i) {
+      assert(num_refinements_x_dma[ii] - R_prev >= 1);
+      for (int j = 0; j < kNumTilesU - num_zero_tiles_u; ++j) {
+        auto nz_idx = num_zero_tiles_u > 0 ? uz_axis.template Pop<ZIndexType>() : set_nz_idx(j);
         for (int k = 0; k < num_active_inputs - ii; ++k) {
-#pragma HLS PIPELINE II=1 style=frp
           assert(num_active_inputs - ii >= 1);
           assert(k + ii < params::N);
           for (int kk = 0; kk < params::G; ++kk) {
+#pragma HLS LOOP_FLATTEN
+#pragma HLS PIPELINE II=1 style=frp
             typename params::VectTuType x_val;
             for (int jj = 0; jj < params::Tu; ++jj) {
-              x_val[jj] = x_buffer[k + ii][jj][z_idx[kk]];
+              x_val[jj] = x_buffer[k + ii][jj][get_idx(nz_idx, kk)];
             }
             x_stream[kk] << x_val;
           }
         }
       }
     }
-    R_prev = num_refinements[ii];
+    R_prev = num_refinements_x_dma[ii];
   }
 
   // ===========================================================================
-  // TODO: Same as non-pruned version -> wrap into a function
+  // TODO: Same as non-pruned version -> wrap into a function (be careful to NTv-ZTv)
   // ===========================================================================
   U_DMA:
   for (int i = 0; i < R_max; ++i) {
 #pragma HLS LOOP_TRIPCOUNT min=params::R max=params::R
-    for (int j = 0; j < kNumTilesU; ++j) {
+    for (int j = 0; j < kNumTilesU - num_zero_tiles_u; ++j) {
       for (int k = 0; k < params::G; ++k) {
         auto u_val = u_axis.template PopVector<ActivationType, params::Tu>();
         for (int ii = 0; ii < num_active_inputs; ++ii) {
 #pragma HLS PIPELINE II=1 style=frp
-          if (i < num_refinements[ii]) {
+          if (i < num_refinements_u_dma[ii]) {
             u_streams[k] << u_val;
           }
         }
@@ -483,7 +517,7 @@ void KernelU_Pruned(const int num_active_inputs,
   // Changed
   U_Kernel:
   for (int i = 0; i < R_total; ++i) {
-    for (int j = 0; j < kNumTilesU; ++j) {
+    for (int j = 0; j < kNumTilesU - num_zero_tiles_u; ++j) {
 #pragma HLS PIPELINE II=1 style=frp
       for (int k = 0; k < params::G; ++k) {
         xu_streams[k] << hlsutils::adder_tree<ActivationType, params::Tu>(
@@ -493,23 +527,23 @@ void KernelU_Pruned(const int num_active_inputs,
   }
   
   // ===========================================================================
-  // TODO: Same as non-pruned version -> wrap into a function
+  // TODO: Same as non-pruned version -> wrap into a function (be careful to NTv-ZTv)
   // ===========================================================================
   int iter_cnt = 0;
   XU_DMA:
   for (int i = 0; i < R_max; ++i) {
     typename params::VectG_Type xu_out[params::N] = {typename params::VectG_Type(0)};
 #pragma HLS ARRAY_PARTITION variable=xu_out complete dim=1
-    for (int j = 0; j < kNumTilesU; ++j) {
+    for (int j = 0; j < kNumTilesU  - num_zero_tiles_u; ++j) {
       for (int k = 0; k < num_active_inputs; ++k) {
 #pragma HLS PIPELINE II=1 style=frp
         for (int ii = 0; ii < params::G; ++ii) {
-          if (i < num_refinements[k]) {
+          if (i < num_refinements_xu_dma[k]) {
             xu_out[k][ii] += xu_streams[ii].read();
 #pragma HLS BIND_OP variable=xu_out[k][ii] op=add impl=dsp
           }
         }
-        if (i < num_refinements[k] && j == kNumTilesU - 1) {
+        if (i < num_refinements_xu_dma[k] && j == kNumTilesU  - num_zero_tiles_u - 1) {
           const bool kIsLast = iter_cnt == R_total - 1;
           xu_axis.template PushVector<ActivationType, params::G>(xu_out[k], kIsLast);
           ++iter_cnt;
@@ -524,14 +558,14 @@ void KernelU_Pruned(const int num_active_inputs,
 
 namespace testu {
 
-static const int kNumInputs = 4;
+static const int kNumInputs = 2;
 static const int kInputSize = 1024;
 static const int Tu = 4;
+static const int ZTu = 0;
 // NOTE: The rest of the parameters are unused for now.
 static const int kDummySize = 1;
 static const int R = 8;
 static const int Tv = 1;
-static const int ZTu = 0;
 static const int ZTv = 0;
 static const int G = 4;
 
@@ -579,10 +613,19 @@ void HlsKernelU(const int num_active_inputs,
   const int num_refinements[testu::params::N],
   const bool pad_output,
   // const int num_zero_tiles_u,
-  // hls::stream<ap_uint<testu::NumTuBits> >& uz_idx_port,
+  // hls::stream<ap_uint<testu::NumTuBits> >& unz_idx_port,
   hls::stream<typename testu::params::VectTuAxiPacketType>& x_port,
   hls::stream<typename testu::params::VectTuAxiPacketType>& u_port,
   hls::stream<typename testu::params::VectG_AxiPacketType>& xu_port);
+
+void HlsKernelU_Pruned(const int num_active_inputs,
+    const int input_size,
+    const int num_refinements[testu::params::N],
+    const int num_zero_tiles_u,
+    hls::stream<typename testu::params::VectGZTuAxiPacketType>& unz_idx_port,
+    hls::stream<typename testu::params::VectTuAxiPacketType>& x_port,
+    hls::stream<typename testu::params::VectTuAxiPacketType>& u_port,
+    hls::stream<typename testu::params::VectG_AxiPacketType>& xu_port);
 
 #endif // end __VITIS_HLS__
 

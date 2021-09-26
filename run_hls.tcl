@@ -43,14 +43,14 @@ if {${use_zedboard}} {
 # NOTE: The namespace must also be included.
 set TB "test_lstm_svd"
 set ARGV "2 4 64 32 2"
-set TOP "HlsKernelS" ;# "SvdModel2LstmSDSoCV2" ;# "HlsLstmSvd" ;# "HlsSvdKernel" ;# "HlsDenseSvd" ; #"HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
+set TOP "HlsKernelV_Pruned" ;# "SvdModel2LstmSDSoCV2" ;# "HlsLstmSvd" ;# "HlsSvdKernel" ;# "HlsDenseSvd" ; #"HlsGemvKernel" ;#"HlsAxisKernelU" ;#"svd::SvdModel2LstmSDSoCV2"
 set SRC_DIR "" ;# Or just leave it empty for including all sub-dirs too.
 set SRC_LIST [list ""] ;# If empty, it will include all files in SRC_DIR subdirs
 # ==============================================================================
 # Project name
 # ==============================================================================
 set prefix ":"
-set TOP_NO_NAMESPACE "HlsKernelS" ;# "SvdModel2LstmSDSoCV2" ;# "HlsLstmSvd" ;# "HlsSvdKernel" ;# "HlsDenseSvd" ; #"HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
+set TOP_NO_NAMESPACE "HlsKernelV_Pruned" ;# "SvdModel2LstmSDSoCV2" ;# "HlsLstmSvd" ;# "HlsSvdKernel" ;# "HlsDenseSvd" ; #"HlsGemvKernel" ; #"HlsAxisKernelU" ;# [ regsub ***=${prefix} ${TOP} "" string ]
 puts ${TOP_NO_NAMESPACE}
 
 if {${USE_VITIS}} {

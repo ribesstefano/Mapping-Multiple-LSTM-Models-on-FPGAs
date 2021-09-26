@@ -25,6 +25,7 @@ int main(int argc, char const *argv[]) {
   const int kZTv = svd::lstm_params::ZTv;
   const int kLutSize = (FIX_WIDTH == 16) ? 512 : 256;
   std::cout << "Setting AcceleratorBlob." << std::endl;
+  // TODO: Change svd::ActivationD into svd::lstm_params::ActivationD.
   auto storage = svd::AcceleratorBlob<float, svd::ActivationD, kNTu, kNTv>(kN,
     kR, kI, kH, kH, kNTu, kZTu, kNTv, kZTv);
 
