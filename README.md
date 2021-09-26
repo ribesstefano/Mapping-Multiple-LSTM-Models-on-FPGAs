@@ -46,7 +46,7 @@ The TKEEP and TSTRB signals must be *always* set to HIGH, as indicated in the [A
 
 Note: for using external DMAs, we need the TLAST, TKEEP and TSTRB signals. In particular, TKEEP and TSTRB must be all set (i.e. all ones) in order to signal data packets.
 
-#### AxiStreamInterface Class
+### AxiStreamInterface Class
 
 This repository contains a wrapper class for kernel arguments of type `hls::stream` named `AxiStreamInterface`. The class is implemented following a _Policy-based_ C++ paradigm, meaning that it accepts either a `AxiStreamPort` or `AxiStreamFifo` as possible policies (in practice, a template argument).
 
@@ -71,11 +71,10 @@ void HlsVectorKernelU(hls::stream<ap_axiu<kAxiBitwidth, 0, 0, 0> >& x_port,
 ```
 The type `ap_axiu` must now be used to generate AXIS with side channels.
 
-## hls::vector Arrays on AXI-Lite Interfaces
+### hls::vector Arrays on AXI-Lite Interfaces
 
 In Vitis 2021.1 it **not** allowed to have `hls::vector` type arguments mapped to AXI-Lite interfaces.
 Instead, use a bare arrays, *e.g.* `const int x[N]` instead of `const hls::vector<int, N> x`.
-
 
 ### Partitioning hls::vector Arrays
 
