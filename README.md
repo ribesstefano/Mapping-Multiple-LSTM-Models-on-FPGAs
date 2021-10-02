@@ -12,13 +12,14 @@ The approximation algorithms are in the `python/` folder.
 
 * CMake
 * Xilinx Vivado 2018.3 (deprecated)
-* Xilinx Vitis 2021.1 (deprecated)
+* Xilinx Vitis 2021.1
 
 ### CMake Simulation
 
+In order to make CMake include the HLS header libraries, one must modify the file `FindVitis.cmake` under `cmake/Modules`.
+
 #### Windows
 
-Simulation is working assuming the Xilinx OpenCV DLLs are copied into the `bin/` folder along side with the generated executables.
 ```
 "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 mkdir build
@@ -31,7 +32,7 @@ cmake --build . --config Release
 mkdir build
 cd build
 cmake ..
-make all
+make -j 4 all
 ```
 
 ## Notes on Using Vitis HLS
@@ -50,7 +51,7 @@ Note: for using external DMAs, we need the TLAST, TKEEP and TSTRB signals. In pa
 
 This repository contains a wrapper class for kernel arguments of type `hls::stream` named `AxiStreamInterface`. The class is implemented following a _Policy-based_ C++ paradigm, meaning that it accepts either a `AxiStreamPort` or `AxiStreamFifo` as possible policies (in practice, a template argument).
 
-The idea is to have a kernel argument, i.e. an HLS port, which can be either an AXIS interface with side-channels, or a bare FIFO interface connected to another kernel. In fact, Vitis HLS doesn't allow stream interfaces with side-channels within an IP. To overcome the issue, the `AxiStreamInterface` can be customized to be an IP port or a FIFO port, depending on the use of the kernel.
+The idea is to have a kernel argument, i.e. an HLS port, which can be either an AXIS interface with side-channels, or a bare FIFO interface connected to another kernel. In fact, Vitis HLS doesn't allow stream interfaces with side-channels *within* an IP. To overcome this issue, the `AxiStreamInterface` can be customized to be an IP port or a FIFO port, depending on the use of the kernel.
 
 An example of this can be seen in `HlsKernelU` and in `svd::SvdKernel`, which specialize the `svd::KernelU` function template. In the first case, the `svd::KernelU` has its output stream port `xu_port` connected to one of the IP's ports (with side-channels). In the latter case instead, `svd::KernelU` is connected to `svd::KernelS`, and so its `xu_port` argument is an internal FIFO (without side-channels).
 
@@ -73,8 +74,8 @@ The type `ap_axiu` must now be used to generate AXIS with side channels.
 
 ### hls::vector Arrays on AXI-Lite Interfaces
 
-In Vitis 2021.1 it **not** allowed to have `hls::vector` type arguments mapped to AXI-Lite interfaces.
-Instead, use a bare arrays, *e.g.* `const int x[N]` instead of `const hls::vector<int, N> x`.
+In Vitis 2021.1 it is **not** allowed to have `hls::vector` type arguments mapped to AXI-Lite interfaces.
+Instead, use bare arrays, *e.g.* `const int x[N]` instead of `const hls::vector<int, N> x`.
 
 ### Partitioning hls::vector Arrays
 

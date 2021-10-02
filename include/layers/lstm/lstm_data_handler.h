@@ -668,7 +668,9 @@ public:
     for (int i = 0; i < this->lstm_num_inputs_; ++i) {
       for (int j = 0; j < this->lstm_output_size_; ++j) {
         if (verbose > 0) {
-          std:: cout << j << ") hls/emulator: " << this->fix_h_curr_[i][j] << " / " << x[i][j];
+          auto h_tmp = this->fix_h_curr_[i][j];
+          auto x_tmp = x[i][j];
+          std:: cout << j << ") hls/emulator: " << h_tmp << " / " << x_tmp;
         }
         if (this->fix_h_curr_[i][j] != x[i][j]) {
           ++num_errors;
