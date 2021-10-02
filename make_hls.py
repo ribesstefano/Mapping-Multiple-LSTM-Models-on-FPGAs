@@ -53,7 +53,6 @@ def get_dependent_files(filename):
     return headers
 
 def main():
-
     avail_fpgas = {
         'ZedBoard' : 'xc7z020clg484-1',
         'ZCU104' : 'xczu7ev-ffvc1156-2-e',
@@ -99,45 +98,55 @@ def main():
 
     if args.csim and args.tb_file == '' or args.cosim and args.tb_file == '':
         parser.error('The --csim and --cosim arguments requires --tb_file.')
-
-    print(args)
-
+    # ==========================================================================
+    # Setup
+    # ==========================================================================
     curr_dir = os.getcwd().replace('\\', '/') + '/'
     hls_prj_dir = curr_dir + '/hls_prj/'
     hls_report_dir = hls_prj_dir + '/reports'
     hls_tool = 'vhls' if args.use_vivado_hls else 'vitis'
     prj_name = f'{hls_tool}_{args.board}_{args.top}'
-
+    reset_string = ' -reset ' if args.no_reset_prj else ''
+    # ==========================================================================
+    # Adjust CFLAGS and add defines
+    # ==========================================================================
     cflags = args.cflags + ' -I' + curr_dir + args.include
     if hls_tool == 'vhls':
         cflags = '-fno-builtin ' + cflags.replace('c++14', 'c++0x')
         print(f'[WARNING] Replacing C++14 with C++11 in Vivado HLS. CFLAGS: {cflags}')
-
+    # ==========================================================================
+    # Generate script file
+    # ==========================================================================
     with open(args.script_name, 'w') as f:
         f.write(get_tcl_utils())
         f.write(f'exec mkdir -p -- {hls_prj_dir}\n')
         f.write(f'exec mkdir -p -- {hls_report_dir}\n')
         f.write(f'cd {hls_prj_dir}\n')
-        f.write('open_project {} "{}"\n'.format('-reset' if not args.no_reset_prj else '', prj_name))
+        f.write(f'open_project {reset_string} "{prj_name}"\n')
         f.write(f'set_top "{args.top}"\n')
         if not args.no_reset_prj:
             pass
             if args.csim or args.cosim:
                 pass
         if hls_tool == 'vitis':
-            f.write(f'open_solution -flow_target vivado -reset "{args.top}"\n')
+            f.write(f'open_solution -flow_target vivado {reset_string} "solution_{args.top}"\n')
         else:
-            f.write(f'open_solution "{args.top}"\n')
+            f.write(f'open_solution "solution_{args.top}"\n')
+        # ======================================================================
+        # Config Synthesis for current solution
+        # ======================================================================
         if not args.no_reset_prj:
             f.write(f'set_part {avail_fpgas[args.board]} ;# {args.board}\n')
             f.write(f'create_clock -period {args.period} -name default\n')
-        if hls_tool == 'vitis':
-            f.write(f'config_compile -name_max_length=12 -pipeline_style=frp -enable_auto_rewind=1\n')
-        else:
-            f.write(f'config_compile -name_max_length=12\n')
-        f.write(f'config_schedule -effort={args.scheduler_effort} -relax_ii_for_timing=0\n')
-        f.write(f'config_core DSP48 -latency 3\n')
-
+            if hls_tool == 'vitis':
+                f.write(f'config_compile -name_max_length=12 -pipeline_style=frp -enable_auto_rewind=1\n')
+            else:
+                f.write(f'config_compile -name_max_length=12\n')
+            f.write(f'config_schedule -effort={args.scheduler_effort} -relax_ii_for_timing=0\n')
+            f.write(f'config_core DSP48 -latency 3\n')
+        # ======================================================================
+        # Add only significant files to synthesis
+        # ======================================================================
         # TODO: Recursively include only the files from which the top function depends on.
         headers = []
         if args.top_file:
@@ -158,7 +167,9 @@ def main():
                                     tmp = tmp.replace('>', '')
                                     headers.append(tmp)
         print(headers)
-
+        # ======================================================================
+        # Add files
+        # ======================================================================
         f.write(f'# Source files\n')
         for fpath, subdirs, files in os.walk(args.src):
             for fname in files:
@@ -183,13 +194,23 @@ def main():
                         if fname.startswith(args.tb_file):
                             print(f'[INFO] Adding simulation file: {unix_filename}')
                             f.write(f'add_files -tb {unix_filename} -cflags "{cflags}"\n')
-
+        # ======================================================================
+        # Start CSim
+        # ======================================================================
         if args.csim:
-            f.write(f'csim_design -clean -O -ldflags {args.ldflags} -argv {args.argv}\n')
+            csim_cmd = 'csim_design -clean -O'
+            if args.ldflags:
+                csim_cmd += f' -ldflags {args.ldflags}'
+            if args.argv:
+                csim_cmd += f' -argv {args.argv}'
+            f.write(f'{csim_cmd}\n')
+        # ======================================================================
+        # Run Synthesis and report
+        # ======================================================================
+        report_outfile = hls_report_dir + f'/{hls_tool}_{args.board}_{args.top}.rpt'
         if not args.no_synthesis:
             f.write(f'csynth_design\n')
             csynth_report = hls_prj_dir + prj_name + f'/solution_{args.top}/syn/report/{args.top}_csynth.rpt'
-            report_outfile = hls_report_dir + f'/{hls_tool}_{args.board}_{args.top}.rpt'
             report_info = f'''puts "================================================================"
 puts "\[INFO\] Reporting information"
 puts "================================================================"        
@@ -200,7 +221,9 @@ grep "== Utilization Estimates" 20 $fin 0 $fout
 close $fin
 close $fout'''
             f.write(f'{report_info}\n')
-
+        # ======================================================================
+        # Run Cosim and report
+        # ======================================================================
         if args.cosim:
             cosim_cmd = f'cosim_design -trace_level port -ldflags "{args.ldflags}" -argv "{args.argv}"'
             if hls_tool == 'vitis' and args.debug_dataflow:
@@ -209,28 +232,32 @@ close $fout'''
                 
             f.write(f'{cosim_cmd}\n')
 
-            cosim_report = hls_prj_dir + prj_name + f'/solution_{args.top}/syn/report/{args.top}_cosim.rpt'
+            cosim_report = hls_prj_dir + prj_name + f'/solution_{args.top}/sim/report/{args.top}_cosim.rpt'
             report_info = f'''puts "================================================================"
 puts "\[INFO\] Reporting information"
 puts "================================================================"        
-set fin [open {csynth_report} r]
+set fin [open {cosim_report} r]
 set fout [open {report_outfile} a]
 grep "Simulation tool" 10 $fin 0 $fout
 close $fin
 close $fout'''
             f.write(f'{report_info}\n')
+        # ======================================================================
+        # Export IP
+        # ======================================================================
         if args.export:
             f.write('export_design -format ip_catalog\n')
         if args.place_and_route:
             f.write('export_design -flow impl -rtl verilog -format ip_catalog\n')
-
+        # ======================================================================
+        # Close and run
+        # ======================================================================
         closing = f'''puts "================================================================"
 puts "\[INFO\] Closing project: {prj_name}"
 puts "================================================================"
 exit
 cd {curr_dir}'''
         f.write(f'{closing}\n')
-
     if args.run_hls:
         if hls_tool == 'vhls':
             os.system(f'vivado_hls -f {args.script_name}')
