@@ -21,24 +21,25 @@ int main(int argc, char const *argv[]) {
   return 0;
 #else
   const int max_num_refinements = testu::params::R;
-  hls::vector<int, testu::params::N> num_refinements_vect = hls::vector<int, testu::params::N>(max_num_refinements);
+  int num_refinements[testu::params::N] = {max_num_refinements};
   for (int i = testu::params::N - 1; i >= 0; --i) {
     int R_tmp = testu::params::R - 2 * (testu::params::N - i - 1);
-    num_refinements_vect[i] = R_tmp > 0 ? R_tmp : 1;
+    num_refinements[i] = R_tmp > 0 ? R_tmp : 1;
   }
-  const int kNumActiveInputs = 1; // testu::params::N;
-  const int kInputSize_tmp = testu::params::I / 1;
-  const int kInputSize = (kInputSize_tmp > testu::params::I) ? testu::params::I : kInputSize_tmp;
-  const int kNumTilesU = kInputSize / testu::params::Tu;
-
   const int kN = testu::params::N;
   const int kR = testu::params::R;
   const int kI = testu::params::I;
   const int kH = testu::params::H;
+  const int kTu = testu::params::Tu;
   const int kNTu = testu::params::MaxNumTu;
   const int kZTu = testu::params::ZTu;
   const int kNTv = testu::params::MaxNumTv;
   const int kZTv = testu::params::ZTv;
+
+  const int kNumActiveInputs = 1; // testu::params::N;
+  const int kInputSize_tmp = testu::params::I / 1;
+  const int kInputSize = (kInputSize_tmp > testu::params::I) ? testu::params::I : kInputSize_tmp;
+  const int kNumTilesU = kInputSize / testu::params::Tu;
 
   typedef typename testu::params::ActivationD ActivationType;
   typedef hls::vector<ActivationType, testu::params::N> VectN_Type;
@@ -90,17 +91,6 @@ int main(int argc, char const *argv[]) {
   int tmp = i_gate->get_nz_idx(0, 0);
   std::cout << tmp << std::endl;
 
-
-  std::cout << "x setup." << std::endl;
-  for (int i = 0; i < testu::params::N; ++i) {
-    for (int j = 0; j < testu::params::I; ++j) {
-      if (std::is_same<short, ActivationType>::value) {
-        x[i][j] = ActivationType(rand());
-      } else {
-        x[i][j] = ActivationType(rand() * 0.00001);
-      }
-    }
-  }
   std::cout << "xu setup." << std::endl;
   for (int i = 0; i < max_num_refinements; ++i) {
     for (int j = 0; j < testu::params::N; ++j) {
@@ -134,7 +124,7 @@ int main(int argc, char const *argv[]) {
     }
   }
 
-#if 0
+#if 1
   const int num_tests = 2;
   int num_errors = 0;
   
@@ -142,44 +132,51 @@ int main(int argc, char const *argv[]) {
   for (int t = 0; t < num_tests; ++t) {
     // NOTE: The streaming order differs from before! kNumTilesU is swapped with
     // testu::params::N.
-      for (int j = 0; j < kNumTilesU; ++j) {
-    for (int i = 0; i < kNumActiveInputs; ++i) {
+    std::cout << "[INFO] Sending x." << std::endl;
+    for (int j = 0; j < kNumTilesU; ++j) {
+      for (int i = 0; i < kNumActiveInputs; ++i) {
         VectTuAct_Type x_val;
         for (int k = 0; k < testu::params::Tu; ++k) {
-          x_val[k] = x[i][j * testu::params::Tu + k];
+          x_val[k] = storage.get_fix_x(i)[j * testu::params::Tu + k];
         }
         x_interface.PushVector<ActivationType, testu::params::Tu>(x_val);
       }
     }
     // NOTE: The streaming order differs from before! kNumTilesU is swapped with
     // testu::params::G.
-    for (int i = 0; i < num_refinements_vect[kNumActiveInputs - 1]; ++i) {
-      for (int j = 0; j < kNumTilesU; ++j) {
-        for (int k = 0; k < testu::params::G; ++k) {
-          VectTuAct_Type u_val;
-          for (int ii = 0; ii < testu::params::Tu; ++ii) {
-            u_val[ii] = u[i][j * testu::params::Tu + ii][k];
-          }
-          u_interface.PushVector<ActivationType, testu::params::Tu>(u_val);
+    std::cout << "[INFO] Sending u." << std::endl;
+    for (int i = 0; i < num_refinements[kNumActiveInputs - 1]; ++i) {
+      for (int j = 0; j < kNumTilesU - kZTu; ++j) {
+        VectTuAct_Type u_val;
+        for (int k = 0; k < testu::params::Tu; ++k) {
+          u_val[k] = i_weight[i * kInputSize + i_gate->get_nz_idx(i, j) * kTu + k];
         }
+        u_interface.PushVector<ActivationType, testu::params::Tu>(u_val);
+        for (int k = 0; k < testu::params::Tu; ++k) {
+          u_val[k] = f_weight[i * kInputSize + f_gate->get_nz_idx(i, j) * kTu + k];
+        }
+        u_interface.PushVector<ActivationType, testu::params::Tu>(u_val);
+        for (int k = 0; k < testu::params::Tu; ++k) {
+          u_val[k] = c_weight[i * kInputSize + c_gate->get_nz_idx(i, j) * kTu + k];
+        }
+        u_interface.PushVector<ActivationType, testu::params::Tu>(u_val);
+        for (int k = 0; k < testu::params::Tu; ++k) {
+          u_val[k] = o_weight[i * kInputSize + o_gate->get_nz_idx(i, j) * kTu + k];
+        }
+        u_interface.PushVector<ActivationType, testu::params::Tu>(u_val);
       }
     }
     std::cout << "[INFO] Starting HlsKernelU." << std::endl;
-    
-    int refinements_tmp[testu::params::N];
-    for (int i = 0; i < testu::params::N; ++i) {
-      refinements_tmp[i] = num_refinements_vect[i];
-    }
     // HlsKernelU(kNumActiveInputs, kInputSize, refinements_tmp, false, x_axis, u_axis, xu_axis);
     const int ztu = 0; // kZTu;
-    HlsKernelU_Pruned(kNumActiveInputs, kInputSize, refinements_tmp, ztu, unz_idx_axis, x_axis, u_axis, xu_axis);
+    HlsKernelU_Pruned(kNumActiveInputs, kInputSize, num_refinements, ztu, unz_idx_axis, x_axis, u_axis, xu_axis);
 
     testu::params::VectG_Type xu_g_val;
     int total_cnt = 0;
     int last_at = -1;
-    for (int i = 0; i < num_refinements_vect[kNumActiveInputs - 1]; ++i) { // R_max
+    for (int i = 0; i < num_refinements[kNumActiveInputs - 1]; ++i) { // R_max
       for (int j = 0; j < kNumActiveInputs; ++j) {
-        if (i < num_refinements_vect[j]) {
+        if (i < num_refinements[j]) {
           bool is_last = xu_interface.isLastPopVector<ActivationType, testu::params::G>(xu_g_val);
           if (is_last) {
             last_at = total_cnt;

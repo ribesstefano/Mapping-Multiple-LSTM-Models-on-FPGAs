@@ -424,6 +424,7 @@ void KernelU_Pruned(const int num_active_inputs,
     num_refinements_xu_dma[i] = num_refinements[i];
   }
 
+  std::cout << "[INFO] Get total R." << std::endl;
   // ===========================================================================
   // TODO: Same as non-pruned version -> wrap into a function (be careful to NTu-ZTu)
   // ===========================================================================
@@ -439,6 +440,7 @@ void KernelU_Pruned(const int num_active_inputs,
     R_total += (num_refinements_init[i] - num_refinements_init[i - 1]) * (num_active_inputs - i);
   }
 
+  std::cout << "[INFO] X_DAM_in." << std::endl;
   // Added
   X_DAM_in:
   for (int i = 0; i < num_active_inputs; ++i) {
@@ -469,6 +471,7 @@ void KernelU_Pruned(const int num_active_inputs,
     }
     return nz_idx;
   };
+  std::cout << "[INFO] X_DMA_Dispatcher." << std::endl;
   // Changed
   int R_prev = 0;
   X_DMA_Dispatcher:

@@ -315,12 +315,20 @@ private:
 
   void InitVector(const bool init_random, const int num_inputs, const int size,
       std::vector<std::vector<FixType> >& fix_y, std::vector<std::vector<FloatType> >& y) {
+    FloatType x;
     for (int i = 0; i < num_inputs; ++i) {
       // fix_y[i] = new FixType[size]; // svd::AllocateContiguously<FixType>(size);
       for (int j = 0; j < size; ++j) {
-        FloatType tmp = init_random ? 0.00001 * rand() : 0;
-        y[i][j] = tmp;
-        fix_y[i][j] = FixType(tmp);
+        if (std::is_same<short, FixType>::value ||
+            std::is_same<int, FixType>::value ||
+            std::is_same<long, FixType>::value ||
+            std::is_same<long long, FixType>::value) {
+          x = init_random ? rand() : 0;
+        } else {
+          x = init_random ? 0.00001 * rand() : 0;
+        }
+        y[i][j] = x;
+        fix_y[i][j] = FixType(x);
       }
     }
   }
@@ -488,7 +496,7 @@ public:
     this->fix_c_curr_.resize(num_inputs, std::vector<FixType>(this->lstm_output_size_));
     this->fix_h_prev_.resize(num_inputs, std::vector<FixType>(this->lstm_output_size_));
     this->fix_c_prev_.resize(num_inputs, std::vector<FixType>(this->lstm_output_size_));
-    this->fix_bias_.resize(num_inputs, std::vector<FixType>(this->lstm_output_size_));
+    this->fix_bias_.resize(num_inputs, std::vector<FixType>(kNumGates / 2 * this->lstm_output_size_));
     this->x_.resize(num_inputs, std::vector<FloatType>(this->lstm_input_size_));
     this->h_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
     this->c_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
@@ -510,10 +518,8 @@ public:
     //   this->fix_s_[i] = new FixType[kS_TotalSize]; // svd::AllocateContiguously<FixType>(kS_TotalSize);
     // }
     this->fix_s_.resize(num_inputs, std::vector<FixType>(kS_TotalSize));
-
-
-    int idx = 0;
     for (int i = 0; i < num_inputs; ++i) {
+      int idx = 0;
       for (int j = 0; j < refinement_steps; ++j) {
         for (auto g : this->cur_gates_) {
           this->fix_s_[i][idx] = g.second->get_s(i).fix_data()[j];

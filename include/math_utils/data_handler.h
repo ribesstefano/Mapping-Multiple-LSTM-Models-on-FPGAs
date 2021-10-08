@@ -113,8 +113,10 @@ public:
     for (int i = 0; i < refinement_steps; ++i) {
       this->fix_nz_idx_.push_back(~IdxType(0));
       this->fix_z_idx_.push_back(~IdxType(0));
-      this->nz_idx_.push_back(-1);
-      this->z_idx_.push_back(-1);
+      for (int j = 0; j < num_tiles; ++j) {
+        this->nz_idx_.push_back(j);
+        this->z_idx_.push_back(j);
+      }
     }
     if (num_zero_tiles > 0) {
       for (int i = 0; i < refinement_steps; ++i) {
@@ -221,8 +223,16 @@ public:
     return this->nz_idx_.at(i);
   }
 
+  /**
+   * @brief      Gets the nz index.
+   *
+   * @param[in]  r     The refinement step
+   * @param[in]  t     The non-zero tile index (range 0 to NumT - ZNumT)
+   *
+   * @return     The nz index.
+   */
   int get_nz_idx(const int r, const int t) {
-    return this->nz_idx_.at(r * this->num_tiles_ + t);
+    return this->nz_idx_.at(r * (this->num_tiles_ - this->num_zero_tiles_) + t);
   }
 
   IdxType* get_fix_z_idx() {
