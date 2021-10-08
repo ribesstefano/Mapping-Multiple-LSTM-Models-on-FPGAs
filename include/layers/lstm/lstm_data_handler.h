@@ -535,10 +535,8 @@ public:
   }
 
   ~AcceleratorBlob() {
-    std::cout << "[INFO] Starting ~AcceleratorBlob()." << std::endl;
     // delete[] this->fix_nz_u_; // FREE(this->fix_nz_u_);
     // delete[] this->fix_nz_v_; // FREE(this->fix_nz_v_);
-    std::cout << "[INFO] Freed this->fix_nz_u_ and this->fix_nz_v_." << std::endl;
     // for (int i = 0; i < this->lstm_num_inputs_; ++i) {
     //   delete[] this->fix_x_[i]; // FREE(this->fix_x_[i]);
     //   delete[] this->fix_h_[i]; // FREE(this->fix_h_[i]);
@@ -553,7 +551,6 @@ public:
     // delete[] this->fix_u_cur_; // FREE(this->fix_u_cur_);
     // delete[] this->fix_u_rec_; // FREE(this->fix_u_rec_);
     // delete[] this->fix_v_; // FREE(this->fix_v_);
-    std::cout << "[INFO] Freed this->fix_u_cur_, this->fix_u_rec_ and this->fix_v_." << std::endl;
     for (auto g : this->cur_gates_) {
       delete g.second;
     }

@@ -113,9 +113,11 @@ public:
     for (int i = 0; i < refinement_steps; ++i) {
       this->fix_nz_idx_.push_back(~IdxType(0));
       this->fix_z_idx_.push_back(~IdxType(0));
-      for (int j = 0; j < num_tiles; ++j) {
-        this->nz_idx_.push_back(j);
-        this->z_idx_.push_back(j);
+      if (num_zero_tiles == 0) {
+        for (int j = 0; j < num_tiles; ++j) {
+          this->nz_idx_.push_back(j);
+          this->z_idx_.push_back(j);
+        }
       }
     }
     if (num_zero_tiles > 0) {
@@ -144,7 +146,15 @@ public:
           } else {
             // Non-pruned tile
             for (int k = 0; k < this->num_tile_elems_; ++k) {
-              FloatType tmp = 0.00001 * rand();
+              FloatType tmp;
+              if (std::is_same<short, FixType>::value ||
+                  std::is_same<int, FixType>::value ||
+                  std::is_same<long, FixType>::value ||
+                  std::is_same<long long, FixType>::value) {
+                tmp = rand();
+              } else {
+                tmp = 0.00001 * rand();
+              }
               this->data_.push_back(tmp);
               this->pruned_data_.push_back(tmp);
               this->fix_data_.push_back(FixType(tmp));
@@ -156,7 +166,15 @@ public:
       }
     } else {
       for (int i = 0; i < this->total_size_; ++i) {
-        FloatType tmp = 0.00001 * rand();
+        FloatType tmp;
+        if (std::is_same<short, FixType>::value ||
+            std::is_same<int, FixType>::value ||
+            std::is_same<long, FixType>::value ||
+            std::is_same<long long, FixType>::value) {
+          tmp = rand();
+        } else {
+          tmp = 0.00001 * rand();
+        }
         this->data_.push_back(tmp);
         this->pruned_data_.push_back(tmp);
         this->fix_data_.push_back(FixType(tmp));
@@ -208,7 +226,6 @@ public:
   int get_z_idx(const int i) {
     return this->z_idx_.at(i);
   }
-
 
   /**
    * @brief      Gets the nz index.

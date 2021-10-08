@@ -1,4 +1,4 @@
-#include "testbenches/test_v_kernel.h"
+#include "testbenches/test_v_kernel_pruned.h"
 #include "dma/axis_lib.h"
 
 #ifdef __VITIS_HLS__
