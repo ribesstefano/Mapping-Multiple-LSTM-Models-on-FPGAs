@@ -26,20 +26,21 @@ int main(int argc, char const *argv[]) {
     int R_tmp = testu::params::R - 2 * (testu::params::N - i - 1);
     num_refinements[i] = R_tmp > 0 ? R_tmp : 1;
   }
+
+  const int kNumActiveInputs = 1; // testu::params::N;
+  const int kInputSize_tmp = testu::params::I / 16;
+  const int kInputSize = (kInputSize_tmp > testu::params::I) ? testu::params::I : kInputSize_tmp;
+  const int kNumTilesU = kInputSize / testu::params::Tu;
   const int kN = testu::params::N;
   const int kR = testu::params::R;
   const int kI = testu::params::I;
   const int kH = testu::params::H;
   const int kTu = testu::params::Tu;
   const int kNTu = testu::params::MaxNumTu;
-  const int kZTu = 8; // testu::params::ZTu;
+  const int kZTu_tmp = 10;
+  const int kZTu = kZTu_tmp >= kNumTilesU ? 0 : kZTu_tmp; // testu::params::ZTu;
   const int kNTv = testu::params::MaxNumTv;
   const int kZTv = testu::params::ZTv;
-
-  const int kNumActiveInputs = 1; // testu::params::N;
-  const int kInputSize_tmp = testu::params::I / 16;
-  const int kInputSize = (kInputSize_tmp > testu::params::I) ? testu::params::I : kInputSize_tmp;
-  const int kNumTilesU = kInputSize / testu::params::Tu;
 
   typedef typename testu::params::ActivationD ActivationType;
   typedef ap_uint<testu::params::NumGTuBitsAligned> IndexType;
@@ -149,23 +150,19 @@ int main(int argc, char const *argv[]) {
       for (int j = 0; j < kNumTilesU - kZTu; ++j) {
         VectTuAct_Type u_val;
         for (int k = 0; k < testu::params::Tu; ++k) {
-          // u_val[k] = i_weight[i * kInputSize + i_gate->get_nz_idx(i, j) * kTu + k];
-          u_val[k] = i_weight_pruned[i * kInputSize + j * kTu + k];
+          u_val[k] = i_weight[i * kInputSize + i_gate->get_nz_idx(i, j) * kTu + k];
         }
         u_interface.PushVector<ActivationType, testu::params::Tu>(u_val);
         for (int k = 0; k < testu::params::Tu; ++k) {
-          // u_val[k] = f_weight[i * kInputSize + f_gate->get_nz_idx(i, j) * kTu + k];
-          u_val[k] = f_weight_pruned[i * kInputSize + j * kTu + k];
+          u_val[k] = f_weight[i * kInputSize + f_gate->get_nz_idx(i, j) * kTu + k];
         }
         u_interface.PushVector<ActivationType, testu::params::Tu>(u_val);
         for (int k = 0; k < testu::params::Tu; ++k) {
-          // u_val[k] = c_weight[i * kInputSize + c_gate->get_nz_idx(i, j) * kTu + k];
-          u_val[k] = c_weight_pruned[i * kInputSize + j * kTu + k];
+          u_val[k] = c_weight[i * kInputSize + c_gate->get_nz_idx(i, j) * kTu + k];
         }
         u_interface.PushVector<ActivationType, testu::params::Tu>(u_val);
         for (int k = 0; k < testu::params::Tu; ++k) {
-          // u_val[k] = o_weight[i * kInputSize + o_gate->get_nz_idx(i, j) * kTu + k];
-          u_val[k] = o_weight_pruned[i * kInputSize + j * kTu + k];
+          u_val[k] = o_weight[i * kInputSize + o_gate->get_nz_idx(i, j) * kTu + k];
         }
         u_interface.PushVector<ActivationType, testu::params::Tu>(u_val);
       }
