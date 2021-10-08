@@ -20,8 +20,8 @@ int main(int argc, char const *argv[]) {
 #ifndef __VITIS_HLS__
   return 0;
 #else
-  const int num_refinements = testu::params::R;
-  hls::vector<int, testu::params::N> num_refinements_vect = hls::vector<int, testu::params::N>(num_refinements);
+  const int max_num_refinements = testu::params::R;
+  hls::vector<int, testu::params::N> num_refinements_vect = hls::vector<int, testu::params::N>(max_num_refinements);
   for (int i = testu::params::N - 1; i >= 0; --i) {
     int R_tmp = testu::params::R - 2 * (testu::params::N - i - 1);
     num_refinements_vect[i] = R_tmp > 0 ? R_tmp : 1;
@@ -40,6 +40,27 @@ int main(int argc, char const *argv[]) {
   const int kNTv = testu::params::MaxNumTv;
   const int kZTv = testu::params::ZTv;
 
+  typedef typename testu::params::ActivationD ActivationType;
+  typedef hls::vector<ActivationType, testu::params::N> VectN_Type;
+  typedef hls::vector<ActivationType, testu::params::G> VectG_Type;
+  typedef hls::vector<ActivationType, testu::params::Tu> VectTuAct_Type;
+  assert(testu::params::I == testu::params::PrunedSizeU);
+
+  ActivationType x[testu::params::N][testu::params::I];
+  ActivationType u[max_num_refinements][testu::params::PrunedSizeU][testu::params::G];
+  ActivationType xu[max_num_refinements][testu::params::N][testu::params::G];
+
+  hls::stream<typename testu::params::VectGZTuAxiPacketType> unz_idx_axis("unz_idx_axis");
+  hls::stream<typename testu::params::VectTuAxiPacketType> x_axis("x_axis");
+  hls::stream<typename testu::params::VectTuAxiPacketType> u_axis("u_axis");
+  hls::stream<typename testu::params::VectG_AxiPacketType> xu_axis("xu_axis");
+
+  VectN_Type xu_gold[max_num_refinements * testu::params::G];
+
+  auto unz_idx_interface = svd::AxiStreamPort<testu::params::NumGTuBitsAligned>(unz_idx_axis);
+  auto x_interface = svd::AxiStreamPort<testu::params::VectTuAxiWidth>(x_axis);
+  auto u_interface = svd::AxiStreamPort<testu::params::VectTuAxiWidth>(u_axis);
+  auto xu_interface = svd::AxiStreamPort<testu::params::VectG_AxiWidth>(xu_axis);
 
   std::cout << "kN: " << kN << std::endl;
   std::cout << "kR: " << kR << std::endl;
@@ -60,38 +81,17 @@ int main(int argc, char const *argv[]) {
   auto c_gate = storage.get_cur_gates("c")->get_u();
   auto o_gate = storage.get_cur_gates("o")->get_u();
 
-
-
   int* nz_i_idx = i_gate->get_nz_idx();
   int* nz_f_idx = f_gate->get_nz_idx();
   int* nz_c_idx = c_gate->get_nz_idx();
   int* nz_o_idx = o_gate->get_nz_idx();
 
+  std::cout << "i_gate->get_nz_idx(0, 0): ";
   int tmp = i_gate->get_nz_idx(0, 0);
-
-  typedef typename testu::params::ActivationD ActivationType;
-  typedef hls::vector<ActivationType, testu::params::N> VectN_Type;
-  typedef hls::vector<ActivationType, testu::params::G> VectG_Type;
-  typedef hls::vector<ActivationType, testu::params::Tu> VectTuAct_Type;
-  assert(testu::params::I == testu::params::PrunedSizeU);
-
-  ActivationType x[testu::params::N][testu::params::I];
-  ActivationType u[num_refinements][testu::params::PrunedSizeU][testu::params::G];
-  ActivationType xu[num_refinements][testu::params::N][testu::params::G];
+  std::cout << tmp << std::endl;
 
 
-  hls::stream<typename testu::params::VectGZTuAxiPacketType> unz_idx_axis("unz_idx_axis");
-  hls::stream<typename testu::params::VectTuAxiPacketType> x_axis("x_axis");
-  hls::stream<typename testu::params::VectTuAxiPacketType> u_axis("u_axis");
-  hls::stream<typename testu::params::VectG_AxiPacketType> xu_axis("xu_axis");
-
-  VectN_Type xu_gold[num_refinements * testu::params::G];
-
-  auto unz_idx_interface = svd::AxiStreamPort<testu::params::NumGTuBitsAligned>(unz_idx_axis);
-  auto x_interface = svd::AxiStreamPort<testu::params::VectTuAxiWidth>(x_axis);
-  auto u_interface = svd::AxiStreamPort<testu::params::VectTuAxiWidth>(u_axis);
-  auto xu_interface = svd::AxiStreamPort<testu::params::VectG_AxiWidth>(xu_axis);
-
+  std::cout << "x setup." << std::endl;
   for (int i = 0; i < testu::params::N; ++i) {
     for (int j = 0; j < testu::params::I; ++j) {
       if (std::is_same<short, ActivationType>::value) {
@@ -101,7 +101,8 @@ int main(int argc, char const *argv[]) {
       }
     }
   }
-  for (int i = 0; i < num_refinements; ++i) {
+  std::cout << "xu setup." << std::endl;
+  for (int i = 0; i < max_num_refinements; ++i) {
     for (int j = 0; j < testu::params::N; ++j) {
       for (int k = 0; k < testu::params::G; ++k) {
         xu[i][j][k] = 0;
@@ -114,25 +115,26 @@ int main(int argc, char const *argv[]) {
   auto f_weight = f_gate->fix_data();
   auto c_weight = c_gate->fix_data();
   auto o_weight = o_gate->fix_data();
-  for (int i = 0; i < num_refinements; ++i) {
+  for (int i = 0; i < max_num_refinements; ++i) {
     for (int j = 0; j < kInputSize; ++j) {
       for (int ii = 0; ii < testu::params::N; ++ii) {
-        xu[i][ii][0] += i_weight[i * kInputSize + j] * x[ii][j];
-        xu[i][ii][1] += f_weight[i * kInputSize + j] * x[ii][j];
-        xu[i][ii][2] += c_weight[i * kInputSize + j] * x[ii][j];
-        xu[i][ii][3] += o_weight[i * kInputSize + j] * x[ii][j];
+        xu[i][ii][0] += i_weight[i * kInputSize + j] * storage.get_fix_x(ii)[j];
+        xu[i][ii][1] += f_weight[i * kInputSize + j] * storage.get_fix_x(ii)[j];
+        xu[i][ii][2] += c_weight[i * kInputSize + j] * storage.get_fix_x(ii)[j];
+        xu[i][ii][3] += o_weight[i * kInputSize + j] * storage.get_fix_x(ii)[j];
       }
     }
   }
   std::cout << "[INFO] Generating gold results." << std::endl;
-  for (int i = 0; i < num_refinements; ++i) {
+  for (int i = 0; i < max_num_refinements; ++i) {
     for (int j = 0; j < testu::params::N; ++j) {
       for (int k = 0; k < testu::params::G; ++k) {
-        xu_gold[i * testu::params::G + k][j] = xu[i][j][k];
+        // xu_gold[i * testu::params::G + k][j] = xu[i][j][k];
       }
     }
   }
 
+#if 0
   const int num_tests = 2;
   int num_errors = 0;
   
@@ -168,7 +170,9 @@ int main(int argc, char const *argv[]) {
     for (int i = 0; i < testu::params::N; ++i) {
       refinements_tmp[i] = num_refinements_vect[i];
     }
-    HlsKernelU(kNumActiveInputs, kInputSize, refinements_tmp, false, x_axis, u_axis, xu_axis);
+    // HlsKernelU(kNumActiveInputs, kInputSize, refinements_tmp, false, x_axis, u_axis, xu_axis);
+    const int ztu = 0; // kZTu;
+    HlsKernelU_Pruned(kNumActiveInputs, kInputSize, refinements_tmp, ztu, unz_idx_axis, x_axis, u_axis, xu_axis);
 
     testu::params::VectG_Type xu_g_val;
     int total_cnt = 0;
@@ -184,7 +188,7 @@ int main(int argc, char const *argv[]) {
           ++total_cnt;
           // std::cout << "\t[INFO] Reading xu[R." << i << "][N." << j << "]" << std::endl;
           for (int k = 0; k < testu::params::G; ++k) {
-            // VectN_Type xu_gold[num_refinements * testu::params::G];
+            // VectN_Type xu_gold[max_num_refinements * testu::params::G];
             std::cout << i << ") test/gold: " << xu_g_val[k] << " / "
                       << xu[i][j][k] << std::endl;
             if (xu_g_val[k] != xu[i][j][k]) {
@@ -200,5 +204,10 @@ int main(int argc, char const *argv[]) {
   }
   std::cout << "[INFO] Number of mismatches: " << num_errors << std::endl;
   return 0; // num_errors;
+
+#endif
+  std::cout << "Exiting." << std::endl;
+
+
 #endif
 }

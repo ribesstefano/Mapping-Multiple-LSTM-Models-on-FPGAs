@@ -64,8 +64,14 @@ T* AllocateContiguously(const int size) {
 }
 
 template <typename T>
-void FreeContiguously(T* x) {
-  FREE(x);
+void FreeContiguously(T** x) {
+#ifdef SDS_DESIGN
+  std::cout << "[INFO] Calling FreeContiguously sds_free()." << std::endl;
+#else
+  std::cout << "[INFO] Calling FreeContiguously free()." << std::endl;
+#endif
+  FREE(*x);
+  *x = nullptr;
 }
 
 template<typename FloatType, typename FixType, int NumTiles = 1>
@@ -107,6 +113,8 @@ public:
     for (int i = 0; i < refinement_steps; ++i) {
       this->fix_nz_idx_.push_back(~IdxType(0));
       this->fix_z_idx_.push_back(~IdxType(0));
+      this->nz_idx_.push_back(-1);
+      this->z_idx_.push_back(-1);
     }
     if (num_zero_tiles > 0) {
       for (int i = 0; i < refinement_steps; ++i) {
@@ -152,6 +160,7 @@ public:
         this->fix_data_.push_back(FixType(tmp));
         this->fix_pruned_data_.push_back(FixType(tmp));
       }
+      std::cout << "this->data_.size(): " << this->data_.size() << std::endl;
     }
   }
 
@@ -195,7 +204,7 @@ public:
   }
 
   int get_z_idx(const int i) {
-    return this->z_idx_[i];
+    return this->z_idx_.at(i);
   }
 
 
@@ -209,11 +218,11 @@ public:
   }
 
   int get_nz_idx(const int i) {
-    return this->nz_idx_[i];
+    return this->nz_idx_.at(i);
   }
 
   int get_nz_idx(const int r, const int t) {
-    return this->nz_idx_[r * this->num_tiles_ + t];
+    return this->nz_idx_.at(r * this->num_tiles_ + t);
   }
 
   IdxType* get_fix_z_idx() {
@@ -229,7 +238,7 @@ public:
   }
 
   IdxType get_fix_nz_idx(const int refinement_step) {
-    return this->fix_nz_idx_[refinement_step];
+    return this->fix_nz_idx_.at(refinement_step);
   }
 
   int get_refinement_steps() {

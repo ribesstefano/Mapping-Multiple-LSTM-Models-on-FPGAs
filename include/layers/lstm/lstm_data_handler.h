@@ -290,9 +290,9 @@ private:
   int s_size_;
   std::unordered_map<std::string, SvdVecType*> cur_gates_;
   std::unordered_map<std::string, SvdVecType*> rec_gates_;
-  FixType* fix_u_cur_;
-  FixType* fix_u_rec_;
-  FixType* fix_v_;
+  std::vector<FixType> fix_u_cur_;
+  std::vector<FixType> fix_u_rec_;
+  std::vector<FixType> fix_v_;
   std::vector<std::vector<FloatType> > x_;
   std::vector<std::vector<FloatType> > h_;
   std::vector<std::vector<FloatType> > c_;
@@ -301,22 +301,22 @@ private:
   std::vector<std::vector<FloatType> > h_curr_;
   std::vector<std::vector<FloatType> > c_curr_;
   std::vector<std::vector<FloatType> > bias_;
-  std::vector<FixType*> fix_x_;
-  std::vector<FixType*> fix_h_;
-  std::vector<FixType*> fix_c_;
-  std::vector<FixType*> fix_h_prev_;
-  std::vector<FixType*> fix_c_prev_;
-  std::vector<FixType*> fix_h_curr_;
-  std::vector<FixType*> fix_c_curr_;
-  std::vector<FixType*> fix_bias_;
-  std::vector<FixType*> fix_s_;
-  ap_uint<NumTilesU>* fix_nz_u_;
-  ap_uint<NumTilesV>* fix_nz_v_;
+  std::vector<std::vector<FixType> > fix_x_;
+  std::vector<std::vector<FixType> > fix_h_;
+  std::vector<std::vector<FixType> > fix_c_;
+  std::vector<std::vector<FixType> > fix_h_prev_;
+  std::vector<std::vector<FixType> > fix_c_prev_;
+  std::vector<std::vector<FixType> > fix_h_curr_;
+  std::vector<std::vector<FixType> > fix_c_curr_;
+  std::vector<std::vector<FixType> > fix_bias_;
+  std::vector<std::vector<FixType> > fix_s_;
+  std::vector<ap_uint<NumTilesU> > fix_nz_u_;
+  std::vector<ap_uint<NumTilesV> > fix_nz_v_;
 
   void InitVector(const bool init_random, const int num_inputs, const int size,
-      std::vector<FixType*>& fix_y, std::vector<std::vector<FloatType> >& y) {
+      std::vector<std::vector<FixType> >& fix_y, std::vector<std::vector<FloatType> >& y) {
     for (int i = 0; i < num_inputs; ++i) {
-      fix_y[i] = svd::AllocateContiguously<FixType>(size);
+      // fix_y[i] = new FixType[size]; // svd::AllocateContiguously<FixType>(size);
       for (int j = 0; j < size; ++j) {
         FloatType tmp = init_random ? 0.00001 * rand() : 0;
         y[i][j] = tmp;
@@ -381,8 +381,18 @@ public:
   AcceleratorBlob(const int num_inputs, const int refinement_steps,
       const int u_cur_size, const int u_rec_size, const int v_size,
       const int num_tiles_u, const int num_zero_tiles_u, const int num_tiles_v,
-      const int num_zero_tiles_v) {
-    srand(time(NULL));
+      const int num_zero_tiles_v)
+      // : fix_x_(num_inputs, nullptr),
+      //   fix_h_(num_inputs, nullptr),
+      //   fix_c_(num_inputs, nullptr),
+      //   fix_h_prev_(num_inputs, nullptr),
+      //   fix_c_prev_(num_inputs, nullptr),
+      //   fix_h_curr_(num_inputs, nullptr),
+      //   fix_c_curr_(num_inputs, nullptr),
+      //   fix_bias_(num_inputs, nullptr),
+      //   fix_s_(num_inputs, nullptr)
+  {
+    // srand(time(NULL));
     this->lstm_num_inputs_ = num_inputs;
     this->lstm_input_size_ = u_cur_size;
     this->lstm_output_size_ = v_size;
@@ -401,15 +411,20 @@ public:
     const int kV_TotalSize = kNumGates * this->cur_gates_["i"]->get_v()->get_pruned_total_size();
     const int kS_TotalSize = kNumGates * refinement_steps;
     std::cout << "setting fix_u_cur_" << std::endl;
-    this->fix_u_cur_ = svd::AllocateContiguously<FixType>(kU_CurTotalSize);
-    this->fix_u_rec_ = svd::AllocateContiguously<FixType>(kU_RecTotalSize);
-    this->fix_v_ = svd::AllocateContiguously<FixType>(kV_TotalSize);
+    // this->fix_u_cur_ = new FixType[kU_CurTotalSize]; // svd::AllocateContiguously<FixType>(kU_CurTotalSize);
+    // this->fix_u_rec_ = new FixType[kU_RecTotalSize]; // svd::AllocateContiguously<FixType>(kU_RecTotalSize);
+    // this->fix_v_ = new FixType[kV_TotalSize]; // svd::AllocateContiguously<FixType>(kV_TotalSize);
+    this->fix_u_cur_.resize(kU_CurTotalSize);
+    this->fix_u_rec_.resize(kU_RecTotalSize);
+    this->fix_v_.resize(kV_TotalSize);
     this->u_cur_size_ = kU_CurTotalSize;
     this->u_rec_size_ = kU_RecTotalSize;
     this->v_size_ = kV_TotalSize;
     this->s_size_ = kS_TotalSize;
-    this->fix_nz_u_ = svd::AllocateContiguously<ap_uint<NumTilesU> >(kS_TotalSize);
-    this->fix_nz_v_ = svd::AllocateContiguously<ap_uint<NumTilesV> >(kS_TotalSize);
+    // this->fix_nz_u_ = new ap_uint<NumTilesU>[kS_TotalSize]; // svd::AllocateContiguously<ap_uint<NumTilesU> >(kS_TotalSize);
+    // this->fix_nz_v_ = new ap_uint<NumTilesV>[kS_TotalSize]; // svd::AllocateContiguously<ap_uint<NumTilesV> >(kS_TotalSize);
+    this->fix_nz_u_.resize(kS_TotalSize);
+    this->fix_nz_v_.resize(kS_TotalSize);
     std::cout << "kS_TotalSize: " << kS_TotalSize << std::endl;
     std::cout << "kS_TotalSize / 8: " << kS_TotalSize / 8 << std::endl;
     // NOTE: the following arrangement is: (R, E, G)
@@ -424,14 +439,14 @@ public:
       this->cur_gates_["f"]->get_u()->fix_pruned_data(),
       this->cur_gates_["c"]->get_u()->fix_pruned_data(),
       this->cur_gates_["o"]->get_u()->fix_pruned_data(),
-      this->fix_u_cur_);
+      this->fix_u_cur_.data());
     std::cout << "setting ArrangeWeights" << std::endl;
     svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kU_RecLengthPruned,
       this->rec_gates_["i"]->get_u()->fix_pruned_data(),
       this->rec_gates_["f"]->get_u()->fix_pruned_data(),
       this->rec_gates_["c"]->get_u()->fix_pruned_data(),
       this->rec_gates_["o"]->get_u()->fix_pruned_data(),
-      this->fix_u_rec_);
+      this->fix_u_rec_.data());
     std::cout << "setting ArrangeWeights S" << std::endl;
     svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kV_LengthPruned,
       kV_LengthPruned,
@@ -443,7 +458,7 @@ public:
       this->rec_gates_["f"]->get_v()->fix_pruned_data(),
       this->rec_gates_["c"]->get_v()->fix_pruned_data(),
       this->rec_gates_["o"]->get_v()->fix_pruned_data(),
-      this->fix_v_);
+      this->fix_v_.data());
     std::cout << "setting ArrangeWeights NZu" << std::endl;
     svd::ArrangeWeights(kArrangementTypeRGE, refinement_steps, 1, 1,
       this->cur_gates_["i"]->get_u()->get_fix_nz_idx(),
@@ -454,7 +469,7 @@ public:
       this->rec_gates_["f"]->get_u()->get_fix_nz_idx(),
       this->rec_gates_["c"]->get_u()->get_fix_nz_idx(),
       this->rec_gates_["o"]->get_u()->get_fix_nz_idx(),
-      this->fix_nz_u_);
+      this->fix_nz_u_.data());
     std::cout << "setting ArrangeWeights NZv" << std::endl;
     svd::ArrangeWeights(kArrangementTypeRGE, refinement_steps, 1, 1,
       this->cur_gates_["i"]->get_v()->get_fix_nz_idx(),
@@ -465,15 +480,15 @@ public:
       this->rec_gates_["f"]->get_v()->get_fix_nz_idx(),
       this->rec_gates_["c"]->get_v()->get_fix_nz_idx(),
       this->rec_gates_["o"]->get_v()->get_fix_nz_idx(),
-      this->fix_nz_v_);
-    this->fix_x_.resize(num_inputs);
-    this->fix_h_.resize(num_inputs);
-    this->fix_c_.resize(num_inputs);
-    this->fix_h_curr_.resize(num_inputs);
-    this->fix_c_curr_.resize(num_inputs);
-    this->fix_h_prev_.resize(num_inputs);
-    this->fix_c_prev_.resize(num_inputs);
-    this->fix_bias_.resize(num_inputs);
+      this->fix_nz_v_.data());
+    this->fix_x_.resize(num_inputs, std::vector<FixType>(this->lstm_input_size_));
+    this->fix_h_.resize(num_inputs, std::vector<FixType>(this->lstm_output_size_));
+    this->fix_c_.resize(num_inputs, std::vector<FixType>(this->lstm_output_size_));
+    this->fix_h_curr_.resize(num_inputs, std::vector<FixType>(this->lstm_output_size_));
+    this->fix_c_curr_.resize(num_inputs, std::vector<FixType>(this->lstm_output_size_));
+    this->fix_h_prev_.resize(num_inputs, std::vector<FixType>(this->lstm_output_size_));
+    this->fix_c_prev_.resize(num_inputs, std::vector<FixType>(this->lstm_output_size_));
+    this->fix_bias_.resize(num_inputs, std::vector<FixType>(this->lstm_output_size_));
     this->x_.resize(num_inputs, std::vector<FloatType>(this->lstm_input_size_));
     this->h_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
     this->c_.resize(num_inputs, std::vector<FloatType>(this->lstm_output_size_));
@@ -491,9 +506,12 @@ public:
     this->InitVector(!init_random, num_inputs, this->lstm_output_size_, this->fix_h_prev_, this->h_prev_);
     this->InitVector(!init_random, num_inputs, this->lstm_output_size_, this->fix_c_prev_, this->c_prev_);
     this->InitVector(init_random, num_inputs, kNumGates / 2 * this->lstm_output_size_, this->fix_bias_, this->bias_);
-    for (int i = 0; i < num_inputs; ++i) {
-      this->fix_s_.push_back(svd::AllocateContiguously<FixType>(kS_TotalSize));
-    }
+    // for (int i = 0; i < num_inputs; ++i) {
+    //   this->fix_s_[i] = new FixType[kS_TotalSize]; // svd::AllocateContiguously<FixType>(kS_TotalSize);
+    // }
+    this->fix_s_.resize(num_inputs, std::vector<FixType>(kS_TotalSize));
+
+
     int idx = 0;
     for (int i = 0; i < num_inputs; ++i) {
       for (int j = 0; j < refinement_steps; ++j) {
@@ -511,28 +529,32 @@ public:
   }
 
   ~AcceleratorBlob() {
-    svd::FreeContiguously(this->fix_u_cur_);
-    svd::FreeContiguously(this->fix_u_rec_);
-    svd::FreeContiguously(this->fix_v_);
-    for (int i = 0; i < this->lstm_num_inputs_; ++i) {
-      svd::FreeContiguously(this->fix_s_[i]);
-      svd::FreeContiguously(this->fix_x_[i]);
-      svd::FreeContiguously(this->fix_h_[i]);
-      svd::FreeContiguously(this->fix_c_[i]);
-      svd::FreeContiguously(this->fix_h_curr_[i]);
-      svd::FreeContiguously(this->fix_c_curr_[i]);
-      svd::FreeContiguously(this->fix_h_prev_[i]);
-      svd::FreeContiguously(this->fix_c_prev_[i]);
-      svd::FreeContiguously(this->fix_bias_[i]);
-    }
-    svd::FreeContiguously(this->fix_nz_u_);
-    svd::FreeContiguously(this->fix_nz_v_);
+    std::cout << "[INFO] Starting ~AcceleratorBlob()." << std::endl;
+    // delete[] this->fix_nz_u_; // FREE(this->fix_nz_u_);
+    // delete[] this->fix_nz_v_; // FREE(this->fix_nz_v_);
+    std::cout << "[INFO] Freed this->fix_nz_u_ and this->fix_nz_v_." << std::endl;
+    // for (int i = 0; i < this->lstm_num_inputs_; ++i) {
+    //   delete[] this->fix_x_[i]; // FREE(this->fix_x_[i]);
+    //   delete[] this->fix_h_[i]; // FREE(this->fix_h_[i]);
+    //   delete[] this->fix_c_[i]; // FREE(this->fix_c_[i]);
+    //   delete[] this->fix_h_curr_[i]; // FREE(this->fix_h_curr_[i]);
+    //   delete[] this->fix_c_curr_[i]; // FREE(this->fix_c_curr_[i]);
+    //   delete[] this->fix_h_prev_[i]; // FREE(this->fix_h_prev_[i]);
+    //   delete[] this->fix_c_prev_[i]; // FREE(this->fix_c_prev_[i]);
+    //   delete[] this->fix_bias_[i]; // FREE(this->fix_bias_[i]);
+    //   delete[] this->fix_s_[i]; // FREE(this->fix_s_[i]);
+    // }
+    // delete[] this->fix_u_cur_; // FREE(this->fix_u_cur_);
+    // delete[] this->fix_u_rec_; // FREE(this->fix_u_rec_);
+    // delete[] this->fix_v_; // FREE(this->fix_v_);
+    std::cout << "[INFO] Freed this->fix_u_cur_, this->fix_u_rec_ and this->fix_v_." << std::endl;
     for (auto g : this->cur_gates_) {
       delete g.second;
     }
     for (auto g : this->rec_gates_) {
       delete g.second;
     }
+    std::cout << "[INFO] ~AcceleratorBlob() completed." << std::endl;
   }
 
   void ResetLstmOutputs() {
@@ -564,19 +586,19 @@ public:
 
 
   FixType* get_fix_u_cur() {
-    return this->fix_u_cur_;
+    return this->fix_u_cur_.data();
   }
 
   FixType* get_fix_u_rec() {
-    return this->fix_u_rec_;
+    return this->fix_u_rec_.data();
   }
 
   FixType* get_fix_v() {
-    return this->fix_v_;
+    return this->fix_v_.data();
   }
 
   FixType* get_fix_s(const int i) {
-    return this->fix_s_[i];
+    return this->fix_s_[i].data();
   }
 
   std::unordered_map<std::string, SvdVecType*> get_cur_gates() {
@@ -596,11 +618,11 @@ public:
   }
 
   FixType* get_fix_x(const int i) {
-    return this->fix_x_[i];
+    return this->fix_x_[i].data();
   }
 
   FixType* get_fix_h(const int i) {
-    return this->fix_h_[i];
+    return this->fix_h_[i].data();
   }
 
   FloatType* get_h(const int i) {
@@ -608,27 +630,27 @@ public:
   }
 
   FixType* get_fix_h_curr(const int i) {
-    return this->fix_h_curr_[i];
+    return this->fix_h_curr_[i].data();
   }
 
   FixType* get_fix_h_prev(const int i) {
-    return this->fix_h_prev_[i];
+    return this->fix_h_prev_[i].data();
   }
 
   FixType* get_fix_c(const int i) {
-    return this->fix_c_[i];
+    return this->fix_c_[i].data();
   }
 
   FixType* get_fix_c_curr(const int i) {
-    return this->fix_c_curr_[i];
+    return this->fix_c_curr_[i].data();
   }
 
   FixType* get_fix_c_prev(const int i) {
-    return this->fix_c_prev_[i];
+    return this->fix_c_prev_[i].data();
   }
 
   FixType* get_fix_bias(const int i) {
-    return this->fix_bias_[i];
+    return this->fix_bias_[i].data();
   }
 
   FloatType* get_bias(const int i) {
@@ -636,11 +658,11 @@ public:
   }
 
   ap_uint<NumTilesU>* get_fix_nz_u() {
-    return this->fix_nz_u_;
+    return this->fix_nz_u_.data();
   }
 
   ap_uint<NumTilesV>* get_fix_nz_v() {
-    return this->fix_nz_v_;
+    return this->fix_nz_v_.data();
   }
 
   int get_u_cur_size() {
