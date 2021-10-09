@@ -180,7 +180,6 @@ public:
         this->fix_data_.push_back(FixType(tmp));
         this->fix_pruned_data_.push_back(FixType(tmp));
       }
-      std::cout << "this->data_.size(): " << this->data_.size() << std::endl;
     }
   }
 

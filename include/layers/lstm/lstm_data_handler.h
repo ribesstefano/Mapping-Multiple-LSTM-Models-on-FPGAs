@@ -418,7 +418,7 @@ public:
     const int kU_RecTotalSize = kNumGates / 2 * this->rec_gates_["i"]->get_u()->get_pruned_total_size();
     const int kV_TotalSize = kNumGates * this->cur_gates_["i"]->get_v()->get_pruned_total_size();
     const int kS_TotalSize = kNumGates * refinement_steps;
-    std::cout << "setting fix_u_cur_" << std::endl;
+    // std::cout << "setting fix_u_cur_" << std::endl;
     // this->fix_u_cur_ = new FixType[kU_CurTotalSize]; // svd::AllocateContiguously<FixType>(kU_CurTotalSize);
     // this->fix_u_rec_ = new FixType[kU_RecTotalSize]; // svd::AllocateContiguously<FixType>(kU_RecTotalSize);
     // this->fix_v_ = new FixType[kV_TotalSize]; // svd::AllocateContiguously<FixType>(kV_TotalSize);
@@ -433,29 +433,29 @@ public:
     // this->fix_nz_v_ = new ap_uint<NumTilesV>[kS_TotalSize]; // svd::AllocateContiguously<ap_uint<NumTilesV> >(kS_TotalSize);
     this->fix_nz_u_.resize(kS_TotalSize);
     this->fix_nz_v_.resize(kS_TotalSize);
-    std::cout << "kS_TotalSize: " << kS_TotalSize << std::endl;
-    std::cout << "kS_TotalSize / 8: " << kS_TotalSize / 8 << std::endl;
+    // std::cout << "kS_TotalSize: " << kS_TotalSize << std::endl;
+    // std::cout << "kS_TotalSize / 8: " << kS_TotalSize / 8 << std::endl;
     // NOTE: the following arrangement is: (R, E, G)
     const int kArrangementTypeREG = 2;
     const int kArrangementTypeRGE = 0;
     const int kU_CurLengthPruned = this->cur_gates_["i"]->get_u()->get_pruned_size();
     const int kU_RecLengthPruned = this->rec_gates_["i"]->get_u()->get_pruned_size();
     const int kV_LengthPruned = this->cur_gates_["i"]->get_v()->get_pruned_size();
-    std::cout << "setting ArrangeWeights" << std::endl;
+    // std::cout << "setting ArrangeWeights" << std::endl;
     svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kU_CurLengthPruned,
       this->cur_gates_["i"]->get_u()->fix_pruned_data(),
       this->cur_gates_["f"]->get_u()->fix_pruned_data(),
       this->cur_gates_["c"]->get_u()->fix_pruned_data(),
       this->cur_gates_["o"]->get_u()->fix_pruned_data(),
       this->fix_u_cur_.data());
-    std::cout << "setting ArrangeWeights" << std::endl;
+    // std::cout << "setting ArrangeWeights" << std::endl;
     svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kU_RecLengthPruned,
       this->rec_gates_["i"]->get_u()->fix_pruned_data(),
       this->rec_gates_["f"]->get_u()->fix_pruned_data(),
       this->rec_gates_["c"]->get_u()->fix_pruned_data(),
       this->rec_gates_["o"]->get_u()->fix_pruned_data(),
       this->fix_u_rec_.data());
-    std::cout << "setting ArrangeWeights S" << std::endl;
+    // std::cout << "setting ArrangeWeights S" << std::endl;
     svd::ArrangeWeights(kArrangementTypeREG, refinement_steps, kV_LengthPruned,
       kV_LengthPruned,
       this->cur_gates_["i"]->get_v()->fix_pruned_data(),
@@ -467,7 +467,7 @@ public:
       this->rec_gates_["c"]->get_v()->fix_pruned_data(),
       this->rec_gates_["o"]->get_v()->fix_pruned_data(),
       this->fix_v_.data());
-    std::cout << "setting ArrangeWeights NZu" << std::endl;
+    // std::cout << "setting ArrangeWeights NZu" << std::endl;
     svd::ArrangeWeights(kArrangementTypeRGE, refinement_steps, 1, 1,
       this->cur_gates_["i"]->get_u()->get_fix_nz_idx(),
       this->cur_gates_["f"]->get_u()->get_fix_nz_idx(),
@@ -478,7 +478,7 @@ public:
       this->rec_gates_["c"]->get_u()->get_fix_nz_idx(),
       this->rec_gates_["o"]->get_u()->get_fix_nz_idx(),
       this->fix_nz_u_.data());
-    std::cout << "setting ArrangeWeights NZv" << std::endl;
+    // std::cout << "setting ArrangeWeights NZv" << std::endl;
     svd::ArrangeWeights(kArrangementTypeRGE, refinement_steps, 1, 1,
       this->cur_gates_["i"]->get_v()->get_fix_nz_idx(),
       this->cur_gates_["f"]->get_v()->get_fix_nz_idx(),
@@ -531,7 +531,7 @@ public:
         }
       }
     }
-    std::cout << "allocation done." << std::endl;
+    // std::cout << "allocation done." << std::endl;
   }
 
   ~AcceleratorBlob() {

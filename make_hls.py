@@ -46,10 +46,22 @@ def is_top_file(filename, top):
 
 def get_dependent_files(filename):
     headers = []
+    headers_decl = []
     with open(filename, 'r') as f:
         for line in f:
             if '#include' in line:
-                headers.append(line)
+                headers_decl.append(line)
+    for h in headers_decl:
+        match = re.search('"(.*?)"', h)
+        if match is not None:
+            for m in match.groups():
+                headers.append(m.replace('"', ''))
+        match = re.search('<(.*?)>', h)
+        if match is not None:
+            for m in match.groups():
+                tmp = m.replace('<', '')
+                tmp = tmp.replace('>', '')
+                headers.append(tmp)
     return headers
 
 def main():
@@ -67,13 +79,15 @@ def main():
     parser.add_argument('--script_name', type=str, default='run_hls_test.tcl', help='Generated TCL filename. Default: run_hls.tcl.')
     parser.add_argument('--run_hls', action='store_true', help='Run th generated TCL file. Default: False.')
 
-    parser.add_argument('--board', type=str, choices=avail_fpgas.keys(), default='ZedBoard', help='The target FPGA board.')
+    parser.add_argument('--board', type=str, choices=avail_fpgas.keys(), default='ZedBoard', help='The target FPGA board. Default: ZedBoard')
     parser.add_argument('--period', type=str, default='10', help='Clock period in ns. Default: 10.')
     # Actions
     parser.add_argument('--use_vivado_hls', action='store_true', help='Use Vivado HLS. Default is Vitis HLS.')
     parser.add_argument('--no_synthesis', action='store_true', help='Do not run synthesis.')
     parser.add_argument('--csim', action='store_true', help='Run C/C++ simulation.')
     parser.add_argument('--cosim', action='store_true', help='Run C/C++ co-simulation.')
+    parser.add_argument('--cosim-all', action='store_true', help='Run C/C++ co-simulation and track all signals.')
+    parser.add_argument('--cosim-port', action='store_true', help='Run C/C++ co-simulation and track ports.')
     parser.add_argument('--export', action='store_true', help='Export IP.')
     parser.add_argument('--place_and_route', action='store_true', help='Export IP and check place-and-route.')
     parser.add_argument('--no_reset_prj', action='store_true', help='Do not reset HLS project.')
@@ -96,7 +110,8 @@ def main():
 
     args = parser.parse_args()
 
-    if args.csim and args.tb_file == '' or args.cosim and args.tb_file == '':
+    run_cosim = args.cosim or args.cosim_port or args.cosim_all
+    if args.csim and args.tb_file == '' or run_cosim and args.tb_file == '':
         parser.error('The --csim and --cosim arguments requires --tb_file.')
     # ==========================================================================
     # Setup
@@ -106,11 +121,11 @@ def main():
     hls_report_dir = hls_prj_dir + '/reports'
     hls_tool = 'vhls' if args.use_vivado_hls else 'vitis'
     prj_name = f'{hls_tool}_{args.board}_{args.top}'
-    reset_string = ' -reset ' if args.no_reset_prj else ''
+    reset_string = '' if args.no_reset_prj else ' -reset '
     # ==========================================================================
     # Adjust CFLAGS and add defines
     # ==========================================================================
-    cflags = args.cflags + ' -I' + curr_dir + args.include
+    cflags = args.cflags + ' -I' + curr_dir + args.include + ' -I/usr/local/include'
     if hls_tool == 'vhls':
         cflags = '-fno-builtin ' + cflags.replace('c++14', 'c++0x')
         print(f'[WARNING] Replacing C++14 with C++11 in Vivado HLS. CFLAGS: {cflags}')
@@ -126,7 +141,7 @@ def main():
         f.write(f'set_top "{args.top}"\n')
         if not args.no_reset_prj:
             pass
-            if args.csim or args.cosim:
+            if args.csim or run_cosim:
                 pass
         if hls_tool == 'vitis':
             f.write(f'open_solution -flow_target vivado {reset_string} "solution_{args.top}"\n')
@@ -148,52 +163,146 @@ def main():
         # Add only significant files to synthesis
         # ======================================================================
         # TODO: Recursively include only the files from which the top function depends on.
+
+        def loadtxt(filename):
+            with open(filename) as f: 
+                txt = ''.join(f.readlines())
+            return txt
+
+        # ======================================================================
+        # Search for the top function in the C++ or Header files
+        # ======================================================================
+        # regex group1, name group2, arguments group3
+        rproc = r"((?<=[\s:~])(\w+)\s*\(([\w\s,<>\[\].=&':/*]*?)\)\s*(const)?\s*(?={))"
+        prog = re.compile(rproc)
+        syn_files = []
+        tb_files = []
         headers = []
-        if args.top_file:
+
+        def find_top_file(starting_dir):
+            for fpath, subdirs, files in os.walk(starting_dir):
+                for fname in files:
+                    unix_filename = curr_dir + '/' + fpath.replace('\\', '/') + '/' + fname
+                    is_cpp_file = fname.endswith('.cpp') or fname.endswith('.cc')
+                    is_h_file = fname.endswith('.hpp') or fname.endswith('.h')
+                    if is_cpp_file or is_h_file:
+                        code = loadtxt(unix_filename)
+                        cppwords = ['if', 'while', 'do', 'for', 'switch']
+                        procs = [(i.group(2), i.group(3)) for i in prog.finditer(code) \
+                            if i.group(2) not in cppwords]
+                        for i in procs:
+                            if i[0] == args.top:
+                                return unix_filename
+
+        def get_headers(headers, top_filename, starting_dir=args.src):
+            added_headers = 0
+            src_dir = curr_dir + starting_dir.replace('\\', '/') + '/'
+            found_file = False
+            for fpath, subdirs, files in os.walk(starting_dir):
+                for fname in files:
+                    unix_filename = curr_dir + '/' + fpath.replace('\\', '/') + '/' + fname
+                    unix_filename = unix_filename.replace('//', '/')
+                    top_filename = top_filename.replace('//', '/')
+                    if unix_filename == top_filename:
+                        found_file = True
+                        hfiles = get_dependent_files(unix_filename)
+                        for h in hfiles:
+                            if h not in headers:
+                                headers.append(h)
+                                added_headers += 1
+            return added_headers, found_file
+
+        top_file = find_top_file(args.src)
+        if top_file is not None:
+            get_headers(headers, top_file, starting_dir=args.src)
+            get_headers(headers, top_file, starting_dir=args.include)
+        else:
+            top_file = find_top_file(args.include)
+            if top_file is None:
+                print(f'[ERROR] Top function {args.top} not found in files. Exiting.')
+                exit(1)
+            get_headers(headers, top_file, starting_dir=args.src)
+            get_headers(headers, top_file, starting_dir=args.include)
+
+        for h in headers:
+            inc_dir = curr_dir + args.include.replace('\\', '/') + '/'
+            if os.path.isfile(inc_dir + h):
+                syn_files.append(inc_dir + h)
+        # Recursive search
+        added_headers = 1
+        while(added_headers != 0):
+            added_headers = 0
+            for h in headers:
+                inc_dir = curr_dir + args.include.replace('\\', '/') + '/'
+                src_dir = curr_dir + args.src.replace('\\', '/') + '/'
+                num_headers, found_file = get_headers(headers, inc_dir + h, starting_dir=args.include)
+                added_headers += num_headers
+                if found_file and h not in tb_files:
+                    syn_files.append(inc_dir + h)
+                    tb_files.append(inc_dir + h)
+                # Adding the corresponding C++ files
+                for hext in ['.h', '.hpp']:
+                    for cppext in ['.cc', '.cpp']:
+                        cppfile = h.replace(hext, cppext)
+                        found_file = False
+                        num_headers, found_file = get_headers(headers, src_dir + cppfile, args.src)
+                        added_headers += num_headers
+                        if found_file and cppfile not in headers:
+                            headers.append(cppfile)
+                            syn_files.append(src_dir + cppfile)
+                            tb_files.append(src_dir + cppfile)
+        f.write(f'# Synthesis files\n')
+        for filename in syn_files:
+            f.write(f'add_files {filename} -cflags "{cflags}"\n')
+
+        if args.tb_file != '':
+            f.write(f'# TB files\n')
+            # Search in src files
             for fpath, subdirs, files in os.walk(args.src):
                 for fname in files:
-                    if args.top_file.replace('.cpp', '') == fname.replace('.cpp', '') or \
-                            args.top_file.replace('.h', '') == fname.replace('.h', ''):
-                        headers_decl = get_dependent_files(fpath + '/' + fname)
-                        for h in headers_decl:
-                            match = re.search('"(.*?)"', h)
-                            if match is not None:
-                                for m in match.groups():
-                                    headers.append(m.replace('"', ''))
-                            match = re.search('<(.*?)>', h)
-                            if match is not None:
-                                for m in match.groups():
-                                    tmp = m.replace('<', '')
-                                    tmp = tmp.replace('>', '')
-                                    headers.append(tmp)
-        print(headers)
-        # ======================================================================
-        # Add files
-        # ======================================================================
-        f.write(f'# Source files\n')
-        for fpath, subdirs, files in os.walk(args.src):
-            for fname in files:
-                unix_filename = curr_dir + '/' + fpath.replace('\\', '/') + '/' + fname
-                if fname.endswith('.cpp') or fname.endswith('.cc'):
-                    if args.tb_dir.replace('\\', '/') not in fpath:
-                        print(f'[INFO] Adding synthesis file: {unix_filename}')
-                        f.write(f'add_files {unix_filename} -cflags "{cflags}"\n')
-                    else:
-                        if fname.startswith(args.tb_file):
-                            print(f'[INFO] Adding simulation file: {unix_filename}')
-                            f.write(f'add_files -tb {unix_filename} -cflags "{cflags}"\n')
-        f.write(f'# Include files\n')
-        for fpath, subdirs, files in os.walk(args.include):
-            for fname in files:
-                unix_filename = curr_dir + '/' + fpath.replace('\\', '/') + '/' + fname
-                if fname.endswith('.h'):
-                    if args.tb_dir.replace('\\', '/') not in fpath:
-                        print(f'[INFO] Adding synthesis file: {unix_filename}')
-                        f.write(f'add_files {unix_filename} -cflags "{cflags}"\n')
-                    else:
-                        if fname.startswith(args.tb_file):
-                            print(f'[INFO] Adding simulation file: {unix_filename}')
-                            f.write(f'add_files -tb {unix_filename} -cflags "{cflags}"\n')
+                    unix_filename = curr_dir + '/' + fpath.replace('\\', '/') + '/' + fname
+                    if fname.startswith(args.tb_file):
+                        f.write(f'add_files -tb {unix_filename} -cflags "{cflags}"\n')
+            # Search in include files
+            for fpath, subdirs, files in os.walk(args.include):
+                for fname in files:
+                    unix_filename = curr_dir + '/' + fpath.replace('\\', '/') + '/' + fname
+                    if fname.startswith(args.tb_file):
+                        f.write(f'add_files -tb {unix_filename} -cflags "{cflags}"\n')
+
+            # for filename in tb_files:
+            #     f.write(f'add_files -tb {filename} -cflags "{cflags}"\n')
+
+        # # ======================================================================
+        # # Add files
+        # # ======================================================================
+        # f.write(f'# Source files\n')
+        # for fpath, subdirs, files in os.walk(args.src):
+        #     for fname in files:
+        #         unix_filename = curr_dir + '/' + fpath.replace('\\', '/') + '/' + fname
+        #         if fname.endswith('.cpp') or fname.endswith('.cc'):
+        #             if args.tb_dir.replace('\\', '/') not in fpath:
+        #                 # print(f'[INFO] Adding synthesis file: {unix_filename}')
+        #                 f.write(f'add_files {unix_filename} -cflags "{cflags}"\n')
+        #             else:
+        #                 if fname.startswith(args.tb_file):
+        #                     # print(f'[INFO] Adding simulation file: {unix_filename}')
+        #                     f.write(f'add_files -tb {unix_filename} -cflags "{cflags}"\n')
+
+
+        # f.write(f'# Include files\n')
+        # for fpath, subdirs, files in os.walk(args.include):
+        #     for fname in files:
+        #         unix_filename = curr_dir + '/' + fpath.replace('\\', '/') + '/' + fname
+        #         if fname.endswith('.hpp') or fname.endswith('.h'):
+        #             if args.tb_dir.replace('\\', '/') not in fpath:
+        #                 # print(f'[INFO] Adding synthesis file: {unix_filename}')
+        #                 f.write(f'add_files {unix_filename} -cflags "{cflags}"\n')
+        #             else:
+        #                 if fname.startswith(args.tb_file):
+        #                     # print(f'[INFO] Adding simulation file: {unix_filename}')
+        #                     f.write(f'add_files -tb {unix_filename} -cflags "{cflags}"\n')
+
         # ======================================================================
         # Start CSim
         # ======================================================================
@@ -224,8 +333,12 @@ close $fout'''
         # ======================================================================
         # Run Cosim and report
         # ======================================================================
-        if args.cosim:
-            cosim_cmd = f'cosim_design -trace_level port -ldflags "{args.ldflags}" -argv "{args.argv}"'
+        if run_cosim:
+            cosim_cmd = f'cosim_design -ldflags "{args.ldflags}" -argv "{args.argv}"'
+            if args.cosim_all:
+                cosim_cmd += ' -trace_level all'
+            if args.cosim_port:
+                cosim_cmd += ' -trace_level port'
             if hls_tool == 'vitis' and args.debug_dataflow:
                 cosim_cmd += ' -enable_dataflow_profiling=1 -enable_fifo_sizing=1'
 
