@@ -1,12 +1,19 @@
-# HLS SVD
+# HLS-SVD
 
-## Overview
+This project includes SVD-based approximation algorithms for compressing deep learning models.
+It also include the accelerator modules exploiting such approximation mechanism. The accelerators code has been developed in HLS targeting Xilinx FPGAs.
 
-This project includes the HLS implementation and the approximation algorithms included in the paper "Mapping Multiple LSTM models on FPGA".
+If you plan on using any of the code in this repository, please cite:
+
+> S. Ribes, P. Trancoso, I. Sourdis and C. -S. Bouganis, "Mapping Multiple LSTM models on FPGAs," 2020 International Conference on Field-Programmable Technology (ICFPT), 2020, pp. 1-9, doi: 10.1109/ICFPT51103.2020.00010.
+
+**Disclaimer: The repository is not actively updated and might contain additional experimental features which are not described in the aforementioned paper. Such features might include untested code.**
 
 ### SVD Approximation Algorithm
 
 The approximation algorithms are in the `python/` folder.
+
+---
 
 ## Requirements
 
@@ -112,16 +119,8 @@ std::cout << "Number of elements in a: " << a::width << std::endl;
 // > Number of elements in a: 5
 ```
 
-## TODOs
-
-List of TODOs:
-
-	* Properly test the pruned versions of Kernel-U and Kernel-V.
-	* ~Import u, s, v new kernels~
-
 ## Bugs
 
 List of possible bugs:
 
-* Constructing data handler storage might lead to segmentation faults.
-* Having `num_active_inputs == 1` is breaking in hardware runs.
+* Setting `num_active_inputs == 1` is breaking the hardware runs.
