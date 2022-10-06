@@ -5,7 +5,16 @@ It also include the accelerator modules exploiting such approximation mechanism.
 
 If you plan on using any of the code in this repository, please cite:
 
-> S. Ribes, P. Trancoso, I. Sourdis and C. -S. Bouganis, "Mapping Multiple LSTM models on FPGAs," 2020 International Conference on Field-Programmable Technology (ICFPT), 2020, pp. 1-9, doi: 10.1109/ICFPT51103.2020.00010.
+```
+@inproceedings{ribes2020mapping,
+  title={{Mapping multiple LSTM models on FPGAs}},
+  author={Ribes, Stefano and Trancoso, Pedro and Sourdis, Ioannis and Bouganis, Christos-Savvas},
+  booktitle={2020 International Conference on Field-Programmable Technology (ICFPT)},
+  pages={1--9},
+  year={2020},
+  organization={IEEE}
+}
+```
 
 **Disclaimer: The repository is not actively updated and might contain additional experimental features which are not described in the aforementioned paper. Such features might include untested code.**
 
